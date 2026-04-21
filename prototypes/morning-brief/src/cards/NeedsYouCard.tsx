@@ -6,6 +6,7 @@ type NeedsYouCardProps = {
   variants: Variants;
   actionRef: (node: HTMLButtonElement | null) => void;
   onReview: () => void;
+  isOffline?: boolean;
 };
 
 export default function NeedsYouCard({
@@ -13,6 +14,7 @@ export default function NeedsYouCard({
   variants,
   actionRef,
   onReview,
+  isOffline = false,
 }: NeedsYouCardProps) {
   return (
     <motion.article className="need-card" variants={variants}>
@@ -31,6 +33,8 @@ export default function NeedsYouCard({
         className="review-button"
         type="button"
         onClick={onReview}
+        disabled={isOffline}
+        title={isOffline ? "chief-core offline" : undefined}
       >
         Review
       </button>

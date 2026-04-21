@@ -1,0 +1,271 @@
+{
+  "generated_at": "2026-04-21T06:45:00-04:00",
+  "owner": "Santosh",
+  "ritual_label": "Morning Reveal",
+  "needs_you": [
+    {
+      "id": "need-001",
+      "title": "Approve outbound investor note",
+      "category": "Capital",
+      "priority": "high",
+      "summary": "A draft reply is ready for the Forte Capital partner. The agent needs approval before sending because it references next-quarter fundraising timing.",
+      "agent": "Comms Chief",
+      "deadline": "Before 9:30 AM",
+      "evidence": [
+        "Parsed latest Forte email thread",
+        "Matched ask against fundraising narrative",
+        "Checked no confidential metrics are included"
+      ],
+      "trust_delta": 4,
+      "estimated_minutes": 3
+    },
+    {
+      "id": "need-002",
+      "title": "Choose demo cut for Friday",
+      "category": "Product",
+      "priority": "medium",
+      "summary": "Two demo paths are viable. The recommendation is the Morning Reveal path because it tightens the Stack flywheel story.",
+      "agent": "Demo Producer",
+      "deadline": "Today",
+      "evidence": [
+        "Compared three open demo scripts",
+        "Scored each against Axiom 9",
+        "Flagged capability-broker gap as visible but acceptable"
+      ],
+      "trust_delta": 2,
+      "estimated_minutes": 5
+    }
+  ],
+  "handled": [
+    {
+      "id": "handled-001",
+      "title": "Sorted overnight email",
+      "category": "Comms",
+      "outcome": "18 messages archived, 4 elevated, 2 added to today's queue.",
+      "agent": "Inbox Steward",
+      "completed_at": "06:05",
+      "confidence": 94,
+      "impact": "Cleared inbox noise before the reveal.",
+      "receipt": {
+        "source": "Gmail inbox snapshot",
+        "policy": "Human approval required for outbound mail",
+        "capability": "Capability Broker: mailbox.read, label.apply"
+      }
+    },
+    {
+      "id": "handled-002",
+      "title": "Prepared board follow-ups",
+      "category": "Capital",
+      "outcome": "Converted notes into 5 tracked follow-ups.",
+      "agent": "Board Chief",
+      "completed_at": "06:09",
+      "confidence": 91,
+      "impact": "Preserved commitments from yesterday's call.",
+      "receipt": {
+        "source": "Calendar transcript summary",
+        "policy": "No send without approver",
+        "capability": "Capability Broker: notes.read, tasks.write"
+      }
+    },
+    {
+      "id": "handled-003",
+      "title": "Reconciled calendar conflicts",
+      "category": "Time",
+      "outcome": "Moved one focus block and held 45 minutes for proposal review.",
+      "agent": "Schedule Chief",
+      "completed_at": "06:12",
+      "confidence": 88,
+      "impact": "Restored a continuous morning work window.",
+      "receipt": {
+        "source": "Primary calendar",
+        "policy": "Allowed to create holds, not cancel meetings",
+        "capability": "Capability Broker: calendar.read, calendar.hold"
+      }
+    },
+    {
+      "id": "handled-004",
+      "title": "Compiled prototype deltas",
+      "category": "Product",
+      "outcome": "Summarized 7 design doc changes since yesterday.",
+      "agent": "Product Cartographer",
+      "completed_at": "06:16",
+      "confidence": 93,
+      "impact": "Made the current surface direction explicit.",
+      "receipt": {
+        "source": "Git working tree and docs index",
+        "policy": "Read-only repository scan",
+        "capability": "Capability Broker: repo.read"
+      }
+    },
+    {
+      "id": "handled-005",
+      "title": "Ranked open risks",
+      "category": "Risk",
+      "outcome": "Reordered 6 open questions by unblock value.",
+      "agent": "Risk Chief",
+      "completed_at": "06:18",
+      "confidence": 86,
+      "impact": "Focused attention on runtime authority before visual polish.",
+      "receipt": {
+        "source": "docs/14-risks-open-questions.md",
+        "policy": "No axiom changes without ADR",
+        "capability": "Capability Broker: docs.read"
+      }
+    },
+    {
+      "id": "handled-006",
+      "title": "Checked runway memo",
+      "category": "Capital",
+      "outcome": "Found no stale assumptions in the latest financing note.",
+      "agent": "Finance Chief",
+      "completed_at": "06:22",
+      "confidence": 82,
+      "impact": "Kept investor talking points consistent.",
+      "receipt": {
+        "source": "Private finance memo snapshot",
+        "policy": "Summaries only, no raw exports",
+        "capability": "Capability Broker: vault.read"
+      }
+    },
+    {
+      "id": "handled-007",
+      "title": "Staged recruiting replies",
+      "category": "Team",
+      "outcome": "Prepared 3 replies and deferred 1 low-signal thread.",
+      "agent": "Talent Chief",
+      "completed_at": "06:24",
+      "confidence": 89,
+      "impact": "Protected founder time while preserving candidate momentum.",
+      "receipt": {
+        "source": "Recruiting label",
+        "policy": "Draft only until human review",
+        "capability": "Capability Broker: mailbox.read, draft.write"
+      }
+    },
+    {
+      "id": "handled-008",
+      "title": "Refreshed demo audience brief",
+      "category": "Product",
+      "outcome": "Condensed audience context into a 6-line briefing.",
+      "agent": "Demo Producer",
+      "completed_at": "06:27",
+      "confidence": 90,
+      "impact": "Tuned the Friday demo to buyer concerns.",
+      "receipt": {
+        "source": "CRM notes and calendar attendees",
+        "policy": "Internal-only synthesis",
+        "capability": "Capability Broker: crm.read, calendar.read"
+      }
+    },
+    {
+      "id": "handled-009",
+      "title": "Labeled urgent approvals",
+      "category": "Comms",
+      "outcome": "Applied approval labels to 2 threads.",
+      "agent": "Inbox Steward",
+      "completed_at": "06:29",
+      "confidence": 96,
+      "impact": "Separated human judgment from routine handling.",
+      "receipt": {
+        "source": "Gmail search query",
+        "policy": "Labels allowed within delegated mailbox scope",
+        "capability": "Capability Broker: label.apply"
+      }
+    },
+    {
+      "id": "handled-010",
+      "title": "Audited demo asset links",
+      "category": "Product",
+      "outcome": "Confirmed 9 of 9 links resolve locally.",
+      "agent": "Demo Producer",
+      "completed_at": "06:32",
+      "confidence": 97,
+      "impact": "Reduced reveal-day presentation risk.",
+      "receipt": {
+        "source": "Drive folder manifest",
+        "policy": "No permission widening",
+        "capability": "Capability Broker: drive.read"
+      }
+    },
+    {
+      "id": "handled-011",
+      "title": "Condensed customer signal",
+      "category": "Market",
+      "outcome": "Grouped 11 feedback snippets into 3 patterns.",
+      "agent": "Market Chief",
+      "completed_at": "06:34",
+      "confidence": 84,
+      "impact": "Pulled demand evidence into the morning operating loop.",
+      "receipt": {
+        "source": "Customer call notes",
+        "policy": "No external sharing",
+        "capability": "Capability Broker: notes.read"
+      }
+    },
+    {
+      "id": "handled-012",
+      "title": "Flagged stale TODOs",
+      "category": "Ops",
+      "outcome": "Archived 6 old TODOs and promoted 2 live ones.",
+      "agent": "Ops Chief",
+      "completed_at": "06:37",
+      "confidence": 87,
+      "impact": "Reduced task graph drag.",
+      "receipt": {
+        "source": "Planning database",
+        "policy": "Only low-risk cleanup actions",
+        "capability": "Capability Broker: tasks.read, tasks.write"
+      }
+    },
+    {
+      "id": "handled-013",
+      "title": "Verified charter references",
+      "category": "Governance",
+      "outcome": "Checked 5 active docs against the 10 axioms.",
+      "agent": "Steward Agent",
+      "completed_at": "06:40",
+      "confidence": 92,
+      "impact": "Kept morning decisions anchored to the operating charter.",
+      "receipt": {
+        "source": "CHARTER.md and docs index",
+        "policy": "ADR required for axiom changes",
+        "capability": "Capability Broker: docs.read"
+      }
+    },
+    {
+      "id": "handled-014",
+      "title": "Prepared reveal summary",
+      "category": "Ops",
+      "outcome": "Assembled the 2 decisions and 14 receipts for this surface.",
+      "agent": "Morning Chief",
+      "completed_at": "06:43",
+      "confidence": 95,
+      "impact": "Made delegated work reviewable at a glance.",
+      "receipt": {
+        "source": "Static brief state",
+        "policy": "Read-only render",
+        "capability": "Capability Broker: prototype.read"
+      }
+    }
+  ],
+  "trust_ledger": [
+    {
+      "id": "trust-comms",
+      "label": "Comms autonomy",
+      "current": 74,
+      "previous": 67
+    },
+    {
+      "id": "trust-product",
+      "label": "Product judgment",
+      "current": 68,
+      "previous": 63
+    },
+    {
+      "id": "trust-ops",
+      "label": "Ops reliability",
+      "current": 82,
+      "previous": 78
+    }
+  ]
+}

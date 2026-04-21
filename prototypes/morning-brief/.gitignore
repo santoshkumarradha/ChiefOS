@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+*.pnp
+*.pnp.js
+
+# Production
+dist/
+build/
+.tsc-out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store

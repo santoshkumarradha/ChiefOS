@@ -35,6 +35,7 @@ Machine-readable map of all Chief OS documentation. Update when adding or renami
 | `regulatory` | [`15-regulatory-posture.md`](./15-regulatory-posture.md) | draft | Legal posture, compliance |
 | `pack-sdk` | [`16-pack-sdk.md`](./16-pack-sdk.md) | draft | Developer contract — public SDK, CapabilityKind closed enum, CAN/CANNOT, dogfood sequence |
 | `os-ceremonies` | [`17-os-ceremonies-and-boundaries.md`](./17-os-ceremonies-and-boundaries.md) | draft | What the OS absorbs (OAuth, pickers, payment, e-sign, devices); threat model; anti-phishing |
+| `ui-standardization` | [`18-ui-standardization.md`](./18-ui-standardization.md) | draft | `chief-ui` primitive catalog, token system, pack enforcement layers |
 
 ## Decisions (ADRs)
 
@@ -52,6 +53,7 @@ Machine-readable map of all Chief OS documentation. Update when adding or renami
 | `adr-0008` | [`../adr/0008-pure-oss-memory-substrate.md`](../adr/0008-pure-oss-memory-substrate.md) | accepted |
 | `adr-0009` | [`../adr/0009-signed-inference.md`](../adr/0009-signed-inference.md) | accepted |
 | `adr-0010` | [`../adr/0010-sdk-public-api-stability.md`](../adr/0010-sdk-public-api-stability.md) | accepted |
+| `adr-0011` | [`../adr/0011-ui-stack-and-component-library.md`](../adr/0011-ui-stack-and-component-library.md) | accepted |
 
 ## Reusable diagrams (mermaid)
 

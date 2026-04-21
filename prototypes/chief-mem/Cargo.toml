@@ -1,0 +1,47 @@
+[package]
+name = "chief-mem"
+version = "0.1.0"
+edition = "2021"
+authors = ["Santosh Kumar Radha <santosh@agentfield.ai>"]
+description = "Chief OS pure-OSS memory graph prototype"
+license = "AGPL-3.0-or-later"
+
+[lib]
+name = "chief_mem"
+path = "src/lib.rs"
+
+[features]
+default = []
+python = ["dep:pyo3"]
+
+[dependencies]
+rusqlite = { version = "0.29", features = ["bundled", "chrono"] }
+blake3 = "1.5"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+thiserror = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+tempfile = "3.8"
+pyo3 = { version = "0.20", optional = true, features = ["extension-module"] }
+
+[dev-dependencies]
+criterion = "0.5"
+tempfile = "3.8"
+
+[[test]]
+name = "basic_roundtrip"
+path = "tests/basic_roundtrip.rs"
+
+[[test]]
+name = "scale_100k"
+path = "tests/scale_100k.rs"
+
+[[test]]
+name = "dedup"
+path = "tests/dedup.rs"
+
+[[bench]]
+name = "query_bench"
+path = "benches/query_bench.rs"
+harness = false

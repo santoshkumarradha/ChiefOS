@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   chief:
     build:
@@ -8,14 +6,17 @@ services:
       args:
         # Override at build time: docker compose build --build-arg MODEL_URL=<url>
         MODEL_URL: https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_k_m.gguf
-        MODEL_SHA256: e4cfb1c3f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c
+        MODEL_SHA256: 626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d
     image: chief-os:latest
     container_name: chief-os
     ports:
       # 4711 = chief-core HTTP API (intent, status, brief, etc.)
-      - "4711:4711"
-      # 5173 = Morning Brief static files (served by chief-core or standalone)
-      - "5173:5173"
+      # Bind host-side to 0.0.0.0 explicitly so the IPv6 host mapping
+      # (which Docker Desktop adds by default and which doesn't reach the
+      # container's IPv4-only listeners) doesn't shadow the IPv4 one.
+      - "0.0.0.0:4711:4711"
+      # 5173 = Morning Brief static files (served by busybox httpd inside the container)
+      - "0.0.0.0:5173:5173"
     volumes:
       # Persistent state directory
       - chief-state:/var/lib/chief

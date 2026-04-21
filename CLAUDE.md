@@ -24,23 +24,35 @@ Everything you do in this repo is tracked in `.plandb.db`. State persists across
 ### The loop
 
 ```bash
+# 0. ALWAYS pin PLANDB_DB to our tracked repo db.
+#    PlanDB walks up from CWD; from a worktree (labs/chief-os-<slug>/) it would
+#    find a different .plandb.db. Pin explicitly — non-negotiable.
+export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db
+#    Agents working in a fresh clone should instead compute the root:
+#      export PLANDB_DB="$(git -C "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" ls-tree -r --name-only HEAD | grep -m1 '^\.plandb\.db$' >/dev/null && git rev-parse --show-toplevel)/.plandb.db"
+#    Or simply: cd into the main repo before running plandb commands.
+
 # 1. Check what's ready
 plandb list --status ready --compact
 
-# 2. Claim a task (you MUST set PLANDB_AGENT to your identity)
-export PLANDB_AGENT=claude-1           # or codex-1, gemini-1, cursor-1, etc.
-plandb go                               # auto-picks next ready task
-# OR
-plandb task claim t-<id> --agent $PLANDB_AGENT    # claim specific task
+# 2. Set your identity and claim
+export PLANDB_AGENT=claude-1           # or codex-1, gemini-1, cursor-<slug>, etc.
+plandb task start t-<id> --agent $PLANDB_AGENT    # start a specific task
 
 # 3. Do the work (the task's --description is your spec)
 
 # 4. Record discoveries as you go
 plandb context "found that X requires Y" --kind discovery
 
-# 5. Complete + auto-claim next
-plandb done --next --result '{"what":"changed"}'
+# 5. Complete
+plandb done t-<id> --result '{"pr":"<url>","summary":"..."}'
 ```
+
+### PLANDB_DB gotcha (read this)
+
+`.plandb.db` is tracked in git at the **repo root** (`labs/nix/.plandb.db`). But PlanDB's discovery walks up from your CWD, so if you run it from a **worktree** at `labs/chief-os-<slug>/` it will find a *different* `.plandb.db` in `labs/` or `~/` and silently write there. That's a data split.
+
+**Rule:** every session, first line of every agent is `export PLANDB_DB=<abs path to labs/nix/.plandb.db>`. Or `cd` into the main repo before touching plandb.
 
 ### Inspection
 
@@ -128,16 +140,18 @@ If a task description isn't self-contained, amend it before claiming.
 ### One task → one branch → one PR → one merge
 
 ```bash
-# 0. Set identity
+# 0. Set identity + pin plandb db (non-negotiable, see gotcha above)
 export PLANDB_AGENT=codex-region-router
+export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db
 
 # 1. Create worktree + branch from main
 cd /Users/santoshkumarradha/Documents/agentfield/code/labs/nix
 git worktree add ../chief-os-region-router -b proto/region-router
 cd ../chief-os-region-router
 
-# 2. Claim the task (atomic across agents)
+# 2. Claim + start the task (atomic across agents; PLANDB_DB pinned above)
 plandb task claim t-proto-region --agent $PLANDB_AGENT
+plandb task start t-proto-region --agent $PLANDB_AGENT
 
 # 3. Do the work. Record discoveries as you go.
 plandb context "discovery: nushell crate licensing is MIT" --kind discovery

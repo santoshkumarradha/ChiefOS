@@ -6,17 +6,24 @@ use chief_core::{
 };
 use chief_inference::{InferenceAttestation, Tier};
 use serde_json::json;
+use std::path::Path;
 use std::sync::Arc;
+use tempfile::tempdir;
 
-#[tokio::test]
-async fn test_intent_and_brief_flow() {
+async fn test_state(path: &Path) -> AppState {
     let config = AppConfig {
-        state_dir: None,
+        state_dir: Some(path.to_path_buf()),
         dev_mode: true,
         backend: BackendKind::Stub,
         model_path: None,
     };
-    let state = AppState::new(config).await.expect("init state");
+    AppState::new(config).await.expect("init state")
+}
+
+#[tokio::test]
+async fn test_intent_and_brief_flow() {
+    let dir = tempdir().expect("temp state dir");
+    let state = test_state(dir.path()).await;
     let state = Arc::new(state);
 
     let intent_text = "draft an email to alice@example.com";
@@ -42,13 +49,8 @@ async fn test_intent_and_brief_flow() {
 
 #[tokio::test]
 async fn test_rewind_flow() {
-    let config = AppConfig {
-        state_dir: None,
-        dev_mode: true,
-        backend: BackendKind::Stub,
-        model_path: None,
-    };
-    let state = AppState::new(config).await.expect("init state");
+    let dir = tempdir().expect("temp state dir");
+    let state = test_state(dir.path()).await;
     let state = Arc::new(state);
 
     let stub_att = InferenceAttestation {
@@ -118,13 +120,8 @@ async fn test_rewind_flow() {
 
 #[tokio::test]
 async fn test_status_endpoint() {
-    let config = AppConfig {
-        state_dir: None,
-        dev_mode: true,
-        backend: BackendKind::Stub,
-        model_path: None,
-    };
-    let state = AppState::new(config).await.expect("init state");
+    let dir = tempdir().expect("temp state dir");
+    let state = test_state(dir.path()).await;
     let state = Arc::new(state);
 
     let uptime = state.uptime_secs();

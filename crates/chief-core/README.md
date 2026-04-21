@@ -38,6 +38,41 @@ chief-core --bind 0.0.0.0:4711 --state /var/lib/chief
 
 Binds to all interfaces. State stored in `/var/lib/chief`.
 
+## Capability Enforcement Modes
+
+`chief-core` enforces capabilities through the SQLite-backed Capability Broker
+at `$CHIEF_HOME/broker.db`. Public routes derive the caller from the
+`x-chief-principal` header in production mode.
+
+- `POST /intent` requires `agent.spawn` scoped to `intent_task`.
+- `POST /approve` requires `ceremony.request` scoped to `approval`.
+- `POST /rewind` requires `ledger.read` scoped to `rewind`.
+- `POST /verify` is read-only and does not require a grant.
+
+### `--dev`
+
+Development mode auto-issues a wildcard grant for principal `dev` and treats
+all HTTP callers as `dev`, regardless of the supplied principal header. Startup
+logs include this banner:
+
+```text
+⚠️  chief-core running in --dev mode: all capabilities auto-granted. DO NOT use in production.
+```
+
+Use `--dev` only for local demos and tests.
+
+### Production
+
+Production mode is default-deny. A request without a matching active grant
+returns:
+
+```json
+{"error":"capability_denied","kind":"agent.spawn","reason":"NoGrant"}
+```
+
+Grants are persisted across restarts, expiration is enforced on every check,
+and revocation takes effect immediately.
+
 ## API Routes
 
 All routes use JSON request/response. Available on HTTP.

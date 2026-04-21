@@ -1,9 +1,16 @@
 //! Axum route handlers for HTTP API.
 
 use crate::brief::assemble_brief;
+use crate::broker::CapabilityDenied;
+use crate::capability::{PrincipalId, RequestedOp};
 use crate::dispatch::dispatch_intent;
 use crate::state::{AppState, BusEvent};
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json, Router};
+use axum::{
+    extract::State,
+    http::{HeaderMap, StatusCode},
+    response::IntoResponse,
+    Json, Router,
+};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tracing::info;
@@ -75,10 +82,22 @@ pub fn router(state: Arc<AppState>) -> Router {
 }
 
 pub async fn intent_handler(
+    headers: HeaderMap,
     State(state): State<Arc<AppState>>,
     Json(req): Json<IntentRequest>,
 ) -> impl IntoResponse {
     info!("intent: {}", req.text);
+
+    if let Err(denied) = state
+        .broker
+        .check(
+            &principal_for_request(&headers, &state),
+            &RequestedOp::agent_spawn("intent_task", 1),
+        )
+        .await
+    {
+        return capability_denied_response(denied);
+    }
 
     let intent_id = state.next_id("intent");
     let cards = match dispatch_intent(&req.text, &intent_id, &state).await {
@@ -119,6 +138,7 @@ pub async fn brief_handler(State(state): State<Arc<AppState>>) -> impl IntoRespo
 }
 
 pub async fn approve_handler(
+    headers: HeaderMap,
     State(state): State<Arc<AppState>>,
     Json(req): Json<ApproveRequest>,
 ) -> impl IntoResponse {
@@ -126,6 +146,17 @@ pub async fn approve_handler(
         "approve: card_id={}, ceremony={}",
         req.card_id, req.ceremony
     );
+
+    if let Err(denied) = state
+        .broker
+        .check(
+            &principal_for_request(&headers, &state),
+            &RequestedOp::ceremony_request("approval"),
+        )
+        .await
+    {
+        return capability_denied_response(denied);
+    }
 
     let card = {
         let mut queue = state.queued_cards.lock().await;
@@ -181,10 +212,22 @@ pub async fn verify_handler(
 }
 
 pub async fn rewind_handler(
+    headers: HeaderMap,
     State(state): State<Arc<AppState>>,
     Json(req): Json<RewindRequest>,
 ) -> impl IntoResponse {
     info!("rewind: duration={}", req.duration);
+
+    if let Err(denied) = state
+        .broker
+        .check(
+            &principal_for_request(&headers, &state),
+            &RequestedOp::ledger_read("rewind"),
+        )
+        .await
+    {
+        return capability_denied_response(denied);
+    }
 
     let mut handled = state.handled_cards.lock().await;
     let reverted_count = handled.len();
@@ -212,4 +255,30 @@ pub async fn status_handler(State(state): State<Arc<AppState>>) -> impl IntoResp
         version: env!("CARGO_PKG_VERSION").to_string(),
     })
     .into_response()
+}
+
+fn principal_for_request(headers: &HeaderMap, state: &AppState) -> PrincipalId {
+    if state.dev_mode {
+        return PrincipalId::from("dev");
+    }
+
+    headers
+        .get("x-chief-principal")
+        .and_then(|value| value.to_str().ok())
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(PrincipalId::from)
+        .unwrap_or_else(|| PrincipalId::from("anonymous"))
+}
+
+fn capability_denied_response(denied: CapabilityDenied) -> axum::response::Response {
+    (
+        StatusCode::FORBIDDEN,
+        Json(serde_json::json!({
+            "error": "capability_denied",
+            "kind": denied.kind(),
+            "reason": denied.reason().to_string(),
+        })),
+    )
+        .into_response()
 }

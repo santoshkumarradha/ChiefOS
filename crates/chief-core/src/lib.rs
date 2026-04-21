@@ -1,6 +1,8 @@
 //! Chief OS integration library.
 
 pub mod brief;
+pub mod broker;
+pub mod capability;
 pub mod dispatch;
 pub mod routes;
 pub mod state;

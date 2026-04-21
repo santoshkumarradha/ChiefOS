@@ -98,12 +98,23 @@ External references, competitor analyses, prior art.
 | ID | File | Status | Purpose |
 |---|---|---|---|
 | `brand-visual-language` | [`brand/visual-language.md`](./brand/visual-language.md) | draft (binding) | Desktop-feel rules: Tauri rendering, typography, color, motion, native integration checklist, anti-patterns. Review-blocker for any UI PR. |
+| `brand-typeface` | [`../brand/typeface.md`](../brand/typeface.md) | draft | Inter + Inter Tight + JetBrains Mono picks, bundling rules, v2 upgrade candidates |
+| `brand-sound` | [`../brand/sound.md`](../brand/sound.md) | draft | Three-sound palette: ship chime, approval cluck, ceremony tone |
+| `brand-motion` | [`../brand/motion.md`](../brand/motion.md) | draft | Seven spring-physics presets; banned motion list |
+
+## Legal (draft, counsel review pending)
+
+| ID | File | Status |
+|---|---|---|
+| `legal-tos` | [`../legal/terms-of-service.md`](../legal/terms-of-service.md) | draft |
+| `legal-privacy` | [`../legal/privacy-policy.md`](../legal/privacy-policy.md) | draft |
 
 ## Directories
 
 - [`../plans/`](../plans/) — implementation plans (see `plans/README.md`)
 - [`../prototypes/`](../prototypes/) — throwaway code spikes
 - [`../brand/`](../brand/) — brand identity
+- [`../legal/`](../legal/) — draft legal documents (external counsel review required)
 
 ## Other
 

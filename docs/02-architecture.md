@@ -16,6 +16,7 @@ tags: [architecture, layers]
 - We own L2–L4. We vendor L0–L1.
 - The OS is a protocol (HTTP + CLI + socket + surface). Channel parity is non-negotiable.
 - **Substrate spine** (from research): signed typed event log, CAS filesystem, `kbd://` clipboard, HAX inbox, omnibar. Everything else is a view.
+- **Signed Inference** ([ADR-0009](../adr/0009-signed-inference.md)): every model call mediated by `chief-inference` and accompanied by a ~400 B cryptographic attestation. Category-defining for regulatory posture + anti-impersonation.
 
 ## Layer map
 
@@ -43,7 +44,7 @@ flowchart TD
         TLD[Trust Ledger]
         RR[Region Router]
         EB[Event Bus]
-        MR[Model Router]
+        CI[chief-inference<br/>Signed Inference]
     end
     subgraph L1[L1 — OS Primitives]
         NIX[NixOS]

@@ -102,6 +102,20 @@ tags: [risks, open-questions, decisions-needed]
 16. Which jurisdictions do we explicitly serve at v0? (Probably US + EU; do we block others?)
 17. Do we register an "AI system" designation in EU AI Act if that category applies?
 
+### Signed Inference (ADR-0009)
+
+18. Canonical prompt form: NFC + CBOR-sorted params + `mem://`-resolved refs — good enough? Need adversarial review.
+19. Device-key publication: DID Document vs. Sigstore Fulcio vs. self-hosted Rekor — pick before v0 ships.
+20. Multi-turn conversations: sign per-turn (lean) vs. per-thread.
+21. Streaming outputs: sign on stream close (lean) vs. chunked signing.
+22. Cloud-provider TEE timeline: which providers offer SEV-SNP / TDX attestations usable by us before v1?
+23. Do we retroactively re-attest tier-3 custody calls if a provider later offers TEE? (Probably not — immutable log.)
+
+### Compute / hardware
+
+24. **v0 targets CPU models + cloud only.** GPU scheduling deferred. Acceptable CPU model quality for sensitive categories (finance, health)? Re-benchmark at day 30.
+25. Apple Silicon MLX path at v0 (CPU + Metal via llama.cpp Metal backend) — does this count as "GPU" under our deferral or is Metal allowed? *Lean: Metal is allowed since it's built-in on target hardware.*
+
 ## Decisions needed BEFORE v0 build starts
 
 | # | Decision | Owner | Deadline |
@@ -114,6 +128,8 @@ tags: [risks, open-questions, decisions-needed]
 | D6 | Pick typeface and sound partner | Design + founder | Day 14 |
 | D7 | Pick live-render implementation strategy for Morning Brief | Surfaces eng | Day 14 |
 | D8 | Pick Person Zero target count for day-90 private beta | Founder | Day 5 |
+| D9 | Signed Inference: canonical prompt form lock-in + device-key publication path | Security eng | Day 14 |
+| D10 | Apple-Silicon Metal acceptance under CPU-only v0 constraint | Kernel eng | Day 7 |
 
 ## Related
 

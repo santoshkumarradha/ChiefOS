@@ -139,6 +139,29 @@ Append-only log of verbal directives from the steward (founder) captured during 
 - [ ] After research returns: propose ADR codifying the "no single-company capture at kernel layer" principle.
 **Docs touched:** `08-memory-substrate.md`, `03-chief-kernel.md`, `13-v0-scope-90-day.md`, `research/2026-04-21-oss-landscape-scan.md`
 
+### 2026-04-21 — Provable AI is kernel-native (promoted from "demo flex")
+
+**Tag:** `architecture`
+**Directive:** Provenance and cryptographic verifiability of AI output must be internal, cleverly designed (not slow, not bloated, not memory-heavy), and woven into the substrate — not an optional add-on or a Chief-branded interface layer.
+**Resolution:**
+- [x] ADR-0009 opened: Signed Inference as L2 primitive (`chief-inference` service).
+- [x] Per-inference attestation ~400 B; Ed25519 signing; BLAKE3 hashes; ~1–2 ms overhead per call; ≤ 5 ms NFR.
+- [x] Three-tier claim model (Generated / Co-signed / Custody) prevents implicit over-claiming.
+- [x] Docs updated: `02-architecture.md`, `03-chief-kernel.md`, `09-local-vs-cloud.md`, `13-v0-scope-90-day.md`, requirements F-207..F-214, NF-507..NF-508.
+- [ ] Implementation prototype (pending — new plandb task).
+- [ ] Canonical prompt form adversarial review (open question in `14-risks`).
+- [ ] Device-key publication path decision (DID vs Sigstore Fulcio vs self-hosted Rekor).
+
+### 2026-04-21 — GPU / hardware scheduling deferred to v1+
+
+**Tag:** `scope`
+**Directive:** Kernel-level LLM/GPU scheduling and local GPU inference deferred. Steward lacks GPU for testing; many target users also lack one. v0 targets CPU models + cloud models only. Model Router handles routing in userspace; hardware scheduling can become an add-on later.
+**Resolution:**
+- [x] `docs/13-v0-scope-90-day.md` out-of-scope table updated.
+- [x] `docs/09-local-vs-cloud.md` local stack pinned to CPU (Qwen 2.5 7B Q4 / Llama 3.2 8B Q4 default).
+- [x] `docs/requirements/non-functional.md` NF-505 revised (CPU targets).
+- [x] Apple Silicon Metal left ambiguous — flagged as decision D10 to lock within 7 days. Lean: Metal is acceptable under v0 constraint since it's a built-in backend, not a discrete GPU.
+
 ## Next audit
 
 - Date: 2026-05-05 (2 weeks).

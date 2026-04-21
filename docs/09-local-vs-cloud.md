@@ -16,8 +16,9 @@ tags: [runtime, local, cloud, hybrid]
 - Source of truth lives on your device. Always.
 - Cloud twin is a **stateless** compute surface for heavy reasoning. It never holds your data in the clear.
 - Three work classes routed automatically: hot-path cloud, sensitive local, always-on state local (with encrypted replica).
-- **Model Router is a kernel service.** Any inference request can be routed local or cloud based on policy at 5 granularities: system → category → pack → agent → call.
+- **`chief-inference` is a kernel service** (ADR-0009). Sole mediator of all model calls. Routes local / cloud at 5 granularities: system → category → pack → agent → call. **Emits a Signed Inference attestation per call.**
 - Network-cable-pull is the trust demo: sensitive work never paused.
+- **v0 targets CPU models + cloud only.** GPU scheduling deferred to v1+ per steward directive 2026-04-21.
 
 ## Three work classes
 
@@ -27,9 +28,9 @@ tags: [runtime, local, cloud, hybrid]
 | Sensitive reasoning | Local model (Qwen/Llama Q4 13–32B) | Finance, health, personal. Privacy non-negotiable. |
 | Always-on state | Local authoritative + cloud encrypted replica | Source of truth lives with user. Cloud twin keeps encrypted mirror for cross-device read. |
 
-## Model Router — kernel service
+## chief-inference — kernel service with Signed Inference
 
-Model routing is a **first-class kernel service** (L2), not ad-hoc in each pack. Every inference call passes through it; the call-site sees a single `infer()` API. The router decides local vs cloud per-call based on a stack of policies resolved in this order:
+Model routing is a **first-class kernel service** (L2), not ad-hoc in each pack. Every inference call passes through `chief-inference`; the call-site sees a single `infer(prompt, params, caps) -> (output, attestation)` API. The router decides local vs cloud per-call based on a stack of policies resolved in this order:
 
 ```
 CALL-LEVEL      explicit override set by caller  → wins if set
@@ -67,7 +68,7 @@ At v0 the system ships with opinionated defaults. The architecture already suppo
 | Agent | Agent spec | Pack default | Rare; pack author opt-in |
 | Call | Caller flag | Rare | Used for testing or forced-offline |
 
-The architectural commitment: **the Model Router exists as a kernel service with a stable API**. Picking the UX for who controls what is a product decision, not an architecture blocker.
+The architectural commitment: **`chief-inference` exists as a kernel service with a stable API**. Picking the UX for who controls what is a product decision, not an architecture blocker.
 
 ### Backend interface
 
@@ -81,16 +82,28 @@ trait ModelBackend {
 }
 ```
 
-Concrete backends in v0: `LocalLlamaCpp`, `CloudClaude`, `CloudOpenAI`. Future: `LocalMlx` (Apple Silicon), `CloudGemini`, `CustomEndpoint`.
+Concrete backends in v0: `LocalLlamaCpp` (CPU), `CloudClaude`, `CloudOpenAI`. Future: `LocalMlx` (Apple Silicon), `CloudGemini`, `CustomEndpoint`. GPU acceleration for local inference is v1+.
 
-Adding a backend is a contained change: implement the trait, register at boot, policy layers automatically see it.
+Adding a backend is a contained change: implement the trait, register at boot, policy layers automatically see it. Attestations are emitted by `chief-inference`, not by backends — backends don't need signing awareness.
+
+### Signed Inference tiers
+
+Per [ADR-0009](../adr/0009-signed-inference.md), every call produces an attestation labeled with its claim tier:
+
+| Tier | Scenario | Claim strength |
+|---|---|---|
+| 1 — **Generated** | Local inference (llama.cpp + fastembed-rs + ort) signed by device key | Strong — "Chief generated this on device D at T" |
+| 2 — **Co-signed** | Cloud inference with provider TEE (SEV-SNP / TDX) attestation | Strong — "Provider X attested, Chief co-signed" |
+| 3 — **Custody** | Cloud inference without TEE | Chain-of-custody only — "Chief received from provider X at T" |
+
+Attestation size ~400 B per call; signing overhead ~1–2 ms (≤ 5 ms NFR). Stored as `in-toto v1` statements in the Provenance Log; verifiable via `cosign`.
 
 ## Local model stack
 
 | Layer | Choice | Notes |
 |---|---|---|
-| Inference engine | llama.cpp | Mature, quantized, GPU/CPU |
-| Model (default) | Qwen 2.5 32B Q4 / Llama 3.3 70B Q4 | Selected at install time based on HW |
+| Inference engine | llama.cpp | Mature, quantized. **v0 runs CPU-only** (GPU deferred to v1+ per directive 2026-04-21). |
+| Model (default) | Qwen 2.5 7B Q4 / Llama 3.2 8B Q4 for v0 CPU; 32B+ when GPU lands | Selected at install time based on available RAM. CPU-fit on 16 GB laptops. |
 | Speech | whisper.cpp + Piper (v1) | Voice loop; v0 text-only |
 | Embeddings | nomic-embed / bge-m3 | CPU-viable |
 | Orchestration | opencode locally | Harness interface |

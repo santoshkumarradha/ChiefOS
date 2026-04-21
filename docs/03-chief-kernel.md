@@ -18,6 +18,7 @@ tags: [kernel, services, api]
 - Capability Broker is the single enforcement point for Axiom 2.
 - Region Router is deterministic rule-table code; no LLM in the hot path.
 - Provenance Log is append-only, Merkle-tree'd, signed.
+- **`chief-inference` mediates every model call and emits a Signed Inference attestation** per call (ADR-0009).
 
 ## Services overview
 
@@ -30,12 +31,17 @@ flowchart LR
     PL[Provenance Log]
     TLD[Trust Ledger]
     RR[Region Router]
+    CI[chief-inference<br/>Signed Inference]
 
     AR -- propose action --> CB
     CB -- classify --> RR
     CB -- read grants --> TLD
     CB -- log --> PL
     AR -- read/write scoped URIs --> MG
+    AR -- llm.generate --> CB
+    CB -- mediated --> CI
+    CI -- attest + sign --> PL
+    CI -- route local/cloud --> CI
     MG -- emits changes --> EB
     PL -- emits entries --> EB
     TLD -- emits updates --> EB
@@ -169,6 +175,28 @@ Rules table lives at `chief-router/rules/*.yaml`; shipped packs can declare addi
 | Dependencies | — |
 | Invariants | Ordering within topic; at-least-once delivery |
 
+### 8. Inference Router + Attestor (`chief-inference`)
+
+Canonical decision in [ADR-0009](../adr/0009-signed-inference.md). This service subsumes the previously-planned Model Router and adds **Signed Inference** — every model call produces a cryptographic attestation.
+
+| Aspect | Value |
+|---|---|
+| Purpose | Sole mediator of all model calls (local + cloud). Routes by policy (5 granularities). Emits a Signed Inference attestation per call. |
+| Key ops | `infer(prompt, params, model_hint, caller_caps) -> (output, attestation)` · `verify(attestation) -> ok/err + tier` |
+| State | Backend registry, active request queue, pending attestations |
+| Storage | Signed attestations → Provenance Log; outputs → Memory Graph under `mem://inference/<hash>` |
+| Dependencies | Capability Broker (grant check), Provenance Log (sign + append), Model backends (local `llama.cpp`, cloud providers) |
+| Invariants | Every outbound LLM call goes through this service. No syscall path allows agents to reach cloud/local models directly. Attestation is tier-labeled (Generated / Co-signed / Custody). |
+
+**Attestation struct** (~400 B; see ADR-0009 for full schema). Ed25519 signature using device key (TPM/SE-sealed). Overhead target: ≤ 5 ms per call — see [`requirements/non-functional.md`](./requirements/non-functional.md) NF-507.
+
+**Routing policy stack** (resolved in order): call-level override → agent manifest → pack manifest → trust-ledger category → system default. See [`09-local-vs-cloud.md`](./09-local-vs-cloud.md).
+
+**Tier labeling:**
+- *Generated* — local model, device-key-signed.
+- *Co-signed* — cloud model with provider TEE attestation (SEV-SNP / TDX).
+- *Custody* — cloud model without TEE; chain-of-custody claim only.
+
 ## API channel matrix
 
 | Service | HTTP | CLI | Unix socket | Internal (in-proc) |
@@ -180,6 +208,7 @@ Rules table lives at `chief-router/rules/*.yaml`; shipped packs can declare addi
 | Trust Ledger | ✓ (read-only for remote) | ✓ | ✓ | ✓ |
 | Region Router | — (called via Broker) | ✓ (inspect) | ✓ | ✓ |
 | Event Bus | ✓ (SSE) | ✓ (tail) | ✓ | ✓ |
+| chief-inference | ✓ (auth required) | ✓ (infer, verify) | ✓ | ✓ |
 
 ## Storage layout
 

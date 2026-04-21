@@ -40,16 +40,24 @@ Append-only. Each requirement has a stable ID `F-NNN`. Reference from docs, ADRs
 | F-107 | Author can publish a signed pack via `chief-sdk publish` | | ✓ | |
 | F-108 | Community trust score visible before install | | ✓ | |
 
-## Model Router
+## chief-inference (Model Router + Signed Inference) — ADR-0009
 
 | ID | Requirement | v0 | v1 | v2 |
 |---|---|---|---|---|
-| F-201 | Model Router is a kernel service with a stable `ModelBackend` trait | ✓ | | |
+| F-201 | `chief-inference` is a kernel service with a stable `ModelBackend` trait | ✓ | | |
 | F-202 | Routing decision considers policy at 5 granularities (system / category / pack / agent / call) | ✓ | | |
 | F-203 | Sensitive categories (finance, health, personal, family, legal.private) never route to cloud | ✓ | | |
 | F-204 | Adding a backend is a contained change (implement trait + register at boot) | ✓ | | |
 | F-205 | User-visible indicator when an op runs on-device | ✓ | | |
 | F-206 | Per-category / per-pack routing override configurable | | ✓ | |
+| F-207 | Every model call produces an `InferenceAttestation` signed by device key | ✓ | | |
+| F-208 | Attestation tier labeled (Generated / Co-signed / Custody) and visible in UX | ✓ | | |
+| F-209 | Cloud calls without provider TEE carry tier-3 "Custody" label only | ✓ | | |
+| F-210 | `chief verify-inference <attestation>` validates any attestation via cosign | ✓ | | |
+| F-211 | Public verification possible without Chief OS installed (via device pubkey + cosign) | ✓ | | |
+| F-212 | Cloud provider TEE attestation (SEV-SNP / TDX) upgraded to tier-2 when available | | ✓ | |
+| F-213 | **v0 local inference is CPU-only.** GPU acceleration v1+. | ✓ (CPU only) | ✓ (GPU) | |
+| F-214 | Apple Silicon Metal backend via llama.cpp (not considered "GPU" for the v0 constraint) | ✓ | | |
 
 ## Substrate spine (from research 2026-04-21-ai-native-primitive-rethinks.md)
 

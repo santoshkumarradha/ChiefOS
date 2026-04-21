@@ -48,6 +48,7 @@ Machine-readable map of all Chief OS documentation. Update when adding or renami
 | `adr-0006` | [`../adr/0006-cas-filesystem.md`](../adr/0006-cas-filesystem.md) | accepted |
 | `adr-0007` | [`../adr/0007-hax-inbox-notifications.md`](../adr/0007-hax-inbox-notifications.md) | accepted |
 | `adr-0008` | [`../adr/0008-pure-oss-memory-substrate.md`](../adr/0008-pure-oss-memory-substrate.md) | accepted |
+| `adr-0009` | [`../adr/0009-signed-inference.md`](../adr/0009-signed-inference.md) | accepted |
 
 ## Reusable diagrams (mermaid)
 

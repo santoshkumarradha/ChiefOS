@@ -35,11 +35,12 @@ tags: [scope, mvp, milestones]
 |---|---|---|
 | 1 | Hardware-bound approval root | TPM/SE + YubiKey optional; ceremony token single-use |
 | 2 | Local filesystem gravity | Chief FS: CAS over blake3 + FUSE legacy shim at `~/`; agents cite `mem://file/<cid>` |
-| 3 | Local-inference fallback | Qwen/Llama Q4 quantized, 13–32B; used for sensitive categories |
+| 3 | Local-inference fallback | **Qwen/Llama Q4 7B–13B, CPU-only for v0** (GPU deferred to v1+); used for sensitive categories |
 | 4 | OS-level rewind | NixOS generations + Memory Graph tombstones + agent-queue journal |
 | 5 | Capability-sandboxed agents | `systemd-nspawn` per agent + eBPF enforcement on net/fs |
 | 6 | OS-owned Chromium | Single instance, cookie store owned by OS, agents drive via CDP |
 | 7 | Provenance graph | Sigstore-compatible: in-toto v1 statements + Rekor-style local log + cosign-signed receipts |
+| 8 | **Signed Inference** | `chief-inference` mediates every model call; Ed25519 attestation per call; tier labels (Generated / Co-signed / Custody). ADR-0009. |
 
 ### 5 substrate-spine primitives (non-negotiable, from research)
 
@@ -115,6 +116,9 @@ From [`research/2026-04-21-oss-landscape-scan.md`](./research/2026-04-21-oss-lan
 - Branded hardware / physical puck (v3).
 - Dual-boot installer / Windows compat (v1 or later).
 - COSMIC DE / Niri tiling compositor (v2 surface story).
+- **GPU acceleration for local inference** (v1+ per steward directive 2026-04-21). v0 runs CPU-only local models + cloud models. Rationale: many target users lack GPUs; simplifies v0 shipping surface.
+- **Kernel-level LLM/GPU scheduling** (v1+ add-on). Model Router handles policy in userspace; kernel-level GPU resource scheduling deferred.
+- **KV-cache-as-process-state** (v2+ research track). Checkpointable agent "mind" requires inference-engine-specific support; parked in ideation.
 
 ## Milestones
 

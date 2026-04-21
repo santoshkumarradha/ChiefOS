@@ -73,14 +73,18 @@ Append-only. Each requirement has a stable ID `NF-NNN`.
 | NF-502 | Capability Broker check: p50 ≤5ms local, p50 ≤20ms guest (microVM). |
 | NF-503 | Memory Graph retrieval: p50 ≤200ms for k=20 over 100k nodes. |
 | NF-504 | Omnibar search result: p50 ≤500ms. |
-| NF-505 | Local-inference latency for summarization: p50 ≤2s on reference GPU, ≤10s on CPU-only reference. |
+| NF-505 | Local-inference latency for summarization (CPU v0): p50 ≤10s on reference CPU (Qwen 2.5 7B Q4); ≤2s on GPU when GPU lands in v1. |
 | NF-506 | Cloud-twin round-trip: p50 ≤800ms end-to-end. |
+| NF-507 | **Signed Inference overhead ≤ 5 ms per call** (BLAKE3 hash + Ed25519 sign + event-log append). ADR-0009. |
+| NF-508 | Attestation storage ≤ 500 B per inference call (struct + provider_attest when present). |
 
 ## Explicit non-performance requirements (v0)
 
 - **No boot-time optimization required at v0.** Explicit non-goal per user directive. Optimize later.
 - No real-time scheduling guarantees.
 - No sub-100ms UI responsiveness target (Apple-parity is a v1 push).
+- **No GPU acceleration for local inference at v0.** Explicit deferral per directive 2026-04-21. v0 targets CPU + cloud only. GPU scheduling / fractional allocation is a v1+ concern.
+- No kernel-level LLM/GPU resource scheduling at v0.
 
 ## Scalability
 

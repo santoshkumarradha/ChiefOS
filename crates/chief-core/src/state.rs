@@ -1,5 +1,7 @@
 //! Shared application state for the Chief OS integration daemon.
 
+use crate::broker::CapabilityBroker;
+use crate::capability::{Grant, PrincipalId};
 use anyhow::{anyhow, Context, Result};
 use chief_event_log_proto::EventLog;
 use chief_harness_proto::NullHarness;
@@ -16,7 +18,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use tokio::sync::{broadcast, Mutex};
-use tracing::info;
+use tracing::{info, warn};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
 #[serde(rename_all = "snake_case")]
@@ -88,6 +90,7 @@ pub struct AppState {
     pub state_dir: PathBuf,
     pub mem: Arc<Mutex<ChiefMem>>,
     pub event_log: Arc<EventLog>,
+    pub broker: Arc<CapabilityBroker>,
     pub harness: Arc<NullHarness>,
     pub router: Arc<RuleEngine>,
     pub queued_cards: Arc<Mutex<VecDeque<Card>>>,
@@ -109,7 +112,12 @@ impl AppState {
         let mem = ChiefMem::open(&mem_db).context("open memory graph")?;
 
         let event_log_dir = state_dir.join("provenance").join("log.db");
-        let event_log = EventLog::open(&event_log_dir).context("open event log")?;
+        let event_log = Arc::new(EventLog::open(&event_log_dir).context("open event log")?);
+        let broker = Arc::new(
+            CapabilityBroker::new(&state_dir, Arc::clone(&event_log))
+                .await
+                .context("open capability broker")?,
+        );
 
         let device_key = Arc::new(EphemeralDeviceKey::new());
         let device_pubkey = device_key.public_key();
@@ -121,6 +129,16 @@ impl AppState {
             .unwrap_or_else(|| "stub".to_string());
         let inference_backend = Arc::new(LocalLlamaCppStub::new(model_name));
         let (event_tx, _) = broadcast::channel(1024);
+
+        if config.dev_mode {
+            warn!(
+                "⚠️  chief-core running in --dev mode: all capabilities auto-granted. DO NOT use in production."
+            );
+            broker
+                .issue(PrincipalId::from("dev"), Grant::dev_god())
+                .await
+                .context("issue dev capability grant")?;
+        }
 
         info!(
             state_dir = %state_dir.display(),
@@ -135,7 +153,8 @@ impl AppState {
             model_path: config.model_path,
             state_dir,
             mem: Arc::new(Mutex::new(mem)),
-            event_log: Arc::new(event_log),
+            event_log,
+            broker,
             harness: Arc::new(NullHarness::new()),
             router: Arc::new(RuleEngine::default()),
             queued_cards: Arc::new(Mutex::new(VecDeque::new())),

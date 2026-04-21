@@ -1,0 +1,173 @@
+# Chief OS Region Router — Default Rule Set
+# Maps (delegation_level, reversibility, horizon, stake) -> (region, surface, friction_tier, audit_template)
+#
+# Regions (from HAX principles):
+# R1: low D, low C, short H -> Ad-hoc chat
+# R2: low D, low C, medium H -> (intermediate)
+# R3: low D, high C, short H -> Evidence card
+# R4: low D, high C, long H -> Quarterly review
+# R5: high D, low C, short H -> One-tap queue
+# R6: high D, low C, long H -> Ambient (resting state)
+# R7: high D, high C, short H -> Just-in-time ceremony
+# R8: high D, high C, long H -> Graduated autonomy + renegotiation
+#
+# Delegation levels: 1 (minimal) to 5 (full autonomy)
+# Reversibility: soft, hard, irreversible
+# Horizon: short, medium, long, open
+# Max stake: -1 = unlimited
+
+version: "1.0"
+rules:
+  # Region 1: Ad-hoc, low delegation, low consequence
+  - min_delegation: 1
+    max_delegation: 2
+    reversibility: "soft"
+    horizon: "short"
+    max_stake: 100.0
+    region: 1
+    surface: "QueueCard"
+    friction_tier: 0
+    audit_template: "audit-r1-adhoc"
+
+  # Region 2: Low delegation, low consequence, medium horizon
+  - min_delegation: 1
+    max_delegation: 2
+    reversibility: "soft"
+    horizon: "medium"
+    max_stake: 50.0
+    region: 2
+    surface: "QueueCard"
+    friction_tier: 1
+    audit_template: "audit-r2-intermediate"
+
+  # Region 3: Evidence card - low delegation, high consequence, short horizon
+  - min_delegation: 1
+    max_delegation: 2
+    reversibility: "hard"
+    horizon: "short"
+    max_stake: 500.0
+    region: 3
+    surface: "EvidenceCard"
+    friction_tier: 2
+    audit_template: "audit-r3-evidence"
+
+  # Region 3 variant: Low delegation, binding effect, short horizon
+  - min_delegation: 1
+    max_delegation: 2
+    reversibility: "*"
+    horizon: "short"
+    max_stake: 100.0
+    region: 3
+    surface: "EvidenceCard"
+    friction_tier: 2
+    audit_template: "audit-r3-binding"
+
+  # Region 4: Quarterly review - low delegation, high consequence, long horizon
+  - min_delegation: 1
+    max_delegation: 2
+    reversibility: "hard"
+    horizon: "long"
+    max_stake: 1000.0
+    region: 4
+    surface: "EvidenceCard"
+    friction_tier: 3
+    audit_template: "audit-r4-quarterly"
+
+  # Region 4 variant: Low delegation, irreversible, any horizon
+  - min_delegation: 1
+    max_delegation: 2
+    reversibility: "irreversible"
+    horizon: "*"
+    max_stake: 500.0
+    region: 4
+    surface: "EvidenceCard"
+    friction_tier: 3
+    audit_template: "audit-r4-irreversible"
+
+  # Region 5: One-tap queue - high delegation, low consequence, short horizon
+  - min_delegation: 4
+    max_delegation: 5
+    reversibility: "soft"
+    horizon: "short"
+    max_stake: 1000.0
+    region: 5
+    surface: "QueueCard"
+    friction_tier: 1
+    audit_template: "audit-r5-queue"
+
+  # Region 6: Ambient (resting state) - high delegation, low consequence, long horizon
+  - min_delegation: 4
+    max_delegation: 5
+    reversibility: "soft"
+    horizon: "long"
+    max_stake: 2000.0
+    region: 6
+    surface: "QueueCard"
+    friction_tier: 0
+    audit_template: "audit-r6-ambient"
+
+  # Region 6 variant: High delegation, open horizon
+  - min_delegation: 4
+    max_delegation: 5
+    reversibility: "soft"
+    horizon: "open"
+    max_stake: 5000.0
+    region: 6
+    surface: "AutoLog"
+    friction_tier: 0
+    audit_template: "audit-r6-open"
+
+  # Region 7: Just-in-time ceremony - high delegation, high consequence, short horizon
+  - min_delegation: 3
+    max_delegation: 5
+    reversibility: "hard"
+    horizon: "short"
+    max_stake: 2400.0
+    region: 7
+    surface: "Ceremony"
+    friction_tier: 3
+    audit_template: "audit-r7-ceremony"
+
+  # Region 7 variant: High delegation, binding, short horizon
+  - min_delegation: 3
+    max_delegation: 5
+    reversibility: "*"
+    horizon: "short"
+    max_stake: 10000.0
+    region: 7
+    surface: "Ceremony"
+    friction_tier: 3
+    audit_template: "audit-r7-binding"
+
+  # Region 8: Graduated autonomy - high delegation, high consequence, long horizon
+  - min_delegation: 3
+    max_delegation: 5
+    reversibility: "hard"
+    horizon: "long"
+    max_stake: 10000.0
+    region: 8
+    surface: "CeremonyCoSign"
+    friction_tier: 4
+    audit_template: "audit-r8-graduated"
+
+  # Region 8 variant: Irreversible actions
+  - min_delegation: 3
+    max_delegation: 5
+    reversibility: "irreversible"
+    horizon: "*"
+    max_stake: 50000.0
+    region: 8
+    surface: "CeremonyCoSign"
+    friction_tier: 4
+    audit_template: "audit-r8-irreversible"
+
+  # Catchall for mid-range delegation (3) with moderate consequences
+  - min_delegation: 3
+    max_delegation: 3
+    reversibility: "soft"
+    horizon: "*"
+    max_stake: 500.0
+    region: 5
+    surface: "QueueCard"
+    friction_tier: 1
+    audit_template: "audit-mid-delegation"

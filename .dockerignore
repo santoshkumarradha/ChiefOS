@@ -1,0 +1,31 @@
+# Build artifacts
+target/
+node_modules/
+
+# Local development state (ephemeral)
+.plandb.db
+.plandb.db-*
+.DS_Store
+
+# Documentation (not needed in container)
+docs/
+adr/
+
+# Git metadata
+.git/
+.gitignore
+
+# Workspace-level targets
+prototypes/*/target/
+prototypes/*/.turbo/
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# Temporary files
+*.tmp
+*.log

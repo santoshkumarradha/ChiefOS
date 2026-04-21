@@ -6,6 +6,40 @@ An AI-native operating system where agents are first-class citizens and humans a
 
 Built on NixOS. Licensed AGPL-3.0.
 
+## Quick Start (Docker)
+
+To try Chief OS locally with `docker compose` (Path B — Docker-as-OS):
+
+```bash
+git clone git@github.com:santoshkumarradha/ChiefOS.git
+cd ChiefOS
+docker compose up -d
+open http://localhost:5173
+```
+
+**First run:** builds the Rust binary and downloads the model (~2 GB). Expect ~10 minutes on a good connection.  
+**Subsequent runs:** ≤ 15 seconds to healthy (just starting the container).
+
+The API is available at `http://localhost:4711`:
+- `GET /status` — health check
+- `GET /brief` — fetch the morning brief
+- `POST /intent` — submit a new intent/task
+- `GET /` — Morning Brief UI at `:5173`
+
+For the full end-to-end demo:
+
+```bash
+bash scripts/demo-docker.sh
+```
+
+To stop:
+
+```bash
+docker compose down
+```
+
+See [`docs/13-v0-scope-90-day.md`](./docs/13-v0-scope-90-day.md) for Path A (NixOS) and architectural context.
+
 ## Status
 
 **Pre-v0 — designing.** This repository currently contains the architectural brief, design axioms, and v0 scope. Code has not landed yet. Follow the doc tree below to understand the system.

@@ -537,6 +537,10 @@ dependencies:
   to_ref: task-41
   kind: blocks
 context:
+- kind: discovery
+  content: 'proto/events completed: Signed Typed Event Log with Merkle chain. Implemented ADR-0005 substrate: 7 event kinds, fjall storage, Ed25519 signing, chain verification with tampering detection. Concurrent safety tested. Benchmark: ~900 events/sec single-threaded. PR #10 opened. Ready for integration into chief-kernel.'
+  tags: []
+  task_ref: null
 - kind: pattern
   content: 'Pre-commit hook test: verifying auto-export works end-to-end.'
   tags: []

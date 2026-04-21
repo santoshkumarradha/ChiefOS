@@ -536,5 +536,9 @@ dependencies:
 - from_ref: task-37
   to_ref: task-41
   kind: blocks
-context: []
+context:
+- kind: pattern
+  content: 'Pre-commit hook test: verifying auto-export works end-to-end.'
+  tags: []
+  task_ref: null
 

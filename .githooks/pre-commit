@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# Chief OS pre-commit hook
+#
+# Keeps docs/plandb-state.sql (authoritative) and docs/plandb-template.yaml
+# (human sidecar) in sync with the local .plandb.db on every commit.
+#
+# Behaviour:
+#   - If .plandb.db exists, re-export via scripts/plandb-export.sh.
+#   - If either exported file changed, stage it so it lands in this commit.
+#   - If no .plandb.db, do nothing (fresh clone before restore; non-kernel
+#     work; etc.).
+#   - If export script missing, do nothing with a warning.
+#
+# Opt-out: set SKIP_PLANDB_HOOK=1 to skip this hook.
+#
+# Install (once per clone):
+#   scripts/install-hooks.sh
+
+set -euo pipefail
+
+if [ "${SKIP_PLANDB_HOOK:-0}" = "1" ]; then
+  exit 0
+fi
+
+ROOT="$(git rev-parse --show-toplevel)"
+DB="$ROOT/.plandb.db"
+EXPORT_SH="$ROOT/scripts/plandb-export.sh"
+
+# No local db → nothing to sync. Commit proceeds.
+if [ ! -f "$DB" ]; then
+  exit 0
+fi
+
+# Guard: don't run during rebase/merge/cherry-pick — these have their own
+# state machinery and auto-staging can confuse the operation.
+if [ -e "$ROOT/.git/rebase-merge" ] || [ -e "$ROOT/.git/rebase-apply" ] \
+   || [ -e "$ROOT/.git/MERGE_HEAD" ] || [ -e "$ROOT/.git/CHERRY_PICK_HEAD" ]; then
+  exit 0
+fi
+
+if [ ! -x "$EXPORT_SH" ]; then
+  echo "pre-commit (plandb): scripts/plandb-export.sh missing or not executable; skipping export." >&2
+  exit 0
+fi
+
+# Capture current hashes of the exports to detect change after export.
+hash_or_empty() {
+  if [ -f "$1" ]; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  else
+    echo ""
+  fi
+}
+
+SQL_FILE="$ROOT/docs/plandb-state.sql"
+YAML_FILE="$ROOT/docs/plandb-template.yaml"
+SQL_BEFORE="$(hash_or_empty "$SQL_FILE")"
+YAML_BEFORE="$(hash_or_empty "$YAML_FILE")"
+
+# The export script echoes its outputs; swallow stdout, keep stderr for problems.
+"$EXPORT_SH" > /dev/null
+
+SQL_AFTER="$(hash_or_empty "$SQL_FILE")"
+YAML_AFTER="$(hash_or_empty "$YAML_FILE")"
+
+# Compare body (ignore timestamp-only diffs in the preamble).
+#   Our preamble has '-- Generated: <iso>' and '-- Source: <path>'. Strip those
+#   for a fair change detection; otherwise every commit would churn the file.
+body_hash() {
+  if [ -f "$1" ]; then
+    grep -v -E '^(-- Generated:|-- Source:|# Generated|# Source)' "$1" \
+      | shasum -a 256 | awk '{print $1}'
+  else
+    echo ""
+  fi
+}
+
+# Stage only if the content (not just timestamps) changed.
+changed=0
+if [ -n "$SQL_AFTER" ] && [ "$SQL_BEFORE" != "$SQL_AFTER" ]; then
+  # Recompute body-only hashes to decide.
+  BEFORE_BODY="$(git show HEAD:docs/plandb-state.sql 2>/dev/null | grep -v -E '^(-- Generated:|-- Source:)' | shasum -a 256 | awk '{print $1}')" || BEFORE_BODY=""
+  AFTER_BODY="$(body_hash "$SQL_FILE")"
+  if [ "$BEFORE_BODY" != "$AFTER_BODY" ]; then
+    git add -- "docs/plandb-state.sql"
+    changed=1
+  fi
+fi
+if [ -n "$YAML_AFTER" ] && [ "$YAML_BEFORE" != "$YAML_AFTER" ]; then
+  BEFORE_BODY="$(git show HEAD:docs/plandb-template.yaml 2>/dev/null | grep -v -E '^(# Generated|# Source)' | shasum -a 256 | awk '{print $1}')" || BEFORE_BODY=""
+  AFTER_BODY="$(body_hash "$YAML_FILE")"
+  if [ "$BEFORE_BODY" != "$AFTER_BODY" ]; then
+    git add -- "docs/plandb-template.yaml"
+    changed=1
+  fi
+fi
+
+if [ "$changed" = "1" ]; then
+  echo "pre-commit (plandb): re-exported + staged docs/plandb-state.sql and/or docs/plandb-template.yaml"
+fi
+
+exit 0

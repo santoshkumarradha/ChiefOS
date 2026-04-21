@@ -61,7 +61,10 @@ plandb done t-<id> --result '{"pr":"<url>","summary":"..."}'
 #### Scripts
 
 ```bash
-# Export current db → text (run on main before commit/PR)
+# One-time per clone: install git hooks (auto-exports on every commit)
+scripts/install-hooks.sh
+
+# Manual export (usually not needed — pre-commit hook handles it)
 scripts/plandb-export.sh
 
 # Rebuild db from committed text (run on fresh clone or after pull)
@@ -69,15 +72,26 @@ scripts/plandb-restore.sh            # refuses if .plandb.db exists
 scripts/plandb-restore.sh --force    # replaces (auto-backs-up the old one)
 ```
 
-#### New-session bootstrap
+#### Pre-commit hook
+
+`scripts/install-hooks.sh` points `git config core.hooksPath` at `.githooks/`. Then on every commit, `.githooks/pre-commit` runs `plandb-export.sh` and auto-stages `docs/plandb-state.sql` + `docs/plandb-template.yaml` if their content changed.
+
+Skip in one-off cases with `SKIP_PLANDB_HOOK=1 git commit ...`.
+
+Skip conditions (built in): mid-rebase, mid-merge, mid-cherry-pick — the hook gets out of the way to avoid confusing those state machines.
+
+#### New-session / fresh-clone bootstrap
 
 ```bash
-git pull
-# If you have no .plandb.db (fresh clone) or want to reset to repo state:
-scripts/plandb-restore.sh
-# Now plandb works.
-plandb status --detail
+git clone git@github.com:santoshkumarradha/ChiefOS.git
+cd ChiefOS
+scripts/install-hooks.sh              # one-time: activate pre-commit hook
+scripts/plandb-restore.sh             # rebuild .plandb.db from committed SQL
+export PLANDB_DB="$(pwd)/.plandb.db"  # pin absolute path (see gotcha below)
+plandb status --detail                # confirm state
 ```
+
+On an existing clone, `git pull` pulls the updated SQL; re-run `scripts/plandb-restore.sh --force` if you want the local binary to match exactly.
 
 #### Before opening a PR on main (or before merging)
 

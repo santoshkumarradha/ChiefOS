@@ -39,7 +39,7 @@ echo ""
 echo "Posting test intent..."
 INTENT_RESPONSE=$(curl -sf -X POST http://localhost:4711/intent \
     -H "Content-Type: application/json" \
-    -d '{"prompt":"Test: summarize the weather"}' 2>/dev/null || echo '{}')
+    -d '{"text":"Test: summarize the weather"}' 2>/dev/null || echo '{}')
 
 echo "Intent response: $INTENT_RESPONSE"
 echo ""

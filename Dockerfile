@@ -2,7 +2,9 @@
 # Stages: builder (Rust) -> ui-builder (Node) -> model-fetcher (model DL) -> runtime
 
 # Stage 1: Builder (Rust binary)
-FROM rust:1.82-slim-bookworm AS builder
+# 1.85+ required: some transitive deps (e.g. rmp 0.8.15) require the edition2024 cargo feature
+# which was stabilized in Rust 1.85. Using the latest stable 1-line pin.
+FROM rust:1.89-slim-bookworm AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
@@ -65,27 +67,35 @@ WORKDIR /model
 # Model download configuration (with sensible defaults)
 # ARG values can be overridden at build time: docker compose build --build-arg MODEL_URL=<url>
 ARG MODEL_URL=https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_k_m.gguf
-ARG MODEL_SHA256=e4cfb1c3f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c4f3c
+# Real SHA256 for qwen2.5-3b-instruct-q4_k_m.gguf (verified from HF Hub x-linked-etag).
+# If HF reuploads the file, override via:
+#   docker compose build --build-arg MODEL_SHA256=<new-sha256>
+ARG MODEL_SHA256=626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d
 
 # Download model with checksum verification
-# If SHA256 doesn't match or download fails, the build stops (fail-fast)
+# If SHA256 doesn't match or download fails, the build stops (fail-fast).
+# --max-time 1800 (30 min) accommodates slow links on a ~2 GB file.
+# --retry 3 with --retry-delay 5 covers transient CDN flakiness.
 RUN echo "Downloading model from: $MODEL_URL" && \
-    curl -fsSL --max-time 300 "$MODEL_URL" -o model.gguf && \
+    curl -fsSL --max-time 1800 --retry 3 --retry-delay 5 "$MODEL_URL" -o model.gguf && \
     echo "Verifying checksum..." && \
     echo "$MODEL_SHA256  model.gguf" | sha256sum -c - && \
-    echo "✓ Model downloaded and verified successfully" && \
+    echo "Model downloaded and verified successfully" && \
     ls -lh model.gguf
 
 # Stage 4: Runtime (slim runtime with all components)
 FROM debian:stable-slim AS runtime
 
-# Install minimal runtime dependencies
+# Install minimal runtime dependencies.
+# busybox-static provides `busybox httpd` for serving Morning Brief static files on :5173
+# without pulling in nginx/apache/python. Adds ~4 MB.
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     libsqlite3-0 \
     libssl3 \
     libgomp1 \
     curl \
+    busybox-static \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app directory and state directory
@@ -101,14 +111,33 @@ COPY --from=ui-builder /build/dist/ ./morning-brief/
 # Copy GGUF model from model-fetcher
 COPY --from=model-fetcher /model/model.gguf /model/qwen2.5-3b.gguf
 
+# Startup script:
+#   - runs `busybox httpd` to serve Morning Brief static files on :5173 (background)
+#   - execs chief-core bound to 0.0.0.0:4711 (foreground, receives signals for graceful shutdown)
+# chief-core defaults to 127.0.0.1:4711 which is NOT reachable from the host port-mapping,
+# so we explicitly bind to all interfaces inside the container.
+RUN printf '%s\n' \
+    '#!/bin/sh' \
+    'set -e' \
+    'echo "[entrypoint] starting busybox httpd on :5173 (docroot=/app/morning-brief)"' \
+    'busybox httpd -f -p 0.0.0.0:5173 -h /app/morning-brief &' \
+    'HTTPD_PID=$!' \
+    'trap "kill $HTTPD_PID 2>/dev/null || true" EXIT INT TERM' \
+    'echo "[entrypoint] starting chief-core on 0.0.0.0:4711"' \
+    'exec chief-core --bind 0.0.0.0:4711 "$@"' \
+    > /usr/local/bin/entrypoint.sh && chmod +x /usr/local/bin/entrypoint.sh
+
 # Verify all critical files exist in runtime
 RUN ls -lh /usr/local/bin/chief-core && \
     ls -lh /model/qwen2.5-3b.gguf && \
-    test -d /app/morning-brief && echo "✓ All components present"
+    ls -lh /usr/local/bin/entrypoint.sh && \
+    test -d /app/morning-brief && \
+    test -f /app/morning-brief/index.html && \
+    echo "All components present"
 
 # Expose ports
 # 4711 = chief-core HTTP API (intent, status, brief, etc.)
-# 5173 = Morning Brief static files (served by chief-core or standalone)
+# 5173 = Morning Brief static files (served by busybox httpd)
 EXPOSE 4711 5173
 
 # Environment configuration
@@ -116,10 +145,10 @@ ENV CHIEF_MODEL_PATH=/model/qwen2.5-3b.gguf
 ENV CHIEF_STATE_DIR=/var/lib/chief
 ENV RUST_LOG=info
 
-# Health check: verify chief-core is responding
-# Starts after 30s (gives chief-core time to boot), then checks every 10s
+# Health check: verify chief-core is responding.
+# Starts after 30s (gives chief-core time to boot), then checks every 10s.
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:4711/status || exit 1
 
-# Run chief-core (which will serve both the API and Morning Brief static files)
-CMD ["chief-core"]
+# Entry point backgrounds the static-file server then execs chief-core in foreground.
+CMD ["/usr/local/bin/entrypoint.sh"]

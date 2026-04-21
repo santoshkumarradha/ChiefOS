@@ -8,6 +8,8 @@ members = [
     "prototypes/chief-inference",
     "crates/chief-core",
     "crates/chief-cli",
+    "crates/chief-sdk",
+    "prototypes/hello-world-pack",
 ]
 exclude = [
     # Keep future exclusions explicit; empty for now.

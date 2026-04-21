@@ -1,0 +1,27 @@
+[package]
+name = "chief-sdk"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "Chief OS public SDK — the developer contract for building packs. Exports stable API surface; kernel internals are NOT re-exported."
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+async-trait.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+chrono.workspace = true
+futures.workspace = true
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+[dev-dependencies]
+tokio-test = "0.4"
+
+[[test]]
+name = "sdk_contract"
+path = "tests/sdk_contract.rs"

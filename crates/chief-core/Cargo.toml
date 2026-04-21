@@ -10,14 +10,15 @@ description = "Chief OS kernel integration: starts L2 services and exposes HTTP 
 
 [dependencies]
 anyhow.workspace = true
-tokio.workspace = true
+tokio = { workspace = true, features = ["net", "signal", "sync"] }
 tracing.workspace = true
-tracing-subscriber.workspace = true
+tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"] }
 axum.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 clap.workspace = true
 chrono.workspace = true
+uuid = { version = "1.6", features = ["serde", "v4"] }
 
 # Internal
 chief-harness-proto       = { path = "../../prototypes/harness" }
@@ -29,3 +30,6 @@ chief-inference           = { path = "../../prototypes/chief-inference" }
 [[bin]]
 name = "chief-core"
 path = "src/main.rs"
+
+[dev-dependencies]
+tempfile.workspace = true

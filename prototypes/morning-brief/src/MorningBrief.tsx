@@ -81,9 +81,10 @@ const cardReveal: Variants = {
 
 type MorningBriefProps = {
   brief: BriefState;
+  isOffline?: boolean;
 };
 
-export default function MorningBrief({ brief }: MorningBriefProps) {
+export default function MorningBrief({ brief, isOffline = false }: MorningBriefProps) {
   const [revealed, setRevealed] = useState(false);
   const [selectedHandled, setSelectedHandled] = useState<HandledItem | null>(
     null,
@@ -221,6 +222,7 @@ export default function MorningBrief({ brief }: MorningBriefProps) {
                 variants={cardReveal}
                 actionRef={registerAction(index)}
                 onReview={() => setEvidenceItem(item)}
+                isOffline={isOffline}
               />
             ))}
           </motion.div>
@@ -309,6 +311,7 @@ export default function MorningBrief({ brief }: MorningBriefProps) {
       <CeremonyModal
         item={evidenceItem}
         onClose={() => setEvidenceItem(null)}
+        isOffline={isOffline}
       />
     </main>
   );

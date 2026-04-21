@@ -1,14 +1,18 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { postApprove } from "../api";
 import type { NeedItem } from "../MorningBrief";
 
 type CeremonyModalProps = {
   item: NeedItem | null;
   onClose: () => void;
+  isOffline?: boolean;
 };
 
-export default function CeremonyModal({ item, onClose }: CeremonyModalProps) {
+export default function CeremonyModal({ item, onClose, isOffline = false }: CeremonyModalProps) {
   const closeRef = useRef<HTMLButtonElement | null>(null);
+  const [isApproving, setIsApproving] = useState(false);
+  const [approvalError, setApprovalError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!item) {
@@ -17,6 +21,23 @@ export default function CeremonyModal({ item, onClose }: CeremonyModalProps) {
 
     closeRef.current?.focus();
   }, [item]);
+
+  const handleApprove = async (ceremony: boolean) => {
+    if (!item || isOffline) return;
+
+    setIsApproving(true);
+    setApprovalError(null);
+
+    try {
+      await postApprove(item.id, ceremony);
+      onClose();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Approval failed";
+      setApprovalError(message);
+    } finally {
+      setIsApproving(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -68,6 +89,7 @@ export default function CeremonyModal({ item, onClose }: CeremonyModalProps) {
                 type="button"
                 aria-label="Close evidence card"
                 onClick={onClose}
+                disabled={isApproving}
               >
                 x
               </button>
@@ -91,8 +113,70 @@ export default function CeremonyModal({ item, onClose }: CeremonyModalProps) {
               {item.evidence.map((entry) => (
                 <li key={entry}>{entry}</li>
               ))}
-              <li>Awaiting human approval</li>
+              <li>
+                {isOffline
+                  ? "chief-core offline - approval disabled"
+                  : "Awaiting human approval"}
+              </li>
             </ol>
+
+            {approvalError && (
+              <div
+                style={{
+                  color: "#d32f2f",
+                  fontSize: "13px",
+                  marginTop: "12px",
+                  padding: "8px",
+                  backgroundColor: "#ffebee",
+                  borderRadius: "4px",
+                }}
+              >
+                {approvalError}
+              </div>
+            )}
+
+            {!isOffline && (
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  marginTop: "16px",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => handleApprove(false)}
+                  disabled={isApproving}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#f5f5f5",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "4px",
+                    cursor: isApproving ? "not-allowed" : "pointer",
+                    opacity: isApproving ? 0.6 : 1,
+                  }}
+                >
+                  {isApproving ? "Approving..." : "Approve"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleApprove(true)}
+                  disabled={isApproving}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#2196f3",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: isApproving ? "not-allowed" : "pointer",
+                    opacity: isApproving ? 0.6 : 1,
+                  }}
+                >
+                  {isApproving ? "Approving..." : "Approve with Ceremony"}
+                </button>
+              </div>
+            )}
           </motion.section>
         </motion.div>
       ) : null}

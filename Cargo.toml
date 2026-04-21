@@ -6,6 +6,7 @@ members = [
     "prototypes/event-log",
     "prototypes/chief-mem",
     "prototypes/chief-inference",
+    "crates/chief-oauth",
     "crates/chief-core",
     "crates/chief-cli",
     "crates/chief-sdk",

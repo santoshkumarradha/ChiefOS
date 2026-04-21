@@ -1,0 +1,18 @@
+%% Chief OS — Capability Pack install → exec → revoke
+%% Embedded in: docs/04-module-system.md, docs/06-security-model.md
+flowchart LR
+    A[Author writes flake] --> B[Sign pack<br/>ed25519 / cosign]
+    B --> C[Publish to registry<br/>official / community]
+    C --> D[User runs chief install]
+    D --> E[Broker renders<br/>grant-consent UI]
+    E -->|approve| F[Build into Nix store<br/>atomic generation]
+    E -->|reject| X[Abort cleanly]
+    F --> G[Agents spawned in sandbox<br/>nspawn / Firecracker]
+    G --> H[Panes mount in surfaces]
+    G --> I[Ingesters subscribe to Event Bus]
+    H --> J[User uses pack]
+    J --> K[Every action ↦ Provenance Log]
+    J --> L{Action}
+    L -->|update| F
+    L -->|revoke| M[Nix rollback<br/>atomic]
+    L -->|remove| M

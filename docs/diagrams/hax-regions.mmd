@@ -1,0 +1,17 @@
+%% Chief OS — HAX 8 regions + Chief's resting state
+%% Embedded in: docs/01-hax-principles.md
+flowchart TD
+    R6["R6: Ambient (high D, low C, long H)<br/>= Chief resting state"]
+    R5["R5: One-tap queue (high D, low C, short H)"]
+    R3["R3: Evidence card (low D, high C, short H)"]
+    R7["R7: Just-in-time ceremony (high D, high C, short H)"]
+    R8["R8: Graduated autonomy + renegotiation<br/>(high D, high C, long H)"]
+    R4["R4: Audit-heavy collab (low D, high C, long H)<br/>= Quarterly Review"]
+    R1["R1: Ad-hoc chat (low D, low C, short H)"]
+
+    R6 -.-> R5
+    R6 -.-> R3
+    R6 -.-> R7
+    R6 -.-> R8
+    R8 -.renegotiation.-> R4
+    R1 -.-> R6

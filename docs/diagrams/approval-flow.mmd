@@ -1,0 +1,27 @@
+%% Chief OS — action → approval → provenance
+%% Embedded in: docs/02-architecture.md, docs/06-security-model.md
+sequenceDiagram
+    participant Ag as Agent (L2)
+    participant CB as Capability Broker (L2)
+    participant RR as Region Router (L2)
+    participant TLD as Trust Ledger (L2)
+    participant Srf as Surface (L4)
+    participant Hum as Human
+    participant SE as Secure Enclave / YubiKey
+    participant PL as Provenance Log (L2)
+    participant MG as Memory Graph (L2)
+
+    Ag->>CB: propose(action, metadata)
+    CB->>CB: verify caps
+    CB->>TLD: read delegation
+    CB->>RR: classify(action, ledger, horizon)
+    RR-->>Srf: dispatch(region, friction_tier)
+    Srf->>Hum: render approval UI (if needed)
+    Hum->>Srf: approve / reject / rewind
+    Srf->>SE: sign(payload, biometric)
+    SE-->>Srf: signed approval token
+    Srf->>CB: present token (single-use)
+    CB->>Ag: execute or cancel
+    Ag->>PL: signed receipt (in-toto v1)
+    Ag->>MG: write outcome (provenance ref)
+    PL-->>TLD: success → record_approval(category)

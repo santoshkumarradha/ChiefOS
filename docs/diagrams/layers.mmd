@@ -1,0 +1,41 @@
+%% Chief OS — layer stack (L0–L4)
+%% Embedded in: docs/02-architecture.md
+flowchart TD
+    subgraph L4[L4 — Surfaces]
+        MB[Morning Brief]
+        LV[Live Agent View]
+        PE[Provenance Explorer]
+        TL[Trust Ledger Viewer]
+        CE[Ceremony UI]
+        CH[Chat Pane]
+        QR[Quarterly Review]
+    end
+    subgraph L3[L3 — Module System]
+        CP[Capability Packs]
+        SK[Stacks]
+        RG[Pack Registry]
+    end
+    subgraph L2[L2 — Chief Kernel]
+        AR[Agent Runtime]
+        CB[Capability Broker]
+        MG[Memory Graph]
+        PL[Provenance Log]
+        TLD[Trust Ledger]
+        RR[Region Router]
+        EB[Event Bus]
+        MR[Model Router]
+    end
+    subgraph L1[L1 — OS Primitives]
+        NIX[NixOS]
+        NS[Linux namespaces]
+        SN[systemd-nspawn / Firecracker]
+        WL[Wayland]
+        LLM[Local LLM runtime]
+        EBPF[eBPF / eBPF-LSM]
+    end
+    subgraph L0[L0 — Hardware]
+        CPU[x86_64 / ARM64]
+        TPM[TPM / Secure Enclave]
+        YK[YubiKey — optional]
+    end
+    L4 --> L3 --> L2 --> L1 --> L0

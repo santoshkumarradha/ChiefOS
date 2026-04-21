@@ -1,0 +1,17 @@
+%% Chief OS — Memory Graph example chain
+%% Embedded in: docs/08-memory-substrate.md
+flowchart LR
+    F["mem://file/abcd<br/>stanford-paper.pdf"]
+    T["mem://thought/pqr<br/>'section 14.3 matters'"]
+    D["mem://decision/xyz<br/>'reply with quote'"]
+    A["mem://artifact/wvu<br/>draft_reply"]
+    E["mem://email/stu<br/>sent response"]
+    P["mem://person/jkl<br/>author@stanford"]
+
+    F -->|refers-to| T
+    T -->|informs| D
+    D -->|authored-by| A
+    A -->|cites| F
+    A -->|replied-to| E
+    E -->|addressed-to| P
+    F -->|authored-by| P

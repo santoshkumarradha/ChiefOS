@@ -1,0 +1,47 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Nix
+result
+result-*
+.direnv/
+.envrc.local
+
+# Secrets
+.env
+.env.*
+!.env.example
+secrets/
+*.key
+*.pem
+
+# Build artifacts
+dist/
+build/
+target/
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+
+# Local state / logs
+*.log
+*.sqlite
+*.sqlite-*
+.chief/
+state/
+cache/
+
+# PlanDB — intentionally TRACKED for this project so task state persists across sessions.
+# Override the global recommendation to ignore these.
+!.plandb.db
+!.plandb.db-wal
+!.plandb.db-shm
+
+# Prototypes scratch
+prototypes/**/out/
+prototypes/**/tmp/

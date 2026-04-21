@@ -1,0 +1,24 @@
+%% Chief OS — L2 kernel services + interactions
+%% Embedded in: docs/03-chief-kernel.md, docs/02-architecture.md
+flowchart LR
+    EB((Event Bus))
+    AR[Agent Runtime]
+    CB[Capability Broker]
+    MG[Memory Graph]
+    PL[Provenance Log]
+    TLD[Trust Ledger]
+    RR[Region Router]
+    MR[Model Router]
+
+    AR -- propose action --> CB
+    CB -- classify --> RR
+    CB -- read grants --> TLD
+    CB -- log --> PL
+    AR -- read/write scoped URIs --> MG
+    AR -- route inference --> MR
+    MR -- local or cloud --> AR
+    MG -- emits changes --> EB
+    PL -- emits entries --> EB
+    TLD -- emits updates --> EB
+    AR -- subscribe --> EB
+    RR -- reads --> TLD

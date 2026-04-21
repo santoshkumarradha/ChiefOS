@@ -1,0 +1,23 @@
+%% Chief OS — Night Handoff → Morning Brief ritual
+%% Embedded in: docs/00-north-star.md, docs/10-viral-loop.md
+sequenceDiagram
+    participant H as Human
+    participant C as Chief OS
+    participant Ag as Agents (overnight)
+    participant MR as Model Router
+    participant Cld as Cloud Twin
+    participant Loc as Local Model
+    participant L as Trust Ledger
+    participant PL as Provenance Log
+
+    H->>C: Night Handoff (30s intent)
+    C->>Ag: Decompose + dispatch with capabilities
+    Ag->>MR: inference request
+    MR->>Cld: non-sensitive categories
+    MR->>Loc: sensitive categories
+    Ag->>Ag: Run 8 hours, emit provenance
+    Ag->>PL: in-toto statements every action
+    Ag->>C: Synthesized artifacts + proposed actions
+    C->>L: Classify each action via Region Router
+    H->>C: Morning Brief (approve / rewind / defer)
+    C->>L: Update delegation (success++ / rollback--)

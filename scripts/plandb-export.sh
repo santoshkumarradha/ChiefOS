@@ -24,7 +24,10 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DB="${ROOT}/.plandb.db"
+# Honour PLANDB_DB if set — crucial when running from a worktree where
+# ROOT/.plandb.db is a gitignored local copy but agents have been writing to
+# the authoritative main-repo db via PLANDB_DB. Fall back to ROOT/.plandb.db.
+DB="${PLANDB_DB:-${ROOT}/.plandb.db}"
 SQL_OUT="${ROOT}/docs/plandb-state.sql"
 YAML_OUT="${ROOT}/docs/plandb-template.yaml"
 WRITE_SQL=1

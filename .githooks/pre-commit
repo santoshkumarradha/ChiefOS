@@ -23,13 +23,29 @@ if [ "${SKIP_PLANDB_HOOK:-0}" = "1" ]; then
 fi
 
 ROOT="$(git rev-parse --show-toplevel)"
-DB="$ROOT/.plandb.db"
-EXPORT_SH="$ROOT/scripts/plandb-export.sh"
 
-# No local db → nothing to sync. Commit proceeds.
-if [ ! -f "$DB" ]; then
-  exit 0
+# Determine which .plandb.db to export from.
+# PLANDB_DB env wins if set (covers the worktree case where agents write to
+# the main repo's db). Fall back to the current worktree's local db.
+# Fall back further to the main-repo path (common-dir-based) if nothing else.
+if [ -n "${PLANDB_DB:-}" ] && [ -f "$PLANDB_DB" ]; then
+  DB="$PLANDB_DB"
+elif [ -f "$ROOT/.plandb.db" ]; then
+  DB="$ROOT/.plandb.db"
+else
+  # Resolve the main worktree via git rev-parse --git-common-dir; its parent
+  # is the main working directory that agents pin PLANDB_DB at.
+  MAIN_WT="$(dirname "$(git rev-parse --git-common-dir)")"
+  if [ -f "$MAIN_WT/.plandb.db" ]; then
+    DB="$MAIN_WT/.plandb.db"
+  else
+    # No db anywhere. Nothing to export.
+    exit 0
+  fi
 fi
+export PLANDB_DB="$DB"
+
+EXPORT_SH="$ROOT/scripts/plandb-export.sh"
 
 # Guard: don't run during rebase/merge/cherry-pick — these have their own
 # state machinery and auto-staging can confuse the operation.

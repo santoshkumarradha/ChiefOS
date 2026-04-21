@@ -33,6 +33,8 @@ Machine-readable map of all Chief OS documentation. Update when adding or renami
 | `v0-scope` | [`13-v0-scope-90-day.md`](./13-v0-scope-90-day.md) | draft | 90-day MVP incl. substrate spine |
 | `risks-open` | [`14-risks-open-questions.md`](./14-risks-open-questions.md) | draft | Honest punch list |
 | `regulatory` | [`15-regulatory-posture.md`](./15-regulatory-posture.md) | draft | Legal posture, compliance |
+| `pack-sdk` | [`16-pack-sdk.md`](./16-pack-sdk.md) | draft | Developer contract — public SDK, CapabilityKind closed enum, CAN/CANNOT, dogfood sequence |
+| `os-ceremonies` | [`17-os-ceremonies-and-boundaries.md`](./17-os-ceremonies-and-boundaries.md) | draft | What the OS absorbs (OAuth, pickers, payment, e-sign, devices); threat model; anti-phishing |
 
 ## Decisions (ADRs)
 
@@ -49,6 +51,7 @@ Machine-readable map of all Chief OS documentation. Update when adding or renami
 | `adr-0007` | [`../adr/0007-hax-inbox-notifications.md`](../adr/0007-hax-inbox-notifications.md) | accepted |
 | `adr-0008` | [`../adr/0008-pure-oss-memory-substrate.md`](../adr/0008-pure-oss-memory-substrate.md) | accepted |
 | `adr-0009` | [`../adr/0009-signed-inference.md`](../adr/0009-signed-inference.md) | accepted |
+| `adr-0010` | [`../adr/0010-sdk-public-api-stability.md`](../adr/0010-sdk-public-api-stability.md) | accepted |
 
 ## Reusable diagrams (mermaid)
 

@@ -647,6 +647,10 @@ dependencies:
   kind: blocks
 context:
 - kind: discovery
+  content: 't-mb-live-api complete: Morning Brief now polls chief-core /brief every 3s. Approval flow working (POST /approve) with offline graceful degradation. All 6 API endpoints wrapped with typed fetch + timeouts (5s default, 30s for /intent & /approve). Tests: api.test.ts (6 endpoints + errors) + useBriefState.test.tsx (polling, offline fallback, backoff reset). PR#26.'
+  tags: []
+  task_ref: task-40
+- kind: discovery
   content: 'Docker validation: 4 bugs found in original Dockerfile/compose: (1) placeholder SHA256 for Qwen model would fail on first build — real sha256 is 626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d (from HF Hub x-linked-etag); (2) Rust 1.82 base image too old — rmp 0.8.15 requires edition2024 (Rust 1.85+) — bumped to rust:1.89-slim-bookworm; (3) chief-core defaults to --bind 127.0.0.1:4711 which isn''t reachable from host port-mapping — wrap in entrypoint.sh that execs with --bind 0.0.0.0:4711; (4) no static-file server for Morning Brief on port 5173 — Dockerfile copied dist to /app/morning-brief but nothing served it — added busybox-static and run busybox httpd on :5173 from entrypoint. Also: Docker Desktop''s default IPv6 port mapping ''::]:5173->5173'' hijacks localhost-over-v6 since busybox httpd is IPv4-only; pin host side to ''0.0.0.0:PORT:PORT'' in compose to force IPv4-only host mapping. Fixed demo-docker.sh payload key (prompt -> text) to match routes.rs. Validation results: build ~200s cold, image 4.35GB, boot-to-healthy ~7s, memory 3MB (stub backend), all 4 endpoints pass.'
   tags: []
   task_ref: null

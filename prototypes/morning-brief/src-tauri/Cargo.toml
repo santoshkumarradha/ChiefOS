@@ -1,0 +1,25 @@
+[package]
+name = "morning-brief-native"
+version = "0.1.0"
+description = "Native shell for the Chief OS Morning Brief prototype"
+authors = ["Chief OS"]
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "morning_brief_native"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+tauri = { version = "2", features = ["macos-private-api"] }
+tauri-plugin-global-shortcut = "2"
+window-vibrancy = "0.5"
+
+[profile.release]
+lto = "thin"
+
+[workspace]

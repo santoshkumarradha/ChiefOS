@@ -37,3 +37,14 @@ The app reads only from `mock/brief-state.json`. It performs no HTTP requests.
 ## Cleanup
 
 CLEANUP date: 2026-05-21. Delete this prototype or justify extension in this README.
+
+## Running as native app
+
+The native shell lives in `src-tauri/` and wraps the Vite prototype with Tauri v2. It registers global shortcuts for the omnibar and inbox toggles, applies macOS HUD vibrancy when available, and exposes bundled Inter fonts through the `get_bundled_font` command.
+
+```bash
+npm install
+npm run tauri:dev
+```
+
+Use `npm run tauri:build` for a production native bundle. The Tauri dev server expects Vite at `http://localhost:5173` and runs `npm run dev` automatically.

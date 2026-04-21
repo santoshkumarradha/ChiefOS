@@ -1,0 +1,26 @@
+{
+  "productName": "morning-brief",
+  "version": "0.1.0",
+  "identifier": "com.chiefos.morning-brief",
+  "build": {
+    "beforeBuildCommand": "tsc -b && vite build",
+    "beforeDevCommand": "vite dev",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Morning Brief",
+        "width": 1280,
+        "height": 800
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "icon": [
+      "src-tauri/icons/icon.png"
+    ]
+  }
+}

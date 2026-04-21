@@ -49,3 +49,7 @@ cache/
 # Prototypes scratch
 prototypes/**/out/
 prototypes/**/tmp/
+
+# Workspace build artifacts (root-level)
+/target
+/Cargo.lock

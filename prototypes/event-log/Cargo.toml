@@ -7,20 +7,21 @@ description = "Chief OS Signed Typed Event Log prototype"
 license = "AGPL-3.0-or-later"
 
 [dependencies]
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-anyhow = "1.0"
-thiserror = "1.0"
-blake3 = { path = "vendor/blake3" }
-ed25519-dalek = { path = "vendor/ed25519-dalek", features = ["rand_core"] }
-rand = "0.8"
-chrono = { version = "0.4", features = ["serde"] }
-fjall = { path = "vendor/fjall" }
-rmp-serde = { path = "vendor/rmp-serde" }
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+ed25519-dalek = { workspace = true, features = ["rand_core"] }
+rand.workspace = true
+chrono.workspace = true
+rmp-serde.workspace = true
+# fjall from crates.io; the vendored stub committed earlier is replaced.
+fjall = "2"
 
 [dev-dependencies]
-criterion = "0.5"
-tempfile = "3.24"
+criterion.workspace = true
+tempfile.workspace = true
 
 [[bench]]
 name = "append_bench"

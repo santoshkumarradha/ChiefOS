@@ -1,0 +1,31 @@
+[package]
+name = "chief-core"
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "Chief OS kernel integration: starts L2 services and exposes HTTP + Unix socket APIs."
+
+[dependencies]
+anyhow.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+axum.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+clap.workspace = true
+chrono.workspace = true
+
+# Internal
+chief-harness-proto       = { path = "../../prototypes/harness" }
+chief-region-router-proto = { path = "../../prototypes/region-router" }
+chief-event-log-proto     = { path = "../../prototypes/event-log" }
+chief-mem                 = { path = "../../prototypes/chief-mem" }
+chief-inference           = { path = "../../prototypes/chief-inference" }
+
+[[bin]]
+name = "chief-core"
+path = "src/main.rs"

@@ -88,6 +88,12 @@ External references, competitor analyses, prior art.
 - [`research/2026-04-21-agent-native-fs.md`](./research/2026-04-21-agent-native-fs.md)
 - [`research/2026-04-21-pure-oss-memory-substrate.md`](./research/2026-04-21-pure-oss-memory-substrate.md)
 
+## Brand & visual
+
+| ID | File | Status | Purpose |
+|---|---|---|---|
+| `brand-visual-language` | [`brand/visual-language.md`](./brand/visual-language.md) | draft (binding) | Desktop-feel rules: Tauri rendering, typography, color, motion, native integration checklist, anti-patterns. Review-blocker for any UI PR. |
+
 ## Directories
 
 - [`../plans/`](../plans/) — implementation plans (see `plans/README.md`)

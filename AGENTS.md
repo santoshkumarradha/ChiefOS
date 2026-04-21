@@ -69,6 +69,7 @@ Sections (in order, omit if empty):
 
 ## Never do this
 
+- **Never ship UI that feels like a web app.** Chief OS is an OS. Read [`docs/brand/visual-language.md`](./docs/brand/visual-language.md) before writing any surface code or reviewing a UI PR. Its §16 anti-pattern list is a review-blocker.
 - Never write prose for prose's sake. Tables, lists, diagrams > paragraphs.
 - Never soften axioms in a doc; propose an ADR instead.
 - Never add a feature without checking against Axiom 9 (demos are product): "Does this improve the Morning Reveal or the Stack flywheel?"

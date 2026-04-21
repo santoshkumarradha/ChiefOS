@@ -4,103 +4,574 @@
 # full-state restore — status, results, and contexts are missing.
 # For restore use docs/plandb-state.sql.
 
-name: chief-os-llama
+name: chief-os
 description: null
 tasks:
 - ref_id: task-1
-  title: Survey chief-inference structure
-  description: 'Inspect chief-inference source, attestation types, tests, README, and workspace Cargo layout. Produce implementation constraints for the real-llama backend while keeping ModelBackend unchanged. Acceptance: know exact files and APIs to edit.'
-  kind: generic
-  priority: 0
+  title: Write docs/02-architecture.md
+  description: 'Write the L0-L4 architecture doc with YAML frontmatter (agent-first format). Include: mermaid diagram of layers, per-layer intent table, ownership table (vendored vs built), data flow diagram. Reference diagrams/layers.mmd and diagrams/kernel-services.mmd. Cross-link to chief-kernel, security-model, base-and-hardware. Keep dense — tables, lists, mermaid over prose. Status: draft.'
+  kind: code
+  priority: 10
   parent_ref: null
   pre_condition: null
   post_condition: null
   pre_hook: null
   post_hook: null
 - ref_id: task-2
-  title: Add feature-gated backend scaffolding
-  description: 'Update Cargo.toml features/dependency, move existing LocalLlamaCppStub into backends/stub.rs, and update backends/mod.rs so default builds use stub while real-llama builds compile local.rs. Acceptance: default cargo build still sees LocalLlamaCppStub and tests can import stub.'
-  kind: generic
-  priority: 0
+  title: Write docs/13-v0-scope-90-day.md
+  description: 'Concrete 90-day MVP. What ships: Night Handoff loop, Morning Brief, 7 OS-only capabilities (hw-bound approval, local FS gravity, local inference fallback, OS rewind, cap-sandboxed agents, OS-owned browser, provenance graph), hardcoded Chief-of-Staff Stack, cloud twin (optional). 30-60-90 milestones. Team requirements (kernel eng, NixOS ops, harness eng, UX, brand). Explicit out-of-scope list.'
+  kind: code
+  priority: 10
   parent_ref: null
   pre_condition: null
   post_condition: null
   pre_hook: null
   post_hook: null
 - ref_id: task-3
-  title: Implement real llama.cpp backend
-  description: 'Rewrite backends/local.rs for cfg(feature=real-llama): resolve model path from CHIEF_MODEL_DIR or ~/.cache/chief-os/models/qwen2.5-3b-instruct-q4_k_m.gguf, auto-detect logical CPU threads, load LlamaModel with llama-cpp-2, implement health/capabilities/infer, and return a local:qwen2.5-3b-instruct-q4_k_m backend id. Keep ModelBackend signature unchanged. Acceptance: real-llama build compiles or surfaces only external native-linker requirements.'
-  kind: generic
-  priority: 0
+  title: Write docs/03-chief-kernel.md
+  description: 'L2 kernel services deep-dive. 6 services: Agent Runtime, Capability Broker, Memory Graph, Provenance Log, Trust Ledger, Region Router, Event Bus. Each service: responsibilities, API contract, storage, dependencies, acceptance. Include mermaid service diagram. CRITICAL: document the agent-harness abstraction point (opencode v0, swappable). Dense tables.'
+  kind: code
+  priority: 9
   parent_ref: null
   pre_condition: null
   post_condition: null
   pre_hook: null
   post_hook: null
 - ref_id: task-4
-  title: Add model fetch script
-  description: 'Create scripts/fetch-model.sh that downloads Qwen2.5 3B Instruct Q4_K_M GGUF from Hugging Face public CDN into CHIEF_MODEL_DIR defaulting to ~/.cache/chief-os/models, verifies SHA256, is idempotent, and prints file size plus hash. Acceptance: script is executable and handles existing good/bad files clearly.'
-  kind: generic
-  priority: 0
+  title: Write docs/06-security-model.md
+  description: 'Capability-based security from hardware up. Trust chain: TPM/Secure Enclave -> user key -> principal -> capability set -> call-site check -> sandbox -> provenance. Threat model: malicious packs, compromised cloud twin, stolen device, supply chain. Approval ceremony cryptography. Include approval-flow mermaid.'
+  kind: code
+  priority: 9
   parent_ref: null
   pre_condition: null
   post_condition: null
   pre_hook: null
   post_hook: null
 - ref_id: task-5
-  title: Add ignored real model integration test
-  description: 'Create prototypes/chief-inference/tests/local_inference_real_model.rs gated by real-llama with an ignored tokio test. It should skip gracefully if model file is absent, instantiate LocalLlamaCppStub::new(model_path), infer ''Say hello in five words'', assert output nonempty, create/parse InferenceAttestation using attest module, and assert Tier::Generated plus model id. Acceptance: default tests unaffected; real-llama ignored test validates end-to-end when model exists.'
-  kind: generic
-  priority: 0
+  title: 'Integration: chief-core binary (L2 services wired together)'
+  description: 'CRITICAL: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db BEFORE any plandb command. Worktree lives at labs/chief-os-core. Implement crates/chief-core/src/main.rs as the integration entrypoint for Chief OS. Responsibilities: spawn in-process instances of all 5 L2 services (chief-event-log-proto as Provenance Log, chief-region-router-proto as Region Router, chief-mem as Memory Graph, chief-inference as Inference + Attestation, chief-harness-proto as Agent Runtime). Expose an HTTP API (axum) on 127.0.0.1:4711 with routes: POST /intent (accept intent text), GET /brief (return Morning Brief JSON), POST /approve (ceremony + sign), POST /verify (verify attestation), POST /rewind (time-based revert), GET /status (health + counters). Also expose a Unix socket at /tmp/chief.sock for local agents. Wire an in-proc Event Bus (tokio broadcast channel). When /intent arrives, dispatch to NullHarness (harness prototype), which emits fake tool calls producing signed drafts that land in Memory Graph; Region Router classifies actions; Morning Brief can query GET /brief to render cards from latest synthesized state. All cross-service calls go through a Capability Broker stub (allow-all for v0 demo; TODO flag to enforce). Tests: cargo test -p chief-core covers /intent -> /brief -> /approve -> /verify roundtrip, /rewind restores state. Integration test spawns chief-core on random port, walks through 3-card scenario. Worktree: branch int/chief-core. Closes no GH issue yet; we''ll open one. References: docs/03-chief-kernel.md, all prototypes'' lib.rs public APIs.'
+  kind: code
+  priority: 9
   parent_ref: null
   pre_condition: null
   post_condition: null
   pre_hook: null
   post_hook: null
 - ref_id: task-6
-  title: Update chief-inference README
-  description: 'Document real local inference: fetch-model.sh, CHIEF_MODEL_DIR, cargo build -p chief-inference --features real-llama, CPU speed expectations, and default stub behavior for cheap CI. Acceptance: README contains a clear Real local inference section.'
-  kind: generic
-  priority: 0
+  title: 'Integration: real llama.cpp backend in chief-inference (CPU)'
+  description: 'CRITICAL: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db BEFORE any plandb command. Worktree: labs/chief-os-llama. Replace LocalLlamaCppStub in prototypes/chief-inference/src/backends/local.rs with a real llama.cpp-backed inference implementation (CPU only for v0 per steward directive 2026-04-21; no GPU / no CUDA / no Metal assumption). Use the llama-cpp-2 Rust bindings (Apache-2.0, community-maintained, multi-maintainer) or a direct subprocess wrapper around the llama.cpp binary if the crate has build issues. Ship-ready default model: Qwen 2.5 3B Instruct Q4_K_M GGUF or Llama 3.2 3B Instruct Q4_K_M GGUF (small enough for laptop CPU + Docker without a GPU). Model not committed to repo; download script at scripts/fetch-model.sh using huggingface-cli or curl from official repos with a SHA256 check. chief-inference::infer() API stays the same; internal dispatch wires to the real backend. Ensure Tier-1 (Generated) attestation carries the real model hash + prompt + output hash. Keep NullHarness stub for tests that must run without a model. Acceptance: cargo test -p chief-inference passes; integration test ''local_inference_real_model'' under feature flag ''real-llama'' runs a small prompt end-to-end when the model is available; tier labeling correct; attestation verification passes. Worktree: branch int/llama. Closes GH issue to be filed.'
+  kind: code
+  priority: 9
   parent_ref: null
   pre_condition: null
   post_condition: null
   pre_hook: null
   post_hook: null
 - ref_id: task-7
-  title: Verify builds and tests
-  description: 'Run required shell verification without lsp_diagnostic: cargo build -p chief-inference, cargo test -p chief-inference, cargo build -p chief-inference --features real-llama, cargo clippy -p chief-inference --features real-llama -- -D warnings, and note ignored real model test behavior. Acceptance: report pass/fail with exact blockers if native llama dependencies or model are unavailable.'
+  title: 'Integration: Docker-as-OS image (chief-core + llama.cpp + Morning Brief)'
+  description: 'CRITICAL: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db BEFORE any plandb command. Worktree: labs/chief-os-docker. Build a Docker image that feels like booting Chief OS. Files at repo root: Dockerfile (multi-stage: builder stage compiles chief-core with --release + builds Morning Brief static bundle; runtime stage is slim debian:stable-slim with ca-certificates + libsqlite3 + the chief-core binary + Morning Brief static files + llama.cpp runtime + a small GGUF model fetched at build time). docker-compose.yaml that runs chief-core on :4711 exposing Morning Brief static files on :5173 via a tiny axum file server. scripts/demo-docker.sh that does ''docker compose up -d'' + waits for /status health + runs through a demo via chief-cli (or raw curl for now). README QUICK START section. Do NOT include a kiosk browser in v0 — user will use their own browser to visit http://localhost:5173 for UI (Path B lite); the ''OS feel'' comes from everything running self-contained inside the container with no host dependencies. Bonus if time permits: a separate Dockerfile.fullscreen using chromium --kiosk + Xvfb to run fullscreen inside the container for a more authentic ''boot into Chief'' experience. Model download baked into Dockerfile layer so docker-compose up is single command. Acceptance: docker compose up produces a healthy container within 90s (excluding model download first time); chief-cli status returns success against it; /brief returns valid JSON; /intent accepts a prompt and the response cycle produces at least 1 signed attestation. Worktree: branch int/docker-os. Closes GH issue to be filed.'
+  kind: code
+  priority: 9
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-8
+  title: Write docs/04-module-system.md
+  description: Capability Packs as Nix flakes. Pack schema (agents, tools, ingesters, panes, rituals, policies, grants). Registry design (official/community/private tiers). Stacks (forkable bundles). Governance UI. Include example pack flake + pack-lifecycle mermaid. Tie to Chief-of-Staff Stack as flagship.
+  kind: code
+  priority: 8
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-9
+  title: Write docs/05-surfaces.md
+  description: 'L4 surfaces: Morning Brief, Live Agent View, Provenance Explorer, Ceremony UI, Chat, Trust Ledger viewer, Quarterly Review. Each: purpose, inputs (reads from L2), interactions, friction tier mapping. Apple-design principles applied. Mermaid for Morning Brief render flow.'
+  kind: code
+  priority: 8
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-10
+  title: Write docs/08-memory-substrate.md
+  description: 'Memory graph as kernel service (not a lib). Schema: nodes (email, file, person, event, decision, artifact, thought, finding), edges (derived-from, replied-to, depends-on, refers-to). URI scheme mem://<type>/<hash>. Horizon tags (short/medium/long/open). Retrieval strategies per surface. Embeddings policy. Backup/encryption. Mermaid schema diagram.'
+  kind: code
+  priority: 8
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-11
+  title: Write docs/14-risks-open-questions.md
+  description: 'Honest punch list. Technical risks: boot time, local model quality, Wayland compat, microVM perf, memory graph scale. Product risks: install friction, cold start, demo fidelity. Supply-chain risks for packs. Regulatory unknowns. Business risks: COGS at scale, competitive response. Each with mitigation or open question. Decisions-needed table.'
+  kind: code
+  priority: 8
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-12
+  title: Write CLAUDE.md for this repo (dev workflow for AI agents)
+  description: 'Create /CLAUDE.md at repo root that any AI agent (Claude, Gemini, Codex, etc.) entering this repo reads first. Content: (1) project summary (1 sentence), (2) read-order: AGENTS.md -> CHARTER.md -> docs/INDEX.md -> docs/13-v0-scope-90-day.md, (3) PlanDB usage as source of truth for tasks (commands, conventions), (4) worktree + branch conventions (proto/<slug>, docs/<slug>), (5) how to claim a task (plandb go --agent <handle>), (6) commit-message format, (7) how to restart work in a new session (plandb status --detail), (8) where logs/research/directives land, (9) how to escalate or flag decisions (add to docs/14-risks-open-questions.md decisions-needed table or open ADR).'
+  kind: code
+  priority: 8
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-13
+  title: 'Integration: chief CLI (intent/approve/verify/rewind/status)'
+  description: 'CRITICAL: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db BEFORE any plandb command. Worktree lives at labs/chief-os-cli. Implement crates/chief-cli/src/main.rs — thin HTTP client over chief-core''s 127.0.0.1:4711 API. Commands: chief intent <text>, chief brief (render the morning brief as a TUI table), chief approve <card-id>, chief verify-inference <attestation-file-or-uri>, chief rewind <duration-eg-4h>, chief status. Use clap derive. Handle connection refused gracefully (print ''chief-core not running; start with scripts/start-chief.sh''). Tests: cargo test -p chief-cli against a mock server. Worktree: branch int/cli. References: docs/03-chief-kernel.md section 8 for chief-inference API shape.'
+  kind: code
+  priority: 8
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-14
+  title: 'Integration: Morning Brief wired to chief-core HTTP API'
+  description: 'CRITICAL: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db BEFORE any plandb command. Worktree lives at labs/chief-os-mb-connect. Modify prototypes/morning-brief to swap mock JSON data source for live calls against http://127.0.0.1:4711/brief. Add action handlers: Approve button POSTs /approve (single-tap tier-1), Rewind slider POSTs /rewind with duration, CeremonyModal shows evidence and on confirm POSTs /approve with ceremony flag. Keep mock as a fallback when chief-core is not reachable. Add env var VITE_CHIEF_CORE_URL so dev and Docker setups can override endpoint. Tests: basic jest/vitest covering the API client module. Worktree: branch int/mb-connect.'
+  kind: code
+  priority: 8
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-15
+  title: Write docs/07-base-and-hardware.md
+  description: NixOS choice justified (scoring table vs Fuchsia, seL4, FreeBSD+Capsicum, illumos, custom). Deploy targets (bare-metal ISO, macOS-host VM image, bootable USB — all from one Nix flake). Hardware requirements (TPM/Secure Enclave mandatory, YubiKey optional). Wayland reasoning. microVM reasoning. Boot time target (<10s). Link adr-0001.
+  kind: code
+  priority: 7
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-16
+  title: Write docs/09-local-vs-cloud.md
+  description: 'Hybrid runtime split. Three classes: hot-path reasoning (cloud), sensitive reasoning (local), always-on state (local with cloud encrypted replica). Routing rules. Local model spec (Qwen/Llama quantized, 13-32B). Cloud twin spec (stateless, agent-ephemeral). Network-cable-yank demo guarantees.'
+  kind: code
+  priority: 7
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-17
+  title: Write docs/10-viral-loop.md
+  description: The Morning Reveal hero video (90s storyboard, beat-by-beat). 'Try your own Morning Brief' web preview funnel (OAuth -> cloud-rendered preview -> shareable signed artifact). Forkable Stacks as second viral loop. Public Stack registry. Social mechanics. Reference diagrams/night-morning-loop.mmd.
+  kind: code
+  priority: 7
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-18
+  title: Write ADRs (template + 0001-0004)
+  description: 'Create adr/README.md (process), adr/template.md (ADR template), and 4 accepted ADRs: 0001-nixos-linux-base (base choice), 0002-capability-based-security (cap-model over UID/GID), 0003-wayland-not-x11 (surface isolation), 0004-machine-as-fax-posture (legal posture for v0-v1). Each ADR: context, decision, alternatives considered (table), consequences.'
+  kind: code
+  priority: 7
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-19
+  title: Write mermaid diagrams (7 files)
+  description: 'docs/diagrams/*.mmd: layers.mmd (L0-L4), kernel-services.mmd (6 services + edges), approval-flow.mmd (action->broker->router->surface->ceremony), hax-regions.mmd (8 regions with boundary crossings), pack-lifecycle.mmd (install->grants->exec->audit), night-morning-loop.mmd (sequence diagram), memory-schema.mmd (nodes+edges).'
+  kind: code
+  priority: 7
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-20
+  title: Strengthen model-routing swappability in local-vs-cloud + architecture
+  description: 'Edit docs/09-local-vs-cloud.md and docs/02-architecture.md to make ModelBackend abstraction explicit as a first-class architectural primitive. Granularity: system-wide, per-category, per-pack, per-agent, per-call. Control plane deferred to later. Add requirement in docs/requirements/non-functional.md.'
+  kind: code
+  priority: 7
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-21
+  title: 'Research: AI-native rethink across ALL OS primitives'
+  description: 'Broad research and filter: for each OS primitive (filesystem, scheduler, memory, clipboard, shell, notifications, logging, observability, search, sessions, compositor, drivers, DNS, timekeeping, mail, calendar, browser, media), evaluate (a) what changes if AI is primary user, (b) strategic uniqueness vs just ''ported'', (c) v0/v1/v2 impact, (d) viral-demo leverage. Rank by (strategic value × demo leverage) / (engineering cost). Output: docs/research/NNNN-ai-native-primitive-rethinks.md with a prioritized table + picks for v0-v1 integration. Companion edits in docs/02-architecture.md for the top 3.'
+  kind: research
+  priority: 7
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-22
+  title: 'Prototype: chief-inference Signed Inference (Rust)'
+  description: 'Implement ADR-0009 chief-inference service. Files: prototypes/chief-inference/{Cargo.toml,src/lib.rs,src/attest.rs,src/backends/local.rs,src/backends/cloud_stub.rs,tests/sign_verify_test.rs,README.md}. Key types: InferenceAttestation{model_id,prompt_hash(blake3),output_hash(blake3),timestamp,device_id,seed,temperature,top_p,provider_attest?,signature(ed25519 64B)}. Three claim tiers (Generated/Co-signed/Custody). Backends: LocalLlamaCppStub (CPU-only v0; use a deterministic fake LLM that echoes with prefix for test determinism), CloudAnthropicStub (returns canned text). Verification API: chief-inference verify <attestation.json> -> (tier, ok/err). Acceptance: sign+verify roundtrip passes; overhead <5ms per call (criterion bench); tier labeling correct for each backend. Worktree: proto/chief-inference. BEFORE plandb cmds: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db. References: adr-0009, docs/03-chief-kernel.md section 8, docs/09-local-vs-cloud.md.'
+  kind: code
+  priority: 7
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-23
+  title: 'Integration: scripts/start-chief.sh + end-to-end demo script'
+  description: 'CRITICAL: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db BEFORE any plandb command. Worktree lives at labs/chief-os-demo. Add scripts/start-chief.sh that: (1) runs chief-core binary in background with proper logging to ./logs/chief-core.log, (2) runs Morning Brief Vite dev server in background on :5173, (3) prints URLs and PID file so user can shutdown cleanly with scripts/stop-chief.sh. Add scripts/demo-night-loop.sh that scripts a full demo: seeds 3 fake intents via chief-cli, polls /brief until ready, prints card summary, auto-approves 2 cards, demonstrates one rewind, verifies one attestation. Demo should complete in under 60 seconds on a fresh start. Also add scripts/stop-chief.sh using the PID file. README.md at repo root updated with Quick Start section. Worktree: branch int/demo-scripts.'
+  kind: code
+  priority: 7
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-24
+  title: Write docs/11-open-source-business.md
+  description: 'Licensing tiers: AGPL-3.0 kernel+surfaces; Apache-2.0 first-party packs; author-choice community packs. Monetization: hosted cloud twin, managed pack registry, support contracts. Revenue model: 9/mo entry, 49/mo pro. COGS modeling. Enterprise path (v3+) via managed offering. Not selling the software.'
+  kind: code
+  priority: 6
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-25
+  title: Write docs/12-apple-design-principles.md
+  description: '10 Apple-inspired product principles applied to Chief OS: one way to do each thing, hide complexity reveal power, defaults beautiful, rituals not workflows, typography as substance, sound as chrome, continuity, physics over animation, demo as gate, privacy as UX. Each with a Chief-OS-specific guardrail.'
+  kind: code
+  priority: 6
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-26
+  title: Write docs/15-regulatory-posture.md
+  description: '''Machine as fax'' legal posture for v0-v1. Every external action requires signed approval token; human is legal actor. E-signature legality (ESIGN/UETA in US, eIDAS in EU). Money rails for v1+ (via licensed partners: Stripe Issuing, Plaid, Modern Treasury). KYC on human, not agent. Glide path to v2 money/legal ceremony. Jurisdictions of concern.'
+  kind: code
+  priority: 6
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-27
+  title: Write requirements/ (4 buckets)
+  description: 'docs/requirements/*.md — 4 buckets: functional.md (what Chief OS does, Night Loop contract, Pack interface), non-functional.md (reliability, observability, extensibility), security.md (threat model, cap-based rules, supply chain), performance.md (boot <10s, Morning Brief render <3s, local-model latency targets). Each bucket: append-only table of requirement IDs.'
+  kind: code
+  priority: 6
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-28
+  title: 'Research: agent-native filesystem design'
+  description: 'Deep-dive research: when AI is primary user, how should the filesystem be organized? Axes to investigate: (1) content-addressed primary layout (mem://file/<hash>) vs human folders; (2) local embedding model selection — fastembed-rs, ort+onnx, sentence-transformers, bge-m3, nomic-embed — benchmark speed vs quality on Chief-OS-class CPU; (3) at-rest vs indexed vs hot — what tier? (4) what agents see vs what humans see — two views over one substrate; (5) does ~/Downloads/ live as legacy shim or get absorbed? Output: docs/research/NNNN-agent-native-fs.md + proposed edits to docs/08-memory-substrate.md. Compare with how Plan9, Tahoe-LAFS, IPFS, Cassandra did content-naming. Also check prior art: Genode, Morello, Copland-attested FS.'
+  kind: research
+  priority: 6
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-29
+  title: Incorporate OS-primitives research findings on agent return
+  description: When the background research agent returns with AI-native primitive rethinks findings, (1) flesh out docs/research/2026-04-21-ai-native-primitive-rethinks.md with full content, (2) propose edits to docs/02-architecture.md for top-5 picks, (3) open ADRs for any that commit us to a technical choice, (4) update docs/14-risks-open-questions.md with new open questions.
+  kind: code
+  priority: 6
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-30
+  title: 'Prototype: chief-mem memory stack (Rust + PyO3)'
+  description: |-
+    CRITICAL SETUP: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db BEFORE any plandb command. Worktree sits at labs/chief-os-mem, sibling to labs/nix; plandb will walk up wrong without this.
+    ---
+    Hypothesis: one Rust crate opens SQLite+sqlite-vec+FTS5 plus iroh-blobs and exposes PyO3 bindings. Implements nodes/edges/vectors/texts SQL schema from adr-0008. Files: prototypes/chief-mem/{Cargo.toml,src/lib.rs,src/schema.sql,src/query.rs,python/chief_mem/__init__.py,tests/*,README.md,measurements.md}. Acceptance: 100k synthetic nodes indexed; p50 query (vector+BM25+graph-walk) < 200ms; Python+Rust both import same .db. Worktree: proto/chief-mem. Dep: validates pure-OSS stack choice from adr-0008. References: docs/08-memory-substrate.md, docs/research/2026-04-21-pure-oss-memory-substrate.md.
+  kind: code
+  priority: 6
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-31
+  title: 'Prototype: Signed Typed Event Log (Rust)'
+  description: |-
+    CRITICAL SETUP: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db BEFORE any plandb command. Worktree sits at labs/chief-os-events, sibling to labs/nix; plandb will walk up wrong without this.
+    ---
+    Hypothesis: append-only, blake3-addressed, Sigstore-signed event store in RocksDB/fjall with FUSE view at /chief/events/. Emits in-toto v1 statements. Files: prototypes/event-log/{Cargo.toml,src/main.rs,src/schema.capnp (or .proto),src/sign.rs,src/fuse.rs,README.md}. Acceptance: 10k events/sec sustained write; Merkle chain verifiable via external tool; FUSE read returns typed events. Worktree: proto/event-log. References: adr-0005, docs/03-chief-kernel.md, docs/06-security-model.md.
+  kind: code
+  priority: 6
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-32
+  title: Write ideation + research scaffolding
+  description: 'docs/ideation/README.md (how to append ideation entries), docs/ideation/2026-04-21-initial-dump.md (capture brainstorm leftovers: federation ideas, physical puck v3, enterprise trust ledger, voice-first v2, ambient display hw, agent marketplace monetization). docs/research/README.md (how to add competitor analyses, prior art, academic refs).'
+  kind: code
+  priority: 5
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-33
+  title: Write scaffold READMEs (plans, prototypes, brand)
+  description: 'plans/README.md (how to write implementation plans from design docs; dated format). prototypes/README.md (scratch spike policy: each prototype gets own README + CLEANUP date). brand/README.md (naming, wordmark, typography, color, voice — todo stubs).'
+  kind: code
+  priority: 5
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-34
+  title: Document polyglot language policy
+  description: 'Add section in docs/02-architecture.md + docs/requirements/non-functional.md declaring polyglot code strategy: Rust for kernel, Go for network services, TypeScript for surfaces, Python for agents/ML. No OS-startup optimization required for v0.'
+  kind: code
+  priority: 5
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-35
+  title: 'Prototype: Region Router (Rust)'
+  description: 'Hypothesis: deterministic rule-table classifier that maps (action_metadata, trust_ledger_snapshot, horizon) -> (region, surface, friction_tier). Rules are YAML loaded at boot. Files: prototypes/region-router/{Cargo.toml,src/main.rs,src/rules.rs,rules/default.yaml,tests/decision_table_test.rs,README.md}. Acceptance: 100% coverage on decision-table unit tests; p50 classify < 200us; rules changes require ADR (encoded in test). Worktree: proto/region-router. Parallel-safe. References: docs/01-hax-principles.md, docs/03-chief-kernel.md (service #6).'
+  kind: code
+  priority: 5
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-36
+  title: 'Prototype: Chief FS CAS + FUSE shim (Rust)'
+  description: 'Hypothesis: blake3 CAS store + FUSE shim at /chief/ that presents legacy paths as pinned aliases. Capture daemon on fanotify writes. Files: prototypes/chief-fs/{Cargo.toml,src/main.rs,src/cas.rs,src/fuse_shim.rs,src/capture_daemon.rs,README.md,measurements.md}. Acceptance: ''ls ~/Downloads'' returns aliased CIDs; delete keeps CAS blob; rename updates graph edge not CID; capture daemon p99 < 10ms per write. Worktree: proto/chief-fs. References: adr-0006, docs/research/2026-04-21-agent-native-fs.md.'
+  kind: code
+  priority: 5
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-37
+  title: 'Prototype: Morning Brief surface (TypeScript)'
+  description: 'Hypothesis: render Morning Brief from mock L2 state (static JSON) at 60fps with card animations using physics-based motion. Files: prototypes/morning-brief/{package.json,src/App.tsx,src/MorningBrief.tsx,src/cards/*,mock/brief-state.json,README.md}. Acceptance: render < 3s from cold; cards animate with spring physics; trust ledger bar increments animate; provenance click-through shows a chain. Worktree: proto/morning-brief. References: docs/05-surfaces.md, docs/12-apple-design-principles.md.'
+  kind: code
+  priority: 5
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-38
+  title: 'Prototype: opencode harness wrapper (Rust)'
+  description: 'Hypothesis: Rust wrapper implementing Harness trait over opencode CLI; validates swappability by also stubbing a NullHarness that records calls. Files: prototypes/harness/{Cargo.toml,src/trait.rs,src/opencode_impl.rs,src/null_impl.rs,tests/swap_test.rs,README.md}. Acceptance: same tests pass against OpencodeHarness and NullHarness; harness can be swapped at boot via config. Worktree: proto/harness. References: docs/03-chief-kernel.md (service #1 harness interface), directives log.'
+  kind: code
+  priority: 5
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-39
+  title: 'Integration: Docker kiosk container (Path B)'
+  description: |-
+    SUPERSEDED 2026-04-21 by t-docker-os; this task kept as history only.
+    ---
+    After Path A lands: build a Dockerfile + docker-compose.yaml at repo root that wraps chief-core + Morning Brief + a kiosk-mode fullscreen browser so 'docker compose up' presents the container as if it were a Chief OS. For headless/container environments, use Xvfb + minimal Wayland compositor or a chromium --kiosk flag. Exposes only the kiosk window; no desktop chrome. Goal: the container feels like booting Chief OS without needing NixOS. scripts/demo-docker.sh wraps the ergonomics. Worktree: branch int/docker-kiosk. Parent plandb task: see Path B in session discussion.
+  kind: code
+  priority: 5
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-40
+  title: Update docs/INDEX.md with final state
+  description: 'After all docs land, update docs/INDEX.md to reflect actual state: statuses, last-updated dates, any renames. Verify all cross-links resolve.'
+  kind: code
+  priority: 4
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-41
+  title: Create docs/directives/ log for user notes and do periodic audit
+  description: Create docs/directives/README.md (append-only log of verbal directives from user — time-stamped). Capture each user comment as an entry. Periodically run an 'audit pass' that cross-references existing docs against directives and flags where edits are needed. First audit scheduled after t-idx completes. This is the formal capture channel for the user's ongoing verbal direction.
+  kind: generic
+  priority: 4
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-42
+  title: 'Prototype: HAX Inbox surface (Rust TUI + Wayland overlay)'
+  description: 'Hypothesis: single pane listing pending approvals with 4 affordances (approve/deny/delegate/defer). ratatui TUI + Iced/Slint Wayland overlay. Files: prototypes/hax-inbox/{Cargo.toml,src/main.rs,src/tui.rs,src/overlay.rs,README.md}. Acceptance: subscribes to event log (mock), renders queue; keyboard-only parity with mouse/touch. Worktree: proto/hax-inbox. References: adr-0007, docs/05-surfaces.md.'
+  kind: code
+  priority: 4
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-43
+  title: 'Follow-up research: incorporate primitive-rethink findings into docs 02/03/05/08/13'
+  description: 'The background agent returned a substrate spine (5 primitives). Most already baked into v0-scope, architecture, and ADRs 0005-0007. Final polish pass: ensure docs/08-memory-substrate.md reflects ADR 0008 pure-OSS stack fully; ensure Clipboard Pane has a dedicated section in docs/05-surfaces.md; cross-link from docs/03-chief-kernel.md to ADR 0005-0008. Worktree: docs/substrate-polish. References: docs/research/2026-04-21-ai-native-primitive-rethinks.md.'
+  kind: code
+  priority: 4
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-44
+  title: Initial commit + track plandb.db
+  description: 'git add -A; verify .plandb.db is tracked (explicit negation in .gitignore); initial commit with message ''init: Chief OS — axioms, architecture scaffold, v0 scope, plandb project''. Do NOT push yet — user decides. Record what was committed.'
+  kind: shell
+  priority: 3
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-45
+  title: 'Brand: pick typeface, sound palette, motion spec'
+  description: 'Per docs/12-apple-design-principles.md: commissioned typeface vs licensed (Pitch/Söhne/Sentinel) vs open (Inter-adjacent). Sound partner (composer or licensed library). Motion spec grounded in physics (spring systems). Deliverable: brand/typeface.md, brand/sound.md, brand/motion.md + specimen screenshots. Deadline: day 30 per v0 scope. References: docs/12-apple-design-principles.md (guardrail 5,6,8), docs/05-surfaces.md.'
+  kind: research
+  priority: 3
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-46
+  title: 'Legal: draft Terms of Service encoding machine-as-fax posture'
+  description: 'Per adr-0004 and docs/15-regulatory-posture.md: ToS must encode (1) every external action is cryptographically signed by user via ceremony, making human the legal actor; (2) ESIGN/UETA/eIDAS compatibility language; (3) GDPR controller/processor clarity (user is controller). External counsel review required before v0 public launch. Files: legal/terms-of-service.md (new dir), legal/privacy-policy.md. Cross-link from docs/15-regulatory-posture.md.'
+  kind: generic
+  priority: 3
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-47
+  title: 'LICENSE: replace placeholder with full AGPL-3.0-or-later text'
+  description: 'Current /LICENSE is a placeholder pointing to gnu.org/licenses/agpl-3.0.txt. Replace with the full license text. Keep the prefix note about project copyright + replaced-Apache-from-GH-wizard. Acceptance: file contains verbatim AGPL-3.0-or-later text from gnu.org, plus our project notice at top. Worktree: docs/license-full.'
+  kind: generic
+  priority: 3
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-48
+  title: 'Future: prototype spikes (capability broker, region router, morning brief render, memory graph)'
+  description: 'Placeholder for post-scaffold implementation work. Use codex on git worktrees for parallel spikes: (1) capability-broker proof — tiny Rust service with typed cap grants, (2) region-router rule-table — deterministic classifier + tests, (3) morning-brief render — React/Svelte surface over mock data, (4) memory-graph tri-store (SQLite + FAISS + edges). Each spike: own README + CLEANUP date. For agent harness inside these: use opencode (swappable interface).'
+  kind: code
+  priority: 2
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-49
+  title: 'Prototype: Capability Broker (Rust)'
+  description: 'Hypothesis: build a minimal Capability Broker in Rust that (a) issues typed scoped bearer-style grants, (b) verifies every call via broker.check, (c) emits signed provenance entries to stdout in in-toto v1 format. Files expected: prototypes/capability-broker/{Cargo.toml,src/main.rs,src/grant.rs,src/check.rs,README.md,measurements.md}. Acceptance: 1000 check() ops in <100ms; grant revoke reflected in next check; fuzz at least 10k inputs with no panic. Worktree: branch proto/capability-broker; own plandb agent (PLANDB_AGENT=codex-cap-broker). Parallel-safe: no shared state with other prototype tasks. References: docs/03-chief-kernel.md (service #2), docs/06-security-model.md, adr/0002.'
   kind: generic
   priority: 0
-  parent_ref: null
+  parent_ref: task-48
   pre_condition: null
   post_condition: null
   pre_hook: null
   post_hook: null
 dependencies:
 - from_ref: task-1
-  to_ref: task-2
+  to_ref: task-3
+  kind: feeds_into
+- from_ref: task-1
+  to_ref: task-8
+  kind: feeds_into
+- from_ref: task-1
+  to_ref: task-9
   kind: feeds_into
 - from_ref: task-1
   to_ref: task-4
   kind: feeds_into
 - from_ref: task-1
-  to_ref: task-6
+  to_ref: task-15
   kind: feeds_into
-- from_ref: task-2
-  to_ref: task-3
+- from_ref: task-1
+  to_ref: task-10
   kind: feeds_into
-- from_ref: task-2
-  to_ref: task-7
+- from_ref: task-1
+  to_ref: task-16
+  kind: feeds_into
+- from_ref: task-1
+  to_ref: task-18
+  kind: feeds_into
+- from_ref: task-1
+  to_ref: task-19
+  kind: feeds_into
+- from_ref: task-1
+  to_ref: task-27
   kind: feeds_into
 - from_ref: task-3
-  to_ref: task-5
-  kind: feeds_into
-- from_ref: task-3
-  to_ref: task-7
+  to_ref: task-2
   kind: feeds_into
 - from_ref: task-4
-  to_ref: task-7
+  to_ref: task-2
+  kind: feeds_into
+- from_ref: task-15
+  to_ref: task-2
+  kind: feeds_into
+- from_ref: task-2
+  to_ref: task-11
+  kind: feeds_into
+- from_ref: task-2
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-3
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-4
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-5
+  to_ref: task-13
+  kind: feeds_into
+- from_ref: task-5
+  to_ref: task-14
+  kind: feeds_into
+- from_ref: task-5
+  to_ref: task-23
+  kind: feeds_into
+- from_ref: task-5
+  to_ref: task-39
+  kind: feeds_into
+- from_ref: task-5
+  to_ref: task-6
   kind: feeds_into
 - from_ref: task-5
   to_ref: task-7
@@ -108,17 +579,81 @@ dependencies:
 - from_ref: task-6
   to_ref: task-7
   kind: feeds_into
+- from_ref: task-8
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-9
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-10
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-11
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-13
+  to_ref: task-23
+  kind: feeds_into
+- from_ref: task-14
+  to_ref: task-23
+  kind: feeds_into
+- from_ref: task-14
+  to_ref: task-39
+  kind: feeds_into
+- from_ref: task-15
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-16
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-17
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-18
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-19
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-24
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-25
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-26
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-27
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-32
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-33
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-40
+  to_ref: task-44
+  kind: feeds_into
+- from_ref: task-44
+  to_ref: task-48
+  kind: blocks
 context:
 - kind: discovery
-  content: chief-inference currently has no crate README; create prototypes/chief-inference/README.md for requested README update. Existing LocalLlamaCppStub::new accepts any Into<String> and tests expect default stub id local:llama-cpp-<name>. Keep that behavior in stub.rs for default mode. real-llama can reinterpret new(arg) as explicit model path if it points to a file, otherwise resolve CHIEF_MODEL_DIR/default filename.
+  content: 't-llama-backend completed: real llama.cpp backend (llama_cpp_rs v0.3) feature-gated behind real-llama. Cargo builds with default (stub) and --features real-llama. Tests pass 16/16. Model download script idempotent. Integration test ready with --ignored flag. Commit: 7c9af95.'
   tags: []
-  task_ref: task-1
+  task_ref: null
 - kind: discovery
-  content: llama-cpp-2 latest docs expose llama_cpp_2::model::LlamaModel, LlamaBackend::init, LlamaModel::load_from_file, LlamaContextParams::with_n_threads(i32), LlamaBatch, and LlamaSampler. docs.rs shows latest release 0.1.144; requested version 0.2 may not exist on docs.rs/crates.io as of 2026-04-21.
+  content: 'Docker-as-OS (t-docker-os) implementation complete and PR #19 opened. Awaiting t-chief-core and t-llama-backend to complete before task can be marked done. Scaffolding verified against: chief-core binary target, morning-brief npm build, prototypes structure. Dockerfile: 4-stage with graceful fallback for real-llama feature. demo-docker.sh: timeout-safe polling with intent/brief endpoints. README: Quick Start section added. All files committed on int/docker-os branch, pushed to origin.'
   tags: []
-  task_ref: task-1
-- kind: reference
-  content: Official Qwen HF model is Qwen/Qwen2.5-3B-Instruct-GGUF. File qwen2.5-3b-instruct-q4_k_m.gguf has SHA256 626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d on the HF file page.
+  task_ref: null
+- kind: discovery
+  content: 'proto/events completed: Signed Typed Event Log with Merkle chain. Implemented ADR-0005 substrate: 7 event kinds, fjall storage, Ed25519 signing, chain verification with tampering detection. Concurrent safety tested. Benchmark: ~900 events/sec single-threaded. PR #10 opened. Ready for integration into chief-kernel.'
   tags: []
-  task_ref: task-1
+  task_ref: null
+- kind: pattern
+  content: 'Pre-commit hook test: verifying auto-export works end-to-end.'
+  tags: []
+  task_ref: null
 

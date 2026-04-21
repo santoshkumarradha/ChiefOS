@@ -36,11 +36,15 @@ __pycache__/
 state/
 cache/
 
-# PlanDB — intentionally TRACKED for this project so task state persists across sessions.
-# Override the global recommendation to ignore these.
-!.plandb.db
-!.plandb.db-wal
-!.plandb.db-shm
+# PlanDB — binary .plandb.db is NOT tracked (causes merge conflicts across
+# parallel worktrees). Task state is committed instead as a text SQL dump at
+# docs/plandb-state.sql (mergeable, reviewable). Scripts round-trip:
+#   scripts/plandb-export.sh  — .plandb.db → docs/plandb-state.sql
+#   scripts/plandb-restore.sh — docs/plandb-state.sql → .plandb.db
+.plandb.db
+.plandb.db-wal
+.plandb.db-shm
+.plandb.db.bak.*
 
 # Prototypes scratch
 prototypes/**/out/

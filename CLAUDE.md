@@ -48,11 +48,56 @@ plandb context "found that X requires Y" --kind discovery
 plandb done t-<id> --result '{"pr":"<url>","summary":"..."}'
 ```
 
-### PLANDB_DB gotcha (read this)
+### Persistence model (read this — changed 2026-04-21)
 
-`.plandb.db` is tracked in git at the **repo root** (`labs/nix/.plandb.db`). But PlanDB's discovery walks up from your CWD, so if you run it from a **worktree** at `labs/chief-os-<slug>/` it will find a *different* `.plandb.db` in `labs/` or `~/` and silently write there. That's a data split.
+**The binary `.plandb.db` is NOT tracked in git.** It's gitignored. Parallel-worktree writes to a binary file caused merge conflicts and state loss; we fixed that by committing a text SQL dump instead.
 
-**Rule:** every session, first line of every agent is `export PLANDB_DB=<abs path to labs/nix/.plandb.db>`. Or `cd` into the main repo before touching plandb.
+- **`docs/plandb-state.sql`** — authoritative full state (status, results, contexts, events). Committed. Mergeable text. Used by the restore script.
+- **`docs/plandb-template.yaml`** — human-readable sidecar (plandb's native `export`). Graph shape only. **Lossy** — drops status, results, and contexts. Great for PR reviewers to see the task graph at a glance, never used for restore.
+- **`.plandb.db`** — local binary, ephemeral, gitignored. Each clone / worktree rebuilds from the SQL dump.
+
+**Why both?** `plandb export` produces clean YAML but intentionally only captures the graph shape — designed as a reusable decomposition template, not a state snapshot. We need full state (is task X done? what was the result? what contexts did agents record?), so we commit the SQL dump too.
+
+#### Scripts
+
+```bash
+# Export current db → text (run on main before commit/PR)
+scripts/plandb-export.sh
+
+# Rebuild db from committed text (run on fresh clone or after pull)
+scripts/plandb-restore.sh            # refuses if .plandb.db exists
+scripts/plandb-restore.sh --force    # replaces (auto-backs-up the old one)
+```
+
+#### New-session bootstrap
+
+```bash
+git pull
+# If you have no .plandb.db (fresh clone) or want to reset to repo state:
+scripts/plandb-restore.sh
+# Now plandb works.
+plandb status --detail
+```
+
+#### Before opening a PR on main (or before merging)
+
+```bash
+# Export the current state so downstream agents pick it up
+scripts/plandb-export.sh
+git add docs/plandb-state.sql
+git commit -m "chore(plandb): export state"
+# Then open/merge the PR as usual.
+```
+
+#### PLANDB_DB gotcha (still applies)
+
+PlanDB walks up from your CWD. From a worktree sibling to `labs/nix/`, it would find a wrong `.plandb.db`. **Pin** the absolute path every session:
+
+```bash
+export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db
+```
+
+Or `cd` into `labs/nix/` before touching plandb. Without this pin, agents write to the wrong db and state diverges.
 
 ### Inspection
 
@@ -233,14 +278,18 @@ Co-Authored-By: Codex <noreply@openai.com>
 ```bash
 cd /Users/santoshkumarradha/Documents/agentfield/code/labs/nix
 git pull
+# Pin the db path (non-negotiable, see gotcha above)
+export PLANDB_DB="$(pwd)/.plandb.db"
+# If no local db OR you want to reset to repo's canonical state:
+[ -f .plandb.db ] || scripts/plandb-restore.sh
 plandb status --detail                  # where did we leave off?
 plandb list --status running            # anything mid-flight elsewhere?
 plandb list --status ready              # what's next?
 plandb search "keyword"                 # find relevant context
-plandb go --agent <your-handle>         # claim next ready task
+plandb task claim t-<id> --agent <your-handle> && plandb task start t-<id> --agent <your-handle>
 ```
 
-All state persists in `.plandb.db`. If you need to re-read context that was recorded earlier:
+All state persists in `docs/plandb-state.sql` (text, in git). The binary `.plandb.db` is rebuilt from it on demand. If you need to re-read context that was recorded earlier:
 
 ```bash
 plandb contexts                        # list all context entries

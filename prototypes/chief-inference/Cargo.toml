@@ -25,10 +25,18 @@ uuid = { version = "1.6", features = ["serde", "v4"] }
 tracing = "0.1"
 hex = "0.4"
 clap = { version = "4.4", features = ["derive"] }
+# llama_cpp_rs: Apache-2.0, high-level Rust bindings for llama.cpp
+# Only enabled when real-llama feature is active (v0 CPU-only per steward directive 2026-04-21)
+llama_cpp_rs = { version = "0.3", optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 tempfile = "3.8"
+
+[features]
+# CPU-only real llama.cpp backend (CPU inference only for v0)
+# Default: disabled for cheap CI (uses stub). Enable with: cargo build --features real-llama
+real-llama = ["llama_cpp_rs"]
 
 [[bench]]
 name = "attest_overhead_bench"

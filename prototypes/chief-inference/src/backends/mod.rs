@@ -1,7 +1,15 @@
 //! Model backends: local and cloud stubs for inference.
 
-pub mod cloud_stub;
+#[cfg(feature = "real-llama")]
 pub mod local;
+
+#[cfg(not(feature = "real-llama"))]
+pub mod stub;
+
+#[cfg(not(feature = "real-llama"))]
+pub use stub as local;
+
+pub mod cloud_stub;
 
 pub use cloud_stub::CloudAnthropicStub;
 pub use local::LocalLlamaCppStub;

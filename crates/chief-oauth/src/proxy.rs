@@ -3,8 +3,8 @@
 use crate::error::{OAuthError, Result};
 use crate::session::SessionHandle;
 use serde::{Deserialize, Serialize};
-use url::Url;
 use std::collections::HashMap;
+use url::Url;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProxyRequest {

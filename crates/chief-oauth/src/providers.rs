@@ -70,4 +70,27 @@ impl Provider {
                 .any(|allowed| host == allowed || host.ends_with(&format!(".{allowed}"))),
         }
     }
+
+    /// Short string identifier for error messages, logs, and event records.
+    pub fn name(&self) -> String {
+        self.key()
+    }
+
+    /// Coarse host allowlist used by `proxy_request` to enforce scope before
+    /// attaching the bearer token. Packs cannot widen this list — only the
+    /// provider config controls it.
+    pub fn allowed_hosts(&self) -> Vec<String> {
+        match self {
+            Self::Google => vec![
+                "googleapis.com".to_string(),
+                "www.googleapis.com".to_string(),
+                "gmail.googleapis.com".to_string(),
+                "calendar.googleapis.com".to_string(),
+                "people.googleapis.com".to_string(),
+                "oauth2.googleapis.com".to_string(),
+            ],
+            Self::Github => vec!["api.github.com".to_string(), "github.com".to_string()],
+            Self::Custom(provider) => provider.allowed_hosts.clone(),
+        }
+    }
 }

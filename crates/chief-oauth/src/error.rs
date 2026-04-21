@@ -14,6 +14,21 @@ pub enum OAuthError {
     UnknownSession,
     #[error("capability denied: {reason}")]
     CapabilityDenied { reason: String },
+    #[error("invalid request: {0}")]
+    InvalidRequest(String),
+    #[error("flow error: {0}")]
+    FlowError(String),
+    #[error("scope denied: provider={provider} host={requested_host}")]
+    ScopeDenied {
+        provider: String,
+        requested_host: String,
+    },
+    #[error("storage error: {0}")]
+    StorageError(String),
+    #[error("encryption error: {0}")]
+    EncryptionError(String),
+    #[error("internal error: {0}")]
+    Internal(String),
     #[error("token endpoint rejected request: {message}")]
     TokenEndpoint { message: String },
     #[error("invalid sealed token store: {reason}")]

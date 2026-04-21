@@ -50,8 +50,13 @@ async fn test_scope_enforcement_allows_google_apis() {
     };
 
     let result = broker.proxy_request(&session, request).await;
-    // The request should succeed in scope validation (may fail elsewhere due to no real token)
-    assert!(result.is_ok() || matches!(result, Err(chief_oauth::OAuthError::EncryptionError(_))));
+    // Scope validation must pass for googleapis.com. Downstream errors (no
+    // sealed token, no network) are acceptable — we only assert this is
+    // NOT a scope denial.
+    assert!(!matches!(
+        result,
+        Err(chief_oauth::OAuthError::ScopeDenied { .. })
+    ));
 }
 
 #[tokio::test]
@@ -74,5 +79,9 @@ async fn test_scope_enforcement_github() {
     };
 
     let result = broker.proxy_request(&session, request).await;
-    assert!(result.is_ok() || matches!(result, Err(chief_oauth::OAuthError::EncryptionError(_))));
+    // Scope validation must pass for api.github.com. Downstream errors OK.
+    assert!(!matches!(
+        result,
+        Err(chief_oauth::OAuthError::ScopeDenied { .. })
+    ));
 }

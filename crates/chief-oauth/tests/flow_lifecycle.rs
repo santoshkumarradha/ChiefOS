@@ -45,9 +45,6 @@ async fn test_complete_flow_lifecycle() {
 
 #[tokio::test]
 async fn test_expired_flow_rejected() {
-    use chief_oauth::flow::{FlowId, PendingFlow};
-    use std::time::{SystemTime, UNIX_EPOCH};
-
     let tmpdir = TempDir::new().unwrap();
     let broker = OAuthBroker::new(tmpdir.path()).await.unwrap();
 

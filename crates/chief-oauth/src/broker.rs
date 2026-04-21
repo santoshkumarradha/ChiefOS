@@ -49,7 +49,7 @@ impl OAuthBroker {
         // Generate state
         let mut rng = rand::thread_rng();
         let state_bytes: [u8; 32] = rng.gen();
-        let state = general_purpose::URL_SAFE_NO_PAD.encode(&state_bytes);
+        let state = general_purpose::URL_SAFE_NO_PAD.encode(state_bytes);
 
         let flow = PendingFlow::new(provider.clone(), scopes, state.clone(), None);
         let flow_id = flow.flow_id.clone();
@@ -63,7 +63,7 @@ impl OAuthBroker {
                     urlencoding::encode(&flow.scopes.join(" ")),
                     &state
                 )
-            },
+            }
             Provider::Github => {
                 format!(
                     "https://github.com/login/oauth?client_id=&redirect_uri={}&scope={}&state={}",
@@ -71,11 +71,15 @@ impl OAuthBroker {
                     urlencoding::encode(&flow.scopes.join(" ")),
                     &state
                 )
-            },
-            Provider::Custom { auth_url, .. } => {
-                return Err(OAuthError::InvalidRequest(
-                    "Custom provider auth URL must be used directly".to_string(),
-                ))
+            }
+            Provider::Custom(ref custom) => {
+                format!(
+                    "{}?client_id=&redirect_uri={}&scope={}&state={}",
+                    custom.auth_url,
+                    urlencoding::encode(redirect_uri),
+                    urlencoding::encode(&flow.scopes.join(" ")),
+                    &state
+                )
             }
         };
 
@@ -95,7 +99,7 @@ impl OAuthBroker {
     pub async fn complete_flow(
         &self,
         flow_id: FlowId,
-        code: &str,
+        _code: &str,
         state: &str,
     ) -> Result<SessionHandle> {
         let mut flows = self
@@ -138,13 +142,16 @@ impl OAuthBroker {
             .sessions
             .lock()
             .map_err(|_| OAuthError::Internal("session lock poisoned".to_string()))?;
+        let now = Utc::now();
         sessions.insert(
             session_id,
             SessionMeta {
                 handle: handle.clone(),
-                created_at: Utc::now(),
+                created_at: now,
                 last_used: None,
                 expires_at: None,
+                updated_at: now,
+                revoked_at: None,
             },
         );
 

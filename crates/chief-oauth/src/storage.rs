@@ -23,8 +23,9 @@ impl SealedTokenStore {
     /// If this is the first run, generates a new encryption key at `keystore_path/oauth.key`.
     /// Otherwise, loads the existing key. Never stores plaintext tokens.
     pub fn new(keystore_path: &Path) -> Result<Self> {
-        fs::create_dir_all(keystore_path)
-            .map_err(|e| OAuthError::StorageError(format!("failed to create keystore dir: {}", e)))?;
+        fs::create_dir_all(keystore_path).map_err(|e| {
+            OAuthError::StorageError(format!("failed to create keystore dir: {}", e))
+        })?;
 
         let key_file = keystore_path.join("oauth.key");
         let cipher = if key_file.exists() {
@@ -35,20 +36,19 @@ impl SealedTokenStore {
                     "invalid key size (expected 32 bytes)".to_string(),
                 ));
             }
-            let key: [u8; 32] = key_bytes.try_into().map_err(|_| {
-                OAuthError::StorageError("failed to parse key bytes".to_string())
-            })?;
+            let key: [u8; 32] = key_bytes
+                .try_into()
+                .map_err(|_| OAuthError::StorageError("failed to parse key bytes".to_string()))?;
             XChaCha20Poly1305::new(&key.into())
         } else {
             let mut rng = rand::thread_rng();
             let key: [u8; 32] = rng.gen();
-            fs::write(&key_file, &key).map_err(|e| {
+            fs::write(&key_file, key).map_err(|e| {
                 OAuthError::StorageError(format!("failed to write key file: {}", e))
             })?;
-            fs::set_permissions(&key_file, fs::Permissions::from_mode(0o600))
-                .map_err(|e| {
-                    OAuthError::StorageError(format!("failed to set key permissions: {}", e))
-                })?;
+            fs::set_permissions(&key_file, fs::Permissions::from_mode(0o600)).map_err(|e| {
+                OAuthError::StorageError(format!("failed to set key permissions: {}", e))
+            })?;
             XChaCha20Poly1305::new(&key.into())
         };
 
@@ -87,7 +87,9 @@ impl SealedTokenStore {
     pub fn unseal(&self) -> Result<TokenRecord> {
         let tokens_file = self.keystore_path.join("tokens.bin");
         if !tokens_file.exists() {
-            return Err(OAuthError::StorageError("tokens file not found".to_string()));
+            return Err(OAuthError::StorageError(
+                "tokens file not found".to_string(),
+            ));
         }
 
         let sealed_bytes = fs::read(&tokens_file)
@@ -100,9 +102,9 @@ impl SealedTokenStore {
         }
 
         let (nonce_bytes, ciphertext) = sealed_bytes.split_at(24);
-        let nonce_array: [u8; 24] = nonce_bytes.try_into().map_err(|_| {
-            OAuthError::EncryptionError("failed to parse nonce".to_string())
-        })?;
+        let nonce_array: [u8; 24] = nonce_bytes
+            .try_into()
+            .map_err(|_| OAuthError::EncryptionError("failed to parse nonce".to_string()))?;
         let nonce: XNonce = nonce_array.into();
 
         let plaintext = self

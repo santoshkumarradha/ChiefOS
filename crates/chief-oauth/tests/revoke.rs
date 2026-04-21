@@ -37,8 +37,6 @@ async fn test_revoke_session() {
 
 #[tokio::test]
 async fn test_revoke_clears_sealed_storage() {
-    use std::fs;
-
     let tmpdir = TempDir::new().unwrap();
     let broker = OAuthBroker::new(tmpdir.path()).await.unwrap();
 

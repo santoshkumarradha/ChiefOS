@@ -12,7 +12,7 @@ impl FlowId {
     pub fn new() -> Self {
         let mut rng = rand::thread_rng();
         let random_bytes: [u8; 16] = rng.gen();
-        let encoded = general_purpose::URL_SAFE_NO_PAD.encode(&random_bytes);
+        let encoded = general_purpose::URL_SAFE_NO_PAD.encode(random_bytes);
         FlowId(format!("flow_{}", encoded))
     }
 }
@@ -21,6 +21,17 @@ impl Default for FlowId {
     fn default() -> Self {
         Self::new()
     }
+}
+
+/// Client configuration for a specific provider flow. Holds the client
+/// credentials the broker uses when exchanging an authorization code for a
+/// token. Supplied by the OS-level OAuth configuration, not by packs.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OAuthClientConfig {
+    pub provider: Provider,
+    pub client_id: String,
+    pub client_secret: Option<String>,
+    pub redirect_uri: String,
 }
 
 /// Challenge returned to the OS for the OAuth login ceremony.
@@ -71,10 +82,7 @@ impl PendingFlow {
 
     /// Check if flow has expired (default: 10 minutes).
     pub fn is_expired(&self) -> bool {
-        self.created_at
-            .elapsed()
-            .unwrap_or_default()
-            .as_secs() > 600
+        self.created_at.elapsed().unwrap_or_default().as_secs() > 600
     }
 }
 

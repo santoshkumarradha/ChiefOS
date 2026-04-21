@@ -53,7 +53,7 @@ async fn test_sealed_file_contains_no_plaintext_token() {
         .await
         .expect("start_flow");
 
-    let session = broker
+    let _session = broker
         .complete_flow(challenge.flow_id, "auth_code_xyz", &challenge.state)
         .await
         .expect("complete_flow");
@@ -78,13 +78,15 @@ async fn test_sealed_file_contains_no_plaintext_token() {
         "token pattern found as plaintext in sealed storage"
     );
 
-    // The file should be mostly high-entropy (binary encrypted data)
-    // A very crude check: if the file is mostly-ASCII, it's probably not encrypted
+    // The file should be high-entropy (binary encrypted data). Random
+    // ciphertext has ~37% printable-ASCII purely by chance (95/256), so the
+    // threshold is set at 0.55 — well above the expected random rate but
+    // well below any plausible plaintext (typical text >85% printable).
     let ascii_count = sealed_bytes.iter().filter(|&&b| b < 128 && b > 31).count();
     let ratio = ascii_count as f64 / sealed_bytes.len() as f64;
     assert!(
-        ratio < 0.3,
-        "sealed file appears to be mostly plaintext ({}% ASCII)",
+        ratio < 0.55,
+        "sealed file appears to be mostly plaintext ({}% printable-ASCII)",
         (ratio * 100.0) as u32
     );
 }

@@ -123,6 +123,75 @@ Every plandb task has a `--description` that is **self-contained**. If you're pi
 
 If a task description isn't self-contained, amend it before claiming.
 
+## PR process (distributed multi-agent flow)
+
+### One task → one branch → one PR → one merge
+
+```bash
+# 0. Set identity
+export PLANDB_AGENT=codex-region-router
+
+# 1. Create worktree + branch from main
+cd /Users/santoshkumarradha/Documents/agentfield/code/labs/nix
+git worktree add ../chief-os-region-router -b proto/region-router
+cd ../chief-os-region-router
+
+# 2. Claim the task (atomic across agents)
+plandb task claim t-proto-region --agent $PLANDB_AGENT
+
+# 3. Do the work. Record discoveries as you go.
+plandb context "discovery: nushell crate licensing is MIT" --kind discovery
+
+# 4. Commit using the <type>: format (see below). Co-Authored-By footer required.
+
+# 5. Push branch to origin.
+git push -u origin proto/region-router
+
+# 6. Open PR using the template at .github/PULL_REQUEST_TEMPLATE.md
+gh pr create --title "proto: Region Router deterministic classifier" \
+             --body "..."
+
+# 7. Record the PR URL into plandb
+plandb done --next --result '{"pr":"<url>","summary":"..."}'
+
+# 8. Steward (or designated reviewer) merges the PR. After merge:
+git worktree remove ../chief-os-region-router
+git branch -D proto/region-router       # only after merge
+```
+
+### PR review expectations
+
+- Reviewer runs the commands in the task description.
+- Every item in the PR template's acceptance checklist is ticked or explicitly waived.
+- Axioms box is honest — if an axiom is touched but not listed, review halts.
+- `plandb show t-<id>` must match the PR scope.
+
+### Rebasing during long work
+
+If `main` advances while your branch is open:
+
+```bash
+cd ../chief-os-<slug>
+git fetch origin
+git rebase origin/main        # never merge; rebase keeps history linear
+git push --force-with-lease    # safe for a branch you own
+```
+
+Never force-push `main`. Never merge `main` backwards into a feature branch.
+
+### PR-from-fork (external contributors)
+
+External contributors fork the repo, push to their fork, open PR against `main`. Same template applies. Acceptance gates are identical; they can't write plandb entries from their fork — reviewer writes the plandb follow-up on merge.
+
+## CI (when live)
+
+- `.github/workflows/doc-lint.yml` — frontmatter + internal-link check on PRs touching docs.
+- Future:
+  - Rust workspace build + test (when `prototypes/*/Cargo.toml` lands).
+  - TypeScript typecheck + lint (for surfaces).
+  - Sigstore / cosign verification on signed pack PRs.
+  - PlanDB state consistency check (no orphan deps, no runaway claims).
+
 ## Commit message format
 
 ```

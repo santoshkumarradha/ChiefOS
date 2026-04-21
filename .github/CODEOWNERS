@@ -1,0 +1,14 @@
+# Chief OS code owners.
+# All changes default to steward until team grows.
+
+*                   @santoshkumarradha
+
+# Axioms and governance — steward only.
+/CHARTER.md         @santoshkumarradha
+/AGENTS.md          @santoshkumarradha
+/CLAUDE.md          @santoshkumarradha
+/adr/               @santoshkumarradha
+
+# Reviewers for layers (placeholder patterns; update when team grows).
+# docs/02-architecture.md, docs/03-chief-kernel.md, docs/06-security-model.md
+# etc. should require explicit review from domain owners at that point.

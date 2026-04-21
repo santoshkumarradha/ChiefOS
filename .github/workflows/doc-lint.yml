@@ -1,0 +1,62 @@
+name: Doc lint
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "adr/**"
+      - "CHARTER.md"
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - "README.md"
+  push:
+    branches: [ main ]
+    paths:
+      - "docs/**"
+      - "adr/**"
+      - "CHARTER.md"
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check internal links
+        run: |
+          set -euo pipefail
+          fail=0
+          find . -type f \( -name "*.md" -o -name "*.mmd" \) \
+            -not -path "./node_modules/*" \
+            -not -path "./target/*" \
+            -not -path "./.git/*" |
+            while read -r f; do
+              # very permissive check: internal relative links resolve
+              awk 'match($0, /\]\(\.?\.?\/[^)]+\)/) {
+                    link = substr($0, RSTART+2, RLENGTH-3);
+                    gsub("#.*", "", link);
+                    if (link != "" && substr(link,1,4) != "http") print FILENAME":"link
+                  }' "$f"
+            done | while read -r line; do
+              file="${line%%:*}"
+              link="${line#*:}"
+              target="$(dirname "$file")/$link"
+              if [ ! -e "$target" ]; then
+                echo "BROKEN: $file -> $link (resolves to $target)"
+                fail=1
+              fi
+            done
+          exit "$fail"
+
+  frontmatter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check YAML frontmatter on design docs
+        run: |
+          set -euo pipefail
+          for f in docs/[0-9]*.md adr/[0-9]*.md; do
+            if [ -f "$f" ]; then
+              head -n 1 "$f" | grep -q "^---$" || { echo "MISSING frontmatter: $f"; exit 1; }
+            fi
+          done
+          echo "All design docs and ADRs have frontmatter."

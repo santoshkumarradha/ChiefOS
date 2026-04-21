@@ -1,0 +1,26 @@
+# Hello World Pack Manifest
+
+name = "hello-world"
+version = "0.1.0"
+description = "Hello World reference pack for SDK demonstration"
+signature = "ed25519:hello-world-sig-stub"
+
+# Grants declared here; usage_reason must be user-readable
+[[grants]]
+kind = "net.http"
+hosts = ["example.com"]
+methods = ["GET"]
+usage_reason = "Fetch greeting from example.com each morning"
+
+[[grants]]
+kind = "mem.write"
+types = ["thought"]
+usage_reason = "Store greetings and reflections in the Memory Graph"
+
+[[grants]]
+kind = "event.emit"
+topic_prefix = "hello-world"
+usage_reason = "Emit events when the pack completes a greeting cycle"
+
+# Agents provided by this pack
+agents = ["hello-world-agent"]

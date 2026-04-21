@@ -1,0 +1,24 @@
+[package]
+name = "hello-world-pack"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "Hello World reference pack — exercising the SDK end-to-end."
+
+[dependencies]
+chief-sdk = { path = "../../crates/chief-sdk" }
+serde.workspace = true
+serde_json.workspace = true
+async-trait.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[[test]]
+name = "integration"
+path = "tests/integration.rs"

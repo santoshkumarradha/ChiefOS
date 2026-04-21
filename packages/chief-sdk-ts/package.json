@@ -1,0 +1,39 @@
+{
+  "name": "@chief-os/sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TypeScript bindings for Chief OS pane authors.",
+  "license": "AGPL-3.0-or-later",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./pane": {
+      "types": "./dist/pane.d.ts",
+      "default": "./dist/pane.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks.d.ts",
+      "default": "./dist/hooks.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}

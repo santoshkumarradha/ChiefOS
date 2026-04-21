@@ -1,0 +1,27 @@
+[package]
+name = "chief-event-log-proto"
+version = "0.1.0"
+edition = "2021"
+authors = ["Santosh Kumar Radha <santosh@agentfield.ai>"]
+description = "Chief OS Signed Typed Event Log prototype"
+license = "AGPL-3.0-or-later"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+thiserror = "1.0"
+blake3 = { path = "vendor/blake3" }
+ed25519-dalek = { path = "vendor/ed25519-dalek", features = ["rand_core"] }
+rand = "0.8"
+chrono = { version = "0.4", features = ["serde"] }
+fjall = { path = "vendor/fjall" }
+rmp-serde = { path = "vendor/rmp-serde" }
+
+[dev-dependencies]
+criterion = "0.5"
+tempfile = "3.24"
+
+[[bench]]
+name = "append_bench"
+harness = false

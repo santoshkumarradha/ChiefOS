@@ -10,19 +10,17 @@ mod real_model_tests {
         device_key::EphemeralDeviceKey,
         Tier,
     };
-    use std::sync::Arc;
     use std::path::PathBuf;
+    use std::sync::Arc;
 
     fn resolve_model_path() -> Option<PathBuf> {
-        let chief_model_dir = std::env::var("CHIEF_MODEL_DIR")
-            .unwrap_or_else(|_| {
-                let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-                format!("{}/.cache/chief-os/models", home)
-            });
-        
-        let model_path = PathBuf::from(&chief_model_dir)
-            .join("qwen2.5-3b-instruct-q4_k_m.gguf");
-        
+        let chief_model_dir = std::env::var("CHIEF_MODEL_DIR").unwrap_or_else(|_| {
+            let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+            format!("{}/.cache/chief-os/models", home)
+        });
+
+        let model_path = PathBuf::from(&chief_model_dir).join("qwen2.5-3b-instruct-q4_k_m.gguf");
+
         if model_path.exists() {
             Some(model_path)
         } else {
@@ -49,14 +47,25 @@ mod real_model_tests {
             Ok(b) => b,
             Err(e) => {
                 eprintln!("Failed to load model: {}", e);
-                panic!("Model loading failed (expected if model not yet available): {}", e);
+                panic!(
+                    "Model loading failed (expected if model not yet available): {}",
+                    e
+                );
             }
         };
 
         // Check ID
         let id = backend.id();
-        assert!(id.0.contains("local:"), "Expected local: prefix in model ID, got {}", id.0);
-        assert!(id.0.contains("qwen"), "Expected qwen in model ID, got {}", id.0);
+        assert!(
+            id.0.contains("local:"),
+            "Expected local: prefix in model ID, got {}",
+            id.0
+        );
+        assert!(
+            id.0.contains("qwen"),
+            "Expected qwen in model ID, got {}",
+            id.0
+        );
 
         // Simple prompt: "Say hello in five words"
         let prompt_text = "Say hello in five words";
@@ -80,13 +89,26 @@ mod real_model_tests {
         let canonical_output = CanonicalOutput::new(&output);
 
         let att = attestor
-            .attest(id.0.clone(), &prompt, &canonical_output, None, Tier::Generated)
+            .attest(
+                id.0.clone(),
+                &prompt,
+                &canonical_output,
+                None,
+                Tier::Generated,
+            )
             .expect("attestation should succeed");
 
         // Verify attestation properties
-        assert_eq!(att.tier, Tier::Generated, "Tier should be Generated for local inference");
+        assert_eq!(
+            att.tier,
+            Tier::Generated,
+            "Tier should be Generated for local inference"
+        );
         assert_eq!(att.model_id, id.0, "Model ID should match backend ID");
-        assert!(att.provider_attest.is_none(), "Local inference should have no provider attestation");
+        assert!(
+            att.provider_attest.is_none(),
+            "Local inference should have no provider attestation"
+        );
         assert_ne!(att.signature, [0u8; 64], "Signature should be non-zero");
 
         println!("✓ Real model inference successful");

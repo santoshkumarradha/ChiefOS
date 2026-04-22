@@ -9,7 +9,7 @@ pub mod router;
 pub mod verify;
 
 pub use attest::{Attestor, InferenceAttestation, ProviderAttestation};
-pub use backends::{ModelBackend, BackendId};
+pub use backends::{BackendId, ModelBackend};
 pub use device_key::DeviceKey;
 pub use router::InferenceRouter;
 

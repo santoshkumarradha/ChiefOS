@@ -51,7 +51,11 @@ mod serde_arrays {
     {
         let vec = <Vec<u8>>::deserialize(deserializer)?;
         if vec.len() != N {
-            return Err(serde::de::Error::custom(format!("expected {} bytes, got {}", N, vec.len())));
+            return Err(serde::de::Error::custom(format!(
+                "expected {} bytes, got {}",
+                N,
+                vec.len()
+            )));
         }
         let mut arr = [0u8; N];
         arr.copy_from_slice(&vec);
@@ -65,7 +69,11 @@ impl InferenceAttestation {
         hasher.update(self.model_id.as_bytes());
         hasher.update(&self.prompt_hash);
         hasher.update(&self.output_hash);
-        hasher.update(self.timestamp.to_rfc3339_opts(chrono::SecondsFormat::Millis, true).as_bytes());
+        hasher.update(
+            self.timestamp
+                .to_rfc3339_opts(chrono::SecondsFormat::Millis, true)
+                .as_bytes(),
+        );
         hasher.update(&self.device_id);
         if let Some(s) = self.seed {
             hasher.update(&s.to_le_bytes());
@@ -89,7 +97,11 @@ impl InferenceAttestation {
         bytes.extend_from_slice(self.model_id.as_bytes());
         bytes.extend_from_slice(&self.prompt_hash);
         bytes.extend_from_slice(&self.output_hash);
-        bytes.extend_from_slice(self.timestamp.to_rfc3339_opts(chrono::SecondsFormat::Millis, true).as_bytes());
+        bytes.extend_from_slice(
+            self.timestamp
+                .to_rfc3339_opts(chrono::SecondsFormat::Millis, true)
+                .as_bytes(),
+        );
         bytes.extend_from_slice(&self.device_id);
         if let Some(s) = self.seed {
             bytes.extend_from_slice(&s.to_le_bytes());
@@ -163,7 +175,15 @@ mod tests {
         let attestor = Attestor::new(key);
         let prompt = CanonicalPrompt::new("hello", Some(0.7), None, None);
         let output = CanonicalOutput::new("ECHO: hello");
-        let att = attestor.attest("local:llama-stub".to_string(), &prompt, &output, None, Tier::Generated).unwrap();
+        let att = attestor
+            .attest(
+                "local:llama-stub".to_string(),
+                &prompt,
+                &output,
+                None,
+                Tier::Generated,
+            )
+            .unwrap();
         assert_eq!(att.model_id, "local:llama-stub");
         assert_eq!(att.tier, Tier::Generated);
     }

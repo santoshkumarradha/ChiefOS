@@ -16,7 +16,7 @@ impl CloudAnthropicStub {
             provider_attest: None,
         }
     }
-    
+
     pub fn with_provider_tee(mut self, tee_type: impl Into<String>) -> Self {
         self.provider_attest = Some(ProviderAttestation {
             provider: "Anthropic".to_string(),
@@ -25,7 +25,7 @@ impl CloudAnthropicStub {
         });
         self
     }
-    
+
     pub fn provider_attest(&self) -> Option<ProviderAttestation> {
         self.provider_attest.clone()
     }
@@ -36,11 +36,11 @@ impl ModelBackend for CloudAnthropicStub {
     fn id(&self) -> BackendId {
         BackendId(format!("cloud:anthropic-{}", self.model_name))
     }
-    
+
     fn health(&self) -> Result<()> {
         Ok(())
     }
-    
+
     fn capabilities(&self) -> CapabilitySet {
         CapabilitySet {
             max_context: 200000,
@@ -48,9 +48,17 @@ impl ModelBackend for CloudAnthropicStub {
             supports_tools: true,
         }
     }
-    
-    async fn infer(&self, prompt: &str, _temperature: Option<f32>, _top_p: Option<f32>) -> Result<String> {
-        Ok(format!("CLOUD RESPONSE to: {} [{}]", prompt, self.model_name))
+
+    async fn infer(
+        &self,
+        prompt: &str,
+        _temperature: Option<f32>,
+        _top_p: Option<f32>,
+    ) -> Result<String> {
+        Ok(format!(
+            "CLOUD RESPONSE to: {} [{}]",
+            prompt, self.model_name
+        ))
     }
 }
 

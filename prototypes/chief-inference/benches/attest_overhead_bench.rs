@@ -13,7 +13,7 @@ fn benchmark_attestation(c: &mut Criterion) {
         let attestor = Attestor::new(key);
         let prompt = CanonicalPrompt::new("hello world test prompt", Some(0.7), Some(0.9), None);
         let output = CanonicalOutput::new("This is a test output from the model.");
-        
+
         b.iter(|| {
             let _ = attestor.attest(
                 black_box("local:llama-7b".to_string()),

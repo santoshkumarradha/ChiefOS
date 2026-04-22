@@ -1,0 +1,43 @@
+# HN + Substack Briefer Pack Manifest
+
+name = "hn-briefer"
+version = "0.1.0"
+description = "HN + Substack briefer pack — first dogfood consuming @chief-os/sdk public API"
+signature = "ed25519:hn-briefer-sig-stub"
+
+# Grant 1: HN HTTP
+[[grants]]
+kind = "net.http"
+hosts = ["news.ycombinator.com", "hn.algolia.com"]
+methods = ["GET"]
+usage_reason = "Fetch HN top-stories feed and Algolia API"
+
+# Grant 2: Substack HTTP
+[[grants]]
+kind = "net.http"
+hosts = ["*.substack.com"]
+methods = ["GET"]
+usage_reason = "Fetch user subscribed Substack feeds"
+
+# Grant 3: Memory write
+[[grants]]
+kind = "mem.write"
+types = ["thought", "card"]
+usage_reason = "Persist briefed items and daily digest card to Memory Graph"
+
+# Grant 4: Surface pane
+[[grants]]
+kind = "surface.pane"
+surfaces = ["morning-brief"]
+usage_reason = "Render daily HN + Substack card in Brief surface"
+
+# Grant 5: LLM generate
+[[grants]]
+kind = "llm.generate"
+tier_min = "default"
+backends = ["default"]
+budget_usd_per_day = 1
+usage_reason = "Summarize and score stories for relevance filtering"
+
+# Agents provided by this pack
+agents = ["hn-briefer-agent"]

@@ -33,8 +33,7 @@ use axum::{
     extract::State,
     http::{header, StatusCode, Uri},
     response::{IntoResponse, Response},
-    routing::get,
-    Json, Router,
+    Router,
 };
 use chief_core::{
     broker::CapabilityDenied,
@@ -45,7 +44,7 @@ use chief_core::{
 use chief_inference::{InferenceAttestation, Tier as InferenceTier};
 use chrono::Utc;
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::{json, Value};
 use tokio::{signal, sync::Mutex, time::interval};
 use tracing::{error, info, warn};
@@ -407,93 +406,21 @@ async fn issue_briefer_grants(state: &Arc<AppState>) -> Result<()> {
 // ────────────────────────────────────────────────────────────────────────────
 
 fn build_http_router(state: Arc<AppState>, dist_path: PathBuf) -> Router {
-    let legacy = core_router(Arc::clone(&state));
-
-    let v1 = Router::new()
-        .route("/v1/brief", get(v1_brief))
-        .route("/v1/inbox", get(v1_inbox))
-        .route("/v1/status", get(v1_status))
-        .with_state(Arc::clone(&state));
+    // core_router (from crates/chief-core/src/routes/) already includes the
+    // full /v1/* surface (brief, inbox, omnibar, ceremony, trust-ledger,
+    // models) as of PR #59. We just compose static-bundle serving on top.
+    let core = core_router(Arc::clone(&state));
 
     // Static file serving is a plain handler so the demo stays within
-    // workspace deps (axum + tokio::fs). Any path not handled by legacy or
-    // /v1/* falls through to the static tree; a missing file resolves to
+    // workspace deps (axum + tokio::fs). Any path not handled by core
+    // routes falls through to the static tree; a missing file resolves to
     // `index.html` to support single-page-app client-side routing.
     let static_state = Arc::new(StaticCtx { dist: dist_path });
     let static_router = Router::new()
         .fallback(static_file_handler)
         .with_state(static_state);
 
-    legacy.merge(v1).merge(static_router)
-}
-
-async fn v1_brief(State(state): State<Arc<AppState>>) -> Response {
-    // Delegate to the public brief assembler via the legacy /brief path.
-    // Easier than reaching into brief module internals — we just proxy.
-    let brief = chief_core::brief::assemble_brief(&state).await;
-    Json(brief).into_response()
-}
-
-#[derive(Debug, Serialize)]
-struct InboxItem {
-    id: String,
-    source: String,
-    subject: String,
-    snippet: String,
-    created_at: chrono::DateTime<chrono::Utc>,
-    status: &'static str,
-}
-
-#[derive(Debug, Serialize)]
-struct InboxResponse {
-    total: usize,
-    items: Vec<InboxItem>,
-}
-
-async fn v1_inbox(State(state): State<Arc<AppState>>) -> Response {
-    let mut items = Vec::new();
-    {
-        let queue = state.queued_cards.lock().await;
-        for card in queue.iter() {
-            items.push(InboxItem {
-                id: card.id.clone(),
-                source: card.action_type.clone(),
-                subject: card.summary.clone(),
-                snippet: truncate_text(&serde_json::to_string(&card.payload).unwrap_or_default(), 240),
-                created_at: card.created_at,
-                status: "needs_you",
-            });
-        }
-    }
-    {
-        let handled = state.handled_cards.lock().await;
-        for card in handled.iter() {
-            items.push(InboxItem {
-                id: card.id.clone(),
-                source: card.action_type.clone(),
-                subject: card.summary.clone(),
-                snippet: truncate_text(&serde_json::to_string(&card.payload).unwrap_or_default(), 240),
-                created_at: card.created_at,
-                status: "handled",
-            });
-        }
-    }
-    items.sort_by(|a, b| b.created_at.cmp(&a.created_at));
-    let total = items.len();
-    Json(InboxResponse { total, items }).into_response()
-}
-
-async fn v1_status(State(state): State<Arc<AppState>>) -> Response {
-    Json(json!({
-        "uptime_s": state.uptime_secs(),
-        "version": env!("CARGO_PKG_VERSION"),
-        "services": {
-            "memory": "ok",
-            "event_log": "ok",
-            "broker": "ok",
-        }
-    }))
-    .into_response()
+    core.merge(static_router)
 }
 
 #[derive(Clone)]
@@ -694,6 +621,36 @@ async fn run_hn_briefer_tick(state: &Arc<AppState>, http: &Client, or: &OpenRout
         });
         queue.push_back(card);
     }
+    // Also append to the v1 inbox store so /v1/inbox + /v1/brief see it.
+    let top_items_preview = items
+        .iter()
+        .take(3)
+        .map(|it| {
+            let title = it.get("title").and_then(|v| v.as_str()).unwrap_or("(untitled)");
+            let score = it.get("score").and_then(|v| v.as_u64()).unwrap_or(0);
+            format!("• {} (score {})", title, score)
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    state
+        .inbox
+        .append(chief_core::inbox::NewInboxItem {
+            kind: chief_core::inbox::InboxKind::Informational,
+            title: format!("HN top stories — {} scored via OpenRouter", items.len()),
+            snippet: top_items_preview,
+            source_agent: HN_BRIEFER_PRINCIPAL.to_string(),
+            badge: chief_core::inbox::BadgeVariant::Handled,
+            ceremony_id: None,
+        })
+        .await;
+    state
+        .trust_ledger
+        .record("hn-briefer", chief_core::trust_ledger::LedgerDelta::Approval)
+        .await;
+    state
+        .trust_ledger
+        .record("hn-briefer", chief_core::trust_ledger::LedgerDelta::Attestation)
+        .await;
     info!("hn-briefer: queued REAL Card from live HN + OpenRouter output");
 
     // 5. The Ceremony moment — attempt Substack. Broker SHOULD deny.
@@ -719,15 +676,65 @@ async fn run_hn_briefer_tick(state: &Arc<AppState>, http: &Client, or: &OpenRout
             info!(
                 reason = ?denied.reason(),
                 kind = denied.kind(),
-                "hn-briefer: Substack access DENIED — emitting CeremonyPending on the bus"
+                "hn-briefer: Substack access DENIED — opening real Ceremony + Inbox item"
             );
             let _ = state.event_tx.send(BusEvent::CapabilityCheck {
                 principal: HN_BRIEFER_PRINCIPAL.to_string(),
                 op: "net.http astralcodexten.substack.com".to_string(),
                 allowed: false,
             });
-            // Also surface the pending ceremony as a card the UI can click to
-            // approve. This is a REAL artefact — the broker check really denied.
+            state
+                .trust_ledger
+                .record("hn-briefer", chief_core::trust_ledger::LedgerDelta::Denial)
+                .await;
+
+            // Open a real Ceremony in the store. On approve (≥3s hold), the
+            // broker will issue the proposed grant for real.
+            let proposed_grant = Grant::new(vec![CapabilityKind::NetHttp {
+                hosts: vec!["astralcodexten.substack.com".to_string()],
+                methods: vec![HttpMethod::Get],
+                usage_reason: "Expand hn-briefer to fetch Astral Codex Ten RSS for the daily brief".to_string(),
+            }]);
+
+            let ceremony = state
+                .ceremonies
+                .open(chief_core::ceremony::NewCeremony {
+                    title: "Approve *.substack.com for hn-briefer".to_string(),
+                    evidence: chief_core::ceremony::CeremonyEvidence {
+                        summary: "hn-briefer wants to fetch Astral Codex Ten RSS to expand the daily brief beyond HN."
+                            .to_string(),
+                        details: json!({
+                            "principal": HN_BRIEFER_PRINCIPAL,
+                            "requested_op": "net.http GET astralcodexten.substack.com",
+                            "denial_reason": format!("{:?}", denied.reason()),
+                            "denial_kind": denied.kind(),
+                            "current_grant_scope": ["news.ycombinator.com", "hacker-news.firebaseio.com", "hn.algolia.com"],
+                        }),
+                    },
+                    source_agent: HN_BRIEFER_PRINCIPAL.to_string(),
+                    trust_context: 6,
+                    proposed_grant,
+                    target_principal: HN_BRIEFER_PRINCIPAL.to_string(),
+                    rollback_window: chrono::Duration::hours(72),
+                    ceremony_ttl: chrono::Duration::hours(24),
+                })
+                .await;
+
+            // Publish CeremonyPending in the inbox so the UI surfaces it.
+            state
+                .inbox
+                .append(chief_core::inbox::NewInboxItem {
+                    kind: chief_core::inbox::InboxKind::CeremonyPending,
+                    title: "Approve *.substack.com for hn-briefer".to_string(),
+                    snippet: "Pack reached beyond its current grant. Hold to approve — 72h rollback window."
+                        .to_string(),
+                    source_agent: HN_BRIEFER_PRINCIPAL.to_string(),
+                    badge: chief_core::inbox::BadgeVariant::Ceremony,
+                    ceremony_id: Some(ceremony.id.clone()),
+                })
+                .await;
+
+            // Keep the legacy card surface populated for the old /brief route.
             let card = Card {
                 id: state.next_id("card"),
                 intent_id: state.next_id("intent"),
@@ -740,6 +747,7 @@ async fn run_hn_briefer_tick(state: &Arc<AppState>, http: &Client, or: &OpenRout
                     "reason": format!("{:?}", denied.reason()),
                     "denial_kind": denied.kind(),
                     "grant_narrowing_hint": "*.substack.com",
+                    "ceremony_id": ceremony.id,
                 }),
                 mem_uri: state.next_id("mem"),
                 region: 2,

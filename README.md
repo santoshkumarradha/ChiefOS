@@ -1,16 +1,14 @@
-<div align="center">
+<h1 align="center">Chief OS</h1>
 
-# Chief OS
+<p align="center"><em>Agents run the night. You approve the morning.</em></p>
 
-*Agents run the night. You approve the morning.*
+<p align="center">An AI-native operating system. Built on NixOS. Linux kernel inside. Novel userland on top.</p>
 
-An AI-native operating system. Built on NixOS. Linux kernel inside. Novel userland on top.
-
-[![License](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](./LICENSE)
-[![Discussions](https://img.shields.io/badge/discussions-open-brightgreen?style=flat-square)](https://github.com/santoshkumarradha/ChiefOS/discussions)
-[![Status](https://img.shields.io/badge/status-building%20in%20public-orange?style=flat-square)](#status)
-
-</div>
+<p align="center">
+  <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square"></a>
+  <a href="https://github.com/santoshkumarradha/ChiefOS/discussions"><img alt="Discussions" src="https://img.shields.io/badge/discussions-open-brightgreen?style=flat-square"></a>
+  <a href="#status"><img alt="Status" src="https://img.shields.io/badge/status-building%20in%20public-orange?style=flat-square"></a>
+</p>
 
 ---
 
@@ -45,46 +43,45 @@ The closest analogy from the human-app era is **iOS and iPadOS**. Apple made the
 
 ## How it works
 
-You hand off intent at night. *"Ship v3, handle Acme, reply to the Stanford PDF."* Chief resumes overnight. Agents run under typed capability grants. Every LLM call signs an attestation. Every tool invocation goes through a broker that can deny. In the morning you get one page: two things that need you, fourteen that are done, a chain of signatures you can replay.
+Five layers. The novel ones are L2 through L4.
 
-Full architecture: [`docs/10-architecture.md`](./docs/10-architecture.md).
+| Layer | Owned by | What lives here |
+|---|---|---|
+| **L4 Surfaces** | Chief OS | Brief, HAX Inbox, Ceremony, Omnibar, Clipboard Pane. Projections of L2 state over four channels: HTTP, CLI, Unix socket, UI. |
+| **L3 Platform** | Chief OS | `chief-sdk` (Rust + TS, semver-bound), `chief-ui` primitive kit, `chief-oauth` session broker, Capability Packs, Pack Registry. |
+| **L2 Kernel** | Chief OS | Agent Runtime (`ctx.ai()` single-shot / `ctx.harness()` multi-turn), Capability Broker, Signed Event Log, Memory Graph, Model Router, Signed Inference, Kernel Principal. |
+| **L1 OS Primitives** | NixOS, Linux | Namespaces, systemd-nspawn, Wayland, llama.cpp, eBPF LSM. Vendored. We do not patch the kernel. |
+| **L0 Hardware** | Vendor | CPU, TPM or Secure Enclave. The device key is the only ambient authority (see [`CHARTER.md`](./CHARTER.md) Axiom 2). |
 
-## Try it
+A single agent invocation moves through the kernel like this. A pack calls `ctx.ai()` or `ctx.harness()` via the SDK. The Agent Runtime resolves the model route from the user's Controls → Models config, fetches the API key from sealed storage (`chief-oauth`), dispatches the inference call, and produces a per-turn `SignedAttestation` over `blake3(prompt ‖ output ‖ model ‖ tier)`. Every tool call the harness emits is intercepted by the Capability Broker before dispatch: check grant, check scope, return `Ok(_)` or typed `CapabilityDenied`. Approved outcomes append to a Merkle-chained event log; L4 surfaces render that log over HTTP and Unix socket.
 
-```bash
-export OPENROUTER_API_KEY=sk-or-...
-docker run -p 8080:8080 \
-  -e OPENROUTER_API_KEY=$OPENROUTER_API_KEY \
-  -v $(pwd)/chief-state:/var/chief \
-  -v $(pwd)/workspace:/workspace \
-  chief-os-demo:latest
-```
+Channel parity is non-negotiable: if state is visible in the UI, the same state must be readable via CLI and HTTP. This is what makes the OS agent-addressable, not just agent-hosting.
 
-Open `http://localhost:8080`. Within about 30 seconds the Brief shows live HN headlines scored by `openai/gpt-4o-mini`. Seconds later a pack reaches past its grant, the broker denies, and a Ceremony card appears. It arises from real capability enforcement, not a fixture.
-
-Build from source: [`deploy/docker/README.md`](./deploy/docker/README.md).
+Details per layer: [`docs/10-architecture.md`](./docs/10-architecture.md). Runtime spec: [`docs/15-agent-runtime.md`](./docs/15-agent-runtime.md). Security model: [`docs/14-security-model.md`](./docs/14-security-model.md).
 
 ## Design docs
 
 | Doc | What |
 |---|---|
-| [`CHARTER.md`](./CHARTER.md) | 10 axioms, the constitution |
+| [`CHARTER.md`](./CHARTER.md) | Ten axioms, the constitution |
 | [`docs/00-north-star.md`](./docs/00-north-star.md) | Wedge, Person Zero, staged vision |
-| [`docs/10-architecture.md`](./docs/10-architecture.md) | L0 through L4 |
-| [`docs/15-agent-runtime.md`](./docs/15-agent-runtime.md) | `ctx.ai()` and `ctx.harness()` |
+| [`docs/10-architecture.md`](./docs/10-architecture.md) | L0 through L4 in depth |
+| [`docs/15-agent-runtime.md`](./docs/15-agent-runtime.md) | `ctx.ai()` and `ctx.harness()` spec |
 | [`docs/14-security-model.md`](./docs/14-security-model.md) | Capabilities, attestation, enforcement |
-| [`docs/30-surfaces.md`](./docs/30-surfaces.md) | Brief, Inbox, Ceremony, Omnibar, and more |
+| [`docs/30-surfaces.md`](./docs/30-surfaces.md) | Surface catalog |
 | [`adr/`](./adr/) | Architectural decisions |
 
 ## Status
 
 <a id="status"></a>
 
-Work in progress. Building in public. The kernel substrate (L2) is mostly real and tested. The SDK and two sample packs run against live models. Four surfaces are prototyped. Eight are designed but not built. This is not yet a daily driver. Things break. Expect churn.
+Work in progress. Building in public.
+
+L2 kernel services are implemented and tested against live OpenRouter: Agent Runtime, Capability Broker, Memory Graph (sqlite-vec + fastembed-rs), Signed Event Log, Model Router, Signed Inference, Kernel Principal. L3 SDK is at 0.3.1 in Rust and TypeScript parity. Two first-party packs run against live models. L4 has 4 surfaces prototyped in React; 8 surfaces designed but unbuilt. This is not a daily driver. Things break. Expect churn.
 
 ## Discussions
 
-Not taking PRs yet. Very much open for discussion: ideas, critiques, prior art, experiments. Open a thread at [github.com/santoshkumarradha/ChiefOS/discussions](https://github.com/santoshkumarradha/ChiefOS/discussions).
+Not accepting PRs yet. Very much open for discussion: ideas, critiques, prior art, experiments. Open a thread at [github.com/santoshkumarradha/ChiefOS/discussions](https://github.com/santoshkumarradha/ChiefOS/discussions).
 
 ## License
 

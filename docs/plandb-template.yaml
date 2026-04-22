@@ -465,6 +465,8 @@ tasks:
 - ref_id: task-30
   title: 'Agent Runtime Phase 3: chief-core harness runtime + opencode adapter (largest v0 build)'
   description: |-
+    CONSOLIDATED 2026-04-21: t-w6-custom-engine merged into this task. Per ADR-0014, CustomEngine must ship in the same PR as OpencodeEngine so the engine-swap abstraction is proven (parity test: same transcript against both). Deliver BOTH engine impls + the runtime that uses them.
+    ---
     Implement ADR-0013 Phase 3 — the actual agent runtime. Reference: docs/20-agent-runtime.md §Harness runtime.
 
     Deliverables:

@@ -38,7 +38,7 @@ use axum::{
 use chief_core::{
     broker::CapabilityDenied,
     capability::{CapabilityKind, Grant, HttpMethod, PrincipalId, RequestedOp},
-    router as core_router,
+    routes::router_with_dist as core_router_with_dist,
     state::{AppConfig, AppState, BackendKind, BusEvent, Card},
 };
 use chief_inference::{InferenceAttestation, Tier as InferenceTier};
@@ -406,21 +406,11 @@ async fn issue_briefer_grants(state: &Arc<AppState>) -> Result<()> {
 // ────────────────────────────────────────────────────────────────────────────
 
 fn build_http_router(state: Arc<AppState>, dist_path: PathBuf) -> Router {
-    // core_router (from crates/chief-core/src/routes/) already includes the
-    // full /v1/* surface (brief, inbox, omnibar, ceremony, trust-ledger,
-    // models) as of PR #59. We just compose static-bundle serving on top.
-    let core = core_router(Arc::clone(&state));
-
-    // Static file serving is a plain handler so the demo stays within
-    // workspace deps (axum + tokio::fs). Any path not handled by core
-    // routes falls through to the static tree; a missing file resolves to
-    // `index.html` to support single-page-app client-side routing.
-    let static_state = Arc::new(StaticCtx { dist: dist_path });
-    let static_router = Router::new()
-        .fallback(static_file_handler)
-        .with_state(static_state);
-
-    core.merge(static_router)
+    // core_router_with_dist serves the React bundle from the explicit path
+    // we resolved via CHIEF_OS_DIST_PATH. Default router() looks at ./dist
+    // relative to CWD which doesn't match our demo orchestrator launch
+    // location.
+    core_router_with_dist(Arc::clone(&state), Some(dist_path))
 }
 
 #[derive(Clone)]

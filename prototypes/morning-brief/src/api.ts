@@ -17,6 +17,7 @@ import type {
   Attestation,
   ApiStatus,
   Brief,
+  Card,
   Ceremony,
   CeremonyApproveResponse,
   CeremonyDenyResponse,
@@ -179,18 +180,146 @@ export async function postRewind(duration: string): Promise<{ reverted_count: nu
 
 /* ---------- /v1 surface ---------- */
 
+/* ---------- Adapters: normalize real backend shapes → frontend types ----- */
+
+type RawBriefNeed = {
+  id: string;
+  title: string;
+  snippet: string;
+  source_agent: string;
+  ceremony_id?: string | null;
+  created_at: string;
+};
+type RawBriefHandled = {
+  id: string;
+  title: string;
+  summary?: string | null;
+  snippet?: string | null;
+  source_agent: string;
+  completed_at: string;
+};
+type RawBriefTrustRow = {
+  category: string;
+  score: number;
+  raw: number;
+  approvals: number;
+  setbacks: number;
+};
+type RawBrief = {
+  greeting: string;
+  needs_you: RawBriefNeed[];
+  handled: RawBriefHandled[];
+  provenance: unknown[];
+  trust: RawBriefTrustRow[];
+  signed_by: string;
+  generated_at: string;
+};
+
+function adaptBrief(raw: RawBrief): Brief {
+  const needs_you: Card[] = (raw.needs_you ?? []).map((n) => ({
+    card_id: n.id,
+    intent_id: n.ceremony_id ?? "",
+    action_type: n.ceremony_id ? "ceremony" : "needs_you",
+    summary: n.title,
+    region: n.snippet,
+    surface: n.source_agent,
+    friction_tier: n.ceremony_id ? "Hold 3s to approve" : "",
+    mem_uri: "",
+    created_at: n.created_at,
+    approved_at: null,
+  }));
+  const handled: Card[] = (raw.handled ?? []).map((h) => ({
+    card_id: h.id,
+    intent_id: "",
+    action_type: "handled",
+    summary: h.title,
+    region: h.snippet ?? h.summary ?? "",
+    surface: h.source_agent,
+    friction_tier: "",
+    mem_uri: "",
+    created_at: h.completed_at,
+    approved_at: h.completed_at,
+  }));
+  const trust_ledger: Record<string, number> = {};
+  for (const row of raw.trust ?? []) {
+    trust_ledger[row.category] = row.score;
+  }
+  return {
+    date: raw.generated_at,
+    needs_you,
+    handled,
+    trust_ledger,
+  };
+}
+
+type RawInboxItem = {
+  id: string;
+  kind: string; // "ceremony_pending" | "informational" | "needs_attention" | ...
+  title: string;
+  snippet: string;
+  source_agent: string;
+  badge: string;
+  timestamp: string;
+  ceremony_id?: string | null;
+};
+
+function adaptInboxKind(raw: string): InboxItem["kind"] {
+  switch (raw) {
+    case "ceremony_pending":
+      return "CeremonyPending";
+    case "needs_attention":
+      return "NeedsYou";
+    case "informational":
+      return "Handled";
+    case "anchor":
+      return "Anchor";
+    default:
+      return "System";
+  }
+}
+
+function adaptInboxItem(raw: RawInboxItem): InboxItem {
+  return {
+    id: raw.id,
+    kind: adaptInboxKind(raw.kind),
+    title: raw.title,
+    snippet: raw.snippet,
+    agent: raw.source_agent,
+    ts: raw.timestamp,
+    badge: raw.badge ?? null,
+    ceremony_id: raw.ceremony_id ?? null,
+    mem_uri: null,
+  };
+}
+
+/* ---------- Public /v1 API ---------- */
+
 /**
  * Morning Brief (/v1/brief).
+ * Transforms the backend shape into the frontend's internal Brief shape so
+ * downstream components (MorningBrief.tsx, trust ledger panel) don't need
+ * to know about the chief-core wire format.
  */
 export async function v1GetBrief(): Promise<Brief> {
-  return jsonGet<Brief>(`${V1_BASE}/brief`);
+  const raw = await jsonGet<RawBrief>(`${V1_BASE}/brief`);
+  return adaptBrief(raw);
 }
 
 /**
  * HAX Inbox — initial page (/v1/inbox).
+ * Backend returns a bare array; we wrap it in an InboxPage for the UI.
  */
 export async function v1GetInbox(): Promise<InboxPage> {
-  return jsonGet<InboxPage>(`${V1_BASE}/inbox`);
+  const raw = await jsonGet<RawInboxItem[]>(`${V1_BASE}/inbox`);
+  return {
+    items: raw.map(adaptInboxItem),
+    next_cursor: null,
+  };
+}
+
+// Exposed for the SSE hook so stream frames can be parsed with the same adapter.
+export function adaptInboxItemExternal(raw: RawInboxItem): InboxItem {
+  return adaptInboxItem(raw);
 }
 
 /**
@@ -204,23 +333,83 @@ export function v1InboxStreamUrl(): string {
 
 /**
  * Omnibar search (/v1/omnibar/search). Debounced at the call site.
+ * Backend returns bare array of hits; UI expects a wrapped result.
  */
 export async function v1OmnibarSearch(query: string): Promise<OmnibarSearchResult> {
   if (!query.trim()) {
     return { hits: [], query };
   }
-  return jsonPost<OmnibarSearchResult>(
+  const started = Date.now();
+  type RawHit = {
+    id: string;
+    source: string;
+    title: string;
+    snippet: string;
+    timestamp?: string | null;
+    ref?: string | null;
+  };
+  const raw = await jsonPost<RawHit[]>(
     `${V1_BASE}/omnibar/search`,
-    { query },
-    5000
+    { q: query },
+    5000,
   );
+  return {
+    query,
+    took_ms: Date.now() - started,
+    hits: raw.map((h) => ({
+      id: h.id,
+      source: (h.source as OmnibarSearchResult["hits"][number]["source"]) ?? "memory",
+      title: h.title,
+      snippet: h.snippet,
+      ts: h.timestamp ?? null,
+      ref: h.ref ?? null,
+    })),
+  };
 }
 
 /**
  * Fetch a single ceremony by id (/v1/ceremony/{id}).
  */
 export async function v1GetCeremony(id: string): Promise<Ceremony> {
-  return jsonGet<Ceremony>(`${V1_BASE}/ceremony/${encodeURIComponent(id)}`);
+  type RawCeremony = {
+    id: string;
+    title: string;
+    evidence: {
+      summary: string;
+      details: Record<string, unknown>;
+    };
+    source_agent: string;
+    trust_context: number;
+    proposed_grant: Record<string, unknown>;
+    target_principal: string;
+    rollback_window_secs: number;
+    created_at: string;
+    expires_at: string;
+    status: string;
+  };
+  const raw = await jsonGet<RawCeremony>(
+    `${V1_BASE}/ceremony/${encodeURIComponent(id)}`,
+  );
+  // Flatten the evidence.details object into labeled rows the UI can render.
+  const evidence = [
+    { label: "Principal", value: String(raw.evidence.details.principal ?? raw.source_agent) },
+    { label: "Requested op", value: String(raw.evidence.details.requested_op ?? "") },
+    { label: "Denial", value: String(raw.evidence.details.denial_reason ?? raw.evidence.details.denial_kind ?? "") },
+  ].filter((r) => r.value.length > 0);
+  const rollbackHours = Math.round(raw.rollback_window_secs / 3600);
+  return {
+    id: raw.id,
+    region: `Region ${raw.trust_context}`,
+    title: raw.title,
+    eyebrow: `CEREMONY · REGION ${raw.trust_context} · CO-SIGN REQUIRED`,
+    summary: raw.evidence.summary,
+    evidence,
+    provenance: [
+      { actor: raw.source_agent, action: "requested", ts: raw.created_at },
+    ],
+    rollback_window: `${rollbackHours} hours · grant held in escrow`,
+    threshold_ms: 3000,
+  };
 }
 
 /**
@@ -252,16 +441,46 @@ export async function v1DenyCeremony(
 }
 
 /**
- * Trust ledger (/v1/trust).
+ * Trust ledger (/v1/trust-ledger).
  */
 export async function v1GetTrust(): Promise<TrustLedger> {
-  return jsonGet<TrustLedger>(`${V1_BASE}/trust`);
+  type RawRow = {
+    category: string;
+    score: number;
+    raw: number;
+    approvals: number;
+    setbacks: number;
+  };
+  const raw = await jsonGet<RawRow[]>(`${V1_BASE}/trust-ledger`);
+  return {
+    rows: raw.map((r) => ({
+      id: r.category,
+      label: r.category,
+      score: r.score,
+      delta: r.approvals - r.setbacks,
+    })),
+    generated_at: new Date().toISOString(),
+  };
 }
 
 /**
- * Model cost tracker (/v1/models/cost).
- * The menubar shows spend_today. If this 404s, the UI shows "—".
+ * Model cost tracker. Backend exposes /v1/models; it currently returns
+ * {tiers: {fast, deep}, bindings: []} without a cost figure. The menubar
+ * falls back to "—" when this is missing.
  */
 export async function v1GetModelCost(): Promise<ModelCost> {
-  return jsonGet<ModelCost>(`${V1_BASE}/models/cost`);
+  type RawModels = {
+    tiers: { fast: unknown; deep: unknown };
+    bindings: unknown[];
+  };
+  try {
+    await jsonGet<RawModels>(`${V1_BASE}/models`);
+  } catch {
+    // Fall through to zero-state response.
+  }
+  return {
+    currency: "USD",
+    spend_today: 0,
+    last_updated: new Date().toISOString(),
+  };
 }

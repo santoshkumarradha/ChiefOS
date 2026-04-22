@@ -17,7 +17,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { v1GetInbox, v1InboxStreamUrl } from "../api";
+import { adaptInboxItemExternal, v1GetInbox, v1InboxStreamUrl } from "../api";
 import type { InboxItem, InboxStreamEvent } from "../types";
 
 export type InboxStreamStatus = "loading" | "live" | "offline";
@@ -85,8 +85,19 @@ export function useInboxStream(): InboxStream {
       es.onmessage = (msg) => {
         if (!mountedRef.current) return;
         try {
-          const parsed = JSON.parse(msg.data) as InboxStreamEvent;
-          applyEvent(parsed);
+          const parsed = JSON.parse(msg.data);
+          // Backend ships raw InboxItem JSON per frame; the frontend's internal
+          // discriminated InboxStreamEvent is a richer shape we don't yet
+          // receive. Treat every frame as an upsert of the adapted item.
+          if (parsed && typeof parsed === "object" && "kind" in parsed && "source_agent" in parsed) {
+            applyEvent({
+              type: "upsert",
+              item: adaptInboxItemExternal(parsed as Parameters<typeof adaptInboxItemExternal>[0]),
+            });
+          } else {
+            // Tolerate pre-wrapped events too, for future-compat.
+            applyEvent(parsed as InboxStreamEvent);
+          }
         } catch {
           // Ignore malformed frames. Do not fake data.
         }

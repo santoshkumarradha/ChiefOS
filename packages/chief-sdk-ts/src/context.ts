@@ -1,18 +1,59 @@
 /**
  * CapabilityContext — the ONLY object through which a pack touches the kernel.
+ *
+ * Mirrors `crates/chief-sdk/src/context.rs`. Any change to the Rust SDK surface
+ * MUST land in the same PR as a matching change here (version lockstep).
  */
 
 import { AiBuilder, InMemoryAiBackend } from "./ai.js";
-import { HarnessBuilder, InMemoryHarnessBackend, type HarnessToolScope } from "./harness.js";
-import type { Tier } from "./tier.js";
-import type { ToolHandle } from "./tool_handle.js";
+import { InMemoryFsConnector, type FsConnector } from "./fs.js";
+import {
+  HarnessBuilder,
+  InMemoryHarnessBackend,
+  type HarnessToolScope,
+} from "./harness.js";
+import { createToolHandle, type ToolHandle } from "./tool_handle.js";
 import type { CapabilityKind } from "./capability.js";
+import type { Tier } from "./tier.js";
 
 /**
  * The capability context passed to all pack code.
  * This is the gate: every I/O must go through here, and the broker enforces grants.
  */
 export class CapabilityContext {
+  readonly #fs: FsConnector;
+
+  /**
+   * @param overrides Optional connector overrides. Currently only `fs` is
+   *   injectable; the rest are wired by `chief-core` in production and stubbed
+   *   in tests via the `InMemory*Backend` classes the builders pick up by
+   *   default.
+   */
+  constructor(overrides: { readonly fs?: FsConnector } = {}) {
+    // Default fs: empty-allowlist stub — accessor returns it, but every
+    // read/watch/list resolves to a `grant_denied` FsError. This keeps the
+    // zero-arg `new CapabilityContext()` backwards-compatible across 0.3.0 → 0.3.1.
+    this.#fs = overrides.fs ?? new InMemoryFsConnector([]);
+  }
+
+  /**
+   * Access the grant-scoped filesystem connector.
+   *
+   * Every read/watch/list call is checked against the pack's `fs.read` /
+   * `fs.watch` grants by the Capability Broker (or the in-memory allowlist,
+   * under tests).
+   *
+   * @example
+   * ```ts
+   * const handle  = await ctx.fs().watch(["/home/user/notes"]);
+   * const bytes   = await ctx.fs().read("/home/user/notes/today.md");
+   * const entries = await ctx.fs().list("/home/user/notes");
+   * ```
+   */
+  fs(): FsConnector {
+    return this.#fs;
+  }
+
   /**
    * Create a single-shot structured LLM call.
    */
@@ -30,88 +71,40 @@ export class CapabilityContext {
   /**
    * Create a tool handle for network access (scoped to specific hosts).
    */
-  netTool(hosts: string[]): ToolHandle {
-    const capKind: CapabilityKind = {
-      kind: "net.http",
-      hosts,
-      methods: ["GET", "POST"],
-    };
-    return createToolHandle(capKind);
+  netTool(_hosts: readonly string[]): ToolHandle {
+    const kind: CapabilityKind = "net.http";
+    return createToolHandle(kind);
   }
 
   /**
    * Create a tool handle for memory access (scoped to specific types).
    */
-  memoryTool(types: string[]): ToolHandle {
-    const capKind: CapabilityKind = {
-      kind: "mem.read",
-      types,
-      horizon: "7d",
-    };
-    return createToolHandle(capKind);
+  memoryTool(_types: readonly string[]): ToolHandle {
+    const kind: CapabilityKind = "mem.read";
+    return createToolHandle(kind);
   }
 
   /**
    * Create a tool handle for filesystem access (scoped to specific paths).
    */
-  fsTool(paths: string[]): ToolHandle {
-    const capKind: CapabilityKind = {
-      kind: "fs.read",
-      paths,
-    };
-    return createToolHandle(capKind);
+  fsTool(_paths: readonly string[]): ToolHandle {
+    const kind: CapabilityKind = "fs.read";
+    return createToolHandle(kind);
   }
 
   /**
    * Create a tool handle for nested AI calls (e.g., for meta-prompting).
    */
-  aiTool(tier: Tier): ToolHandle {
-    const capKind: CapabilityKind = {
-      kind: "llm.ai",
-      maxTokens: 1024,
-      tier,
-    };
-    return createToolHandle(capKind);
+  aiTool(_tier: Tier): ToolHandle {
+    const kind: CapabilityKind = "llm.ai";
+    return createToolHandle(kind);
   }
 
   /**
    * Create a tool handle for nested harness calls (meta-prompting).
    */
-  harnessTool(scope: HarnessToolScope): ToolHandle {
-    const capKind: CapabilityKind = {
-      kind: "llm.harness",
-      maxTurns: scope.maxTurns,
-      maxCostUsd: 0.5,
-      maxWallSecs: 60,
-      tier: "deep",
-    };
-    return createToolHandle(capKind);
+  harnessTool(_scope: HarnessToolScope): ToolHandle {
+    const kind: CapabilityKind = "llm.harness";
+    return createToolHandle(kind);
   }
-}
-
-/**
- * Internal helper: create a branded ToolHandle (only callable by context methods).
- */
-function createToolHandle(kind: CapabilityKind): ToolHandle {
-  return {
-    id: randomId(),
-    kind,
-  } as ToolHandle;
-}
-
-/**
- * Generate a random opaque ID for a tool handle.
- */
-function randomId(): string {
-  const buf = new Uint8Array(16);
-  if (typeof window !== "undefined" && window.crypto) {
-    window.crypto.getRandomValues(buf);
-  } else {
-    for (let i = 0; i < buf.length; i++) {
-      buf[i] = Math.floor(Math.random() * 256);
-    }
-  }
-  return Array.from(buf)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
 }

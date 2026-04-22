@@ -61,6 +61,7 @@ pub mod capability;
 pub mod connectors;
 pub mod context;
 pub mod error;
+pub mod fs;
 pub mod grant;
 pub mod harness;
 pub mod ingester;
@@ -77,6 +78,7 @@ pub use ai_error::{AiError, HarnessError};
 pub use capability::CapabilityKind;
 pub use context::CapabilityContext;
 pub use error::{Result, SdkError};
+pub use fs::{FsConnector, FsError, InMemoryFsConnector};
 pub use grant::Grant;
 pub use harness::{
     HarnessBackend, HarnessBuilder, HarnessTranscript, Role, SignedAttestation, Turn, TurnContent,

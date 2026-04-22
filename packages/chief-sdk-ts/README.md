@@ -2,6 +2,22 @@
 
 TypeScript bindings for Chief OS pack authors.
 
+## Accessors
+
+| Accessor | Since | Use for |
+| --- | --- | --- |
+| `ctx.ai()` | 0.2 | single-shot structured inference |
+| `ctx.harness()` | 0.2 | multi-turn tool-using agents |
+| `ctx.fs()` | 0.3.1 | grant-scoped filesystem (watch / read / list) |
+
+Example — `ctx.fs()`:
+
+```ts
+const bytes   = await ctx.fs().read("/home/user/notes/today.md");
+const entries = await ctx.fs().list("/home/user/notes");
+const handle  = await ctx.fs().watch(["/home/user/notes"]);
+```
+
 ## Hello Pack
 
 ```ts

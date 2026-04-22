@@ -17,6 +17,7 @@ import type {
   PaneProps,
   RowProps,
   SectionHeaderProps,
+  SelectProps,
   SourceAvatarProps,
   SparklineProps,
   TabBarProps,
@@ -443,4 +444,51 @@ export function Box({ as = "div", grid, flex, children }: BoxProps) {
   }
 
   return h(as, { className: "chief-box", "data-chief": "box", "data-layout": dataLayout, style }, children);
+}
+
+export function Select<T extends string = string>({
+  id,
+  options,
+  selected,
+  onSelect,
+  placeholder = "Select an option",
+  disabled = false,
+}: SelectProps<T>): ReactElement | null {
+  return h(
+    "div",
+    {
+      id,
+      className: "chief-select",
+      "data-chief": "select",
+      "data-disabled": disabled,
+    },
+    h(
+      "select",
+      {
+        value: selected,
+        onChange: (e: unknown) => {
+          const target = e as { target?: { value?: string } };
+          if (target.target?.value) {
+            onSelect(target.target.value as T);
+          }
+        },
+        disabled,
+        style: { width: "100%" },
+      },
+      placeholder && !selected
+        ? h("option", { value: "", disabled: true }, placeholder)
+        : null,
+      ...options.map((opt) =>
+        h(
+          "option",
+          {
+            key: opt.id,
+            value: opt.id,
+            disabled: opt.disabled ?? false,
+          },
+          opt.label,
+        ),
+      ),
+    ),
+  );
 }

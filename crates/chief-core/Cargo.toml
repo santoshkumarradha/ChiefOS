@@ -16,10 +16,20 @@ tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"
 axum.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+serde_yaml.workspace = true
 clap.workspace = true
 chrono.workspace = true
+thiserror.workspace = true
 rusqlite = { version = "0.29", features = ["bundled", "chrono"] }
 uuid = { version = "1.6", features = ["serde", "v4"] }
+
+# Router dependencies
+toml.workspace = true
+num_cpus.workspace = true
+
+# SDK types
+chief-sdk = { path = "../../crates/chief-sdk" }
+chief-oauth = { path = "../../crates/chief-oauth" }
 
 # Internal
 chief-harness-proto       = { path = "../../prototypes/harness" }

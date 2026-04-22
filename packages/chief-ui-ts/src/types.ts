@@ -184,3 +184,18 @@ export interface BoxProps {
   flex?: BoxFlexOptions;
   children?: ReactNode;
 }
+
+export interface SelectOption<T = string> {
+  id: T;
+  label: string;
+  disabled?: boolean;
+}
+
+export interface SelectProps<T = string> {
+  id?: string;
+  options: readonly SelectOption<T>[];
+  selected: T;
+  onSelect: (option: T) => void;
+  placeholder?: string;
+  disabled?: boolean;
+}

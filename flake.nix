@@ -87,6 +87,15 @@
               wayland
               wayland-protocols
               libxkbcommon
+              # Opencode engine runtime (ADR-0014, t-h-opencode-real).
+              # chief-core launches `opencode serve` as a child process and
+              # supervises it under systemd-nspawn. Opencode is a Node.js
+              # application, so nodejs_20 is required. Opencode itself is
+              # not yet packaged upstream in nixpkgs; the v0 install path
+              # is `npm install -g opencode` invoked by the system
+              # activation script. TODO: replace with a nixpkgs derivation
+              # once opencode lands upstream (tracked at ADR-0014 risks).
+              nodejs_20
             ];
             
             # Enable Chief OS compositor (Hyprland)

@@ -1290,6 +1290,14 @@ dependencies:
   kind: blocks
 context:
 - kind: discovery
+  content: Clipboard Pane has no ADR yet despite being flagged substrate-spine in primitive-rethink research; added a note in docs/05-surfaces.md that a follow-up ADR is warranted. Also caught stale FAISS references in docs/03-chief-kernel.md (Memory Graph row, storage-layout tree, open-questions item 2) — all rewritten to sqlite-vec/iroh-blobs per ADR-0008.
+  tags: []
+  task_ref: task-75
+- kind: discovery
+  content: FTS restore verified v2
+  tags: []
+  task_ref: null
+- kind: discovery
   content: ChiefCoreAiBackend's legacy pick() path requires ModelsConfig.providers map populated for Cloud bindings. resolve_cloud_route() bypasses this so ProviderRegistry from Models surface is single source of truth.
   tags: []
   task_ref: null

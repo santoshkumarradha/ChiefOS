@@ -748,6 +748,16 @@ tasks:
   pre_hook: null
   post_hook: null
 - ref_id: task-55
+  title: 'Prototype: Chief FS CAS + FUSE shim (Rust)'
+  description: 'Hypothesis: blake3 CAS store + FUSE shim at /chief/ that presents legacy paths as pinned aliases. Capture daemon on fanotify writes. Files: prototypes/chief-fs/{Cargo.toml,src/main.rs,src/cas.rs,src/fuse_shim.rs,src/capture_daemon.rs,README.md,measurements.md}. Acceptance: ''ls ~/Downloads'' returns aliased CIDs; delete keeps CAS blob; rename updates graph edge not CID; capture daemon p99 < 10ms per write. Worktree: proto/chief-fs. References: adr-0006, docs/research/2026-04-21-agent-native-fs.md. NOT on critical path for v0 — deferred after agent runtime lands.'
+  kind: code
+  priority: 5
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-56
   title: Update docs/INDEX.md with final state
   description: 'After all docs land, update docs/INDEX.md to reflect actual state: statuses, last-updated dates, any renames. Verify all cross-links resolve.'
   kind: code
@@ -757,7 +767,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-56
+- ref_id: task-57
   title: Create docs/directives/ log for user notes and do periodic audit
   description: Create docs/directives/README.md (append-only log of verbal directives from user — time-stamped). Capture each user comment as an entry. Periodically run an 'audit pass' that cross-references existing docs against directives and flags where edits are needed. First audit scheduled after t-idx completes. This is the formal capture channel for the user's ongoing verbal direction.
   kind: generic
@@ -767,7 +777,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-57
+- ref_id: task-58
   title: 'Prototype: HAX Inbox surface (Rust TUI + Wayland overlay)'
   description: 'Hypothesis: single pane listing pending approvals with 4 affordances (approve/deny/delegate/defer). ratatui TUI + Iced/Slint Wayland overlay. Files: prototypes/hax-inbox/{Cargo.toml,src/main.rs,src/tui.rs,src/overlay.rs,README.md}. Acceptance: subscribes to event log (mock), renders queue; keyboard-only parity with mouse/touch. Worktree: proto/hax-inbox. References: adr-0007, docs/05-surfaces.md.'
   kind: code
@@ -777,7 +787,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-58
+- ref_id: task-59
   title: 'Follow-up research: incorporate primitive-rethink findings into docs 02/03/05/08/13'
   description: 'The background agent returned a substrate spine (5 primitives). Most already baked into v0-scope, architecture, and ADRs 0005-0007. Final polish pass: ensure docs/08-memory-substrate.md reflects ADR 0008 pure-OSS stack fully; ensure Clipboard Pane has a dedicated section in docs/05-surfaces.md; cross-link from docs/03-chief-kernel.md to ADR 0005-0008. Worktree: docs/substrate-polish. References: docs/research/2026-04-21-ai-native-primitive-rethinks.md.'
   kind: code
@@ -787,7 +797,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-59
+- ref_id: task-60
   title: Initial commit + track plandb.db
   description: 'git add -A; verify .plandb.db is tracked (explicit negation in .gitignore); initial commit with message ''init: Chief OS — axioms, architecture scaffold, v0 scope, plandb project''. Do NOT push yet — user decides. Record what was committed.'
   kind: shell
@@ -797,7 +807,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-60
+- ref_id: task-61
   title: 'Brand: pick typeface, sound palette, motion spec'
   description: 'Per docs/12-apple-design-principles.md: commissioned typeface vs licensed (Pitch/Söhne/Sentinel) vs open (Inter-adjacent). Sound partner (composer or licensed library). Motion spec grounded in physics (spring systems). Deliverable: brand/typeface.md, brand/sound.md, brand/motion.md + specimen screenshots. Deadline: day 30 per v0 scope. References: docs/12-apple-design-principles.md (guardrail 5,6,8), docs/05-surfaces.md.'
   kind: research
@@ -807,7 +817,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-61
+- ref_id: task-62
   title: 'Legal: draft Terms of Service encoding machine-as-fax posture'
   description: 'Per adr-0004 and docs/15-regulatory-posture.md: ToS must encode (1) every external action is cryptographically signed by user via ceremony, making human the legal actor; (2) ESIGN/UETA/eIDAS compatibility language; (3) GDPR controller/processor clarity (user is controller). External counsel review required before v0 public launch. Files: legal/terms-of-service.md (new dir), legal/privacy-policy.md. Cross-link from docs/15-regulatory-posture.md.'
   kind: generic
@@ -817,7 +827,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-62
+- ref_id: task-63
   title: 'LICENSE: replace placeholder with full AGPL-3.0-or-later text'
   description: 'Current /LICENSE is a placeholder pointing to gnu.org/licenses/agpl-3.0.txt. Replace with the full license text. Keep the prefix note about project copyright + replaced-Apache-from-GH-wizard. Acceptance: file contains verbatim AGPL-3.0-or-later text from gnu.org, plus our project notice at top. Worktree: docs/license-full.'
   kind: generic
@@ -827,7 +837,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-63
+- ref_id: task-64
   title: 'Future: prototype spikes (capability broker, region router, morning brief render, memory graph)'
   description: 'Placeholder for post-scaffold implementation work. Use codex on git worktrees for parallel spikes: (1) capability-broker proof — tiny Rust service with typed cap grants, (2) region-router rule-table — deterministic classifier + tests, (3) morning-brief render — React/Svelte surface over mock data, (4) memory-graph tri-store (SQLite + FAISS + edges). Each spike: own README + CLEANUP date. For agent harness inside these: use opencode (swappable interface).'
   kind: code
@@ -837,12 +847,12 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-64
+- ref_id: task-65
   title: 'Prototype: Capability Broker (Rust)'
   description: 'Hypothesis: build a minimal Capability Broker in Rust that (a) issues typed scoped bearer-style grants, (b) verifies every call via broker.check, (c) emits signed provenance entries to stdout in in-toto v1 format. Files expected: prototypes/capability-broker/{Cargo.toml,src/main.rs,src/grant.rs,src/check.rs,README.md,measurements.md}. Acceptance: 1000 check() ops in <100ms; grant revoke reflected in next check; fuzz at least 10k inputs with no panic. Worktree: branch proto/capability-broker; own plandb agent (PLANDB_AGENT=codex-cap-broker). Parallel-safe: no shared state with other prototype tasks. References: docs/03-chief-kernel.md (service #2), docs/06-security-model.md, adr/0002.'
   kind: generic
   priority: 0
-  parent_ref: task-63
+  parent_ref: task-64
   pre_condition: null
   post_condition: null
   pre_hook: null
@@ -900,7 +910,7 @@ dependencies:
   to_ref: task-25
   kind: feeds_into
 - from_ref: task-7
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-9
   to_ref: task-20
@@ -912,22 +922,22 @@ dependencies:
   to_ref: task-29
   kind: feeds_into
 - from_ref: task-11
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-12
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-22
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-23
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-24
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-25
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-28
   to_ref: task-29
@@ -936,43 +946,43 @@ dependencies:
   to_ref: task-47
   kind: feeds_into
 - from_ref: task-30
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-31
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-32
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-33
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-34
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-38
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-39
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-40
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-41
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-48
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
 - from_ref: task-49
-  to_ref: task-55
+  to_ref: task-56
   kind: feeds_into
-- from_ref: task-55
-  to_ref: task-59
+- from_ref: task-56
+  to_ref: task-60
   kind: feeds_into
-- from_ref: task-59
-  to_ref: task-63
+- from_ref: task-60
+  to_ref: task-64
   kind: blocks
 context:
 - kind: discovery

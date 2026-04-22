@@ -1,0 +1,40 @@
+# File-watcher Briefer Pack Manifest
+
+name = "file-watcher-briefer"
+version = "0.1.0"
+description = "File-watcher briefer pack - second dogfood consuming @chief-os/sdk public API"
+signature = "ed25519:file-watcher-briefer-sig-stub"
+
+# Grant 1: watch Markdown and text notes in Documents
+[[grants]]
+kind = "fs.watch"
+paths = ["~/Documents/**/*.md", "~/Documents/**/*.txt"]
+usage_reason = "Watch user Documents notes for changes that should appear in the Morning Brief"
+
+# Grant 2: read changed files in Documents
+[[grants]]
+kind = "fs.read"
+paths = ["~/Documents/**"]
+usage_reason = "Read recently modified Documents files so the pack can summarize them"
+
+# Grant 3: Memory write
+[[grants]]
+kind = "mem.write"
+types = ["thought", "card"]
+usage_reason = "Persist per-file summaries and the aggregate file watcher card to Memory Graph"
+
+# Grant 4: Surface pane
+[[grants]]
+kind = "surface.pane"
+surfaces = ["morning-brief"]
+usage_reason = "Render the aggregate file watcher card in the Morning Brief surface"
+
+# Grant 5: LLM AI inference
+[[grants]]
+kind = "llm.ai"
+max_tokens = 500
+tier = "fast"
+usage_reason = "Summarize recently modified files with fast-tier AI"
+
+# Agents provided by this pack
+agents = ["file-watcher-agent"]

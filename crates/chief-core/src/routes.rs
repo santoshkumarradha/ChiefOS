@@ -11,6 +11,7 @@ use axum::{
     response::IntoResponse,
     Json, Router,
 };
+use chief_oauth::FlowId;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tracing::info;
@@ -70,8 +71,38 @@ pub struct StatusResponse {
     pub version: String,
 }
 
+// OAuth request/response types
+#[derive(Debug, Serialize, Deserialize)]
+pub struct OAuthStartRequest {
+    pub provider: String,
+    pub scopes: Vec<String>,
+    pub redirect_uri: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct OAuthCompleteRequest {
+    pub flow_id: String,
+    pub code: String,
+    pub state: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct OAuthProxyRequest {
+    pub session_id: String,
+    pub url: String,
+    pub method: String,
+    pub headers: std::collections::HashMap<String, String>,
+    pub body: Option<Vec<u8>>,
+}
+
 pub fn router(state: Arc<AppState>) -> Router {
     Router::new()
+        .route("/oauth/start", axum::routing::post(oauth_start_handler))
+        .route(
+            "/oauth/complete",
+            axum::routing::post(oauth_complete_handler),
+        )
+        .route("/oauth/proxy", axum::routing::post(oauth_proxy_handler))
         .route("/intent", axum::routing::post(intent_handler))
         .route("/brief", axum::routing::get(brief_handler))
         .route("/approve", axum::routing::post(approve_handler))
@@ -255,6 +286,192 @@ pub async fn status_handler(State(state): State<Arc<AppState>>) -> impl IntoResp
         version: env!("CARGO_PKG_VERSION").to_string(),
     })
     .into_response()
+}
+
+// OAuth handlers
+pub async fn oauth_start_handler(
+    headers: HeaderMap,
+    State(state): State<Arc<AppState>>,
+    Json(req): Json<OAuthStartRequest>,
+) -> impl IntoResponse {
+    let principal = principal_for_request(&headers, &state);
+
+    // Check capability if not in dev mode
+    if !state.dev_mode {
+        if let Err(denied) = state
+            .broker
+            .check(
+                &principal,
+                &RequestedOp::net_oauth2(&req.provider, req.scopes.clone()),
+            )
+            .await
+        {
+            return capability_denied_response(denied);
+        }
+    }
+
+    // Parse provider from string
+    let provider = match req.provider.as_str() {
+        "google" => chief_oauth::Provider::Google,
+        "github" => chief_oauth::Provider::Github,
+        _ => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({
+                    "error": "unsupported_provider",
+                    "provider": req.provider
+                })),
+            )
+                .into_response();
+        }
+    };
+
+    match state
+        .oauth_broker
+        .start_flow(provider, &req.scopes, &req.redirect_uri)
+        .await
+    {
+        Ok(challenge) => {
+            let flow_id_str = challenge.flow_id.0.clone();
+            info!(
+                principal = %principal,
+                provider = %req.provider,
+                flow_id = %flow_id_str,
+                scopes_count = req.scopes.len(),
+                "oauth flow started"
+            );
+            Json(challenge).into_response()
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({
+                "error": "flow_error",
+                "details": e.to_string()
+            })),
+        )
+            .into_response(),
+    }
+}
+
+pub async fn oauth_complete_handler(
+    headers: HeaderMap,
+    State(state): State<Arc<AppState>>,
+    Json(req): Json<OAuthCompleteRequest>,
+) -> impl IntoResponse {
+    let principal = principal_for_request(&headers, &state);
+
+    let flow_id = FlowId(req.flow_id.clone());
+    match state
+        .oauth_broker
+        .complete_flow(flow_id, &req.code, &req.state)
+        .await
+    {
+        Ok(session_handle) => {
+            info!(
+                principal = %principal,
+                session_id = %session_handle.id,
+                provider = %session_handle.provider.name(),
+                scopes_count = session_handle.scopes.len(),
+                "oauth flow completed"
+            );
+            Json(session_handle).into_response()
+        }
+        Err(e) => (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({
+                "error": "completion_error",
+                "details": e.to_string()
+            })),
+        )
+            .into_response(),
+    }
+}
+
+pub async fn oauth_proxy_handler(
+    headers: HeaderMap,
+    State(state): State<Arc<AppState>>,
+    Json(req): Json<OAuthProxyRequest>,
+) -> impl IntoResponse {
+    let principal = principal_for_request(&headers, &state);
+
+    // Find session
+    let sessions = match state.oauth_broker.list().await {
+        Ok(sessions) => sessions,
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({
+                    "error": "session_list_error",
+                    "details": e.to_string()
+                })),
+            )
+                .into_response();
+        }
+    };
+
+    let session_meta = match sessions.iter().find(|s| s.handle.id == req.session_id) {
+        Some(sm) => sm,
+        None => {
+            return (
+                StatusCode::NOT_FOUND,
+                Json(serde_json::json!({
+                    "error": "session_not_found",
+                    "session_id": req.session_id
+                })),
+            )
+                .into_response();
+        }
+    };
+
+    // Check capability for the session's provider
+    let provider_key = session_meta.handle.provider.name();
+    if !state.dev_mode {
+        if let Err(denied) = state
+            .broker
+            .check(&principal, &RequestedOp::net_oauth2(&provider_key, vec![]))
+            .await
+        {
+            return capability_denied_response(denied);
+        }
+    }
+
+    // Prepare proxy request
+    let proxy_req = chief_oauth::ProxyRequest {
+        url: req.url.clone(),
+        method: req.method.clone(),
+        headers: req.headers.clone(),
+        body: req.body.clone(),
+    };
+
+    match state
+        .oauth_broker
+        .proxy_request(&session_meta.handle, proxy_req)
+        .await
+    {
+        Ok(resp) => {
+            info!(
+                principal = %principal,
+                session_id = %req.session_id,
+                url_host = %req.url,
+                status = resp.status,
+                "oauth proxy request completed"
+            );
+            Json(serde_json::json!({
+                "status": resp.status,
+                "headers": resp.headers,
+                "body_size": resp.body.len()
+            }))
+            .into_response()
+        }
+        Err(e) => (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({
+                "error": "proxy_error",
+                "details": e.to_string()
+            })),
+        )
+            .into_response(),
+    }
 }
 
 fn principal_for_request(headers: &HeaderMap, state: &AppState) -> PrincipalId {

@@ -1,6 +1,6 @@
 //! SQLite-backed capability broker.
 
-use crate::capability::{Grant, GrantId, PrincipalId, RequestedOp, ScopeDecision};
+use crate::capability::{CapabilityKind, Grant, GrantId, PrincipalId, RequestedOp, ScopeDecision};
 use anyhow::{Context, Result};
 use chief_event_log_proto::schema::Event;
 use chief_event_log_proto::EventLog;
@@ -163,6 +163,49 @@ impl CapabilityBroker {
     }
 }
 
+fn evaluate_capability(capability: &CapabilityKind, op: &RequestedOp) -> ScopeDecision {
+    match (capability, op) {
+        (
+            CapabilityKind::NetOauth2 {
+                providers, scopes, ..
+            },
+            RequestedOp::NetOauth2 {
+                provider,
+                scopes: requested_scopes,
+            },
+        ) => {
+            if oauth_grant_covers(providers, scopes, provider, requested_scopes) {
+                ScopeDecision::Allowed
+            } else {
+                ScopeDecision::ScopeExceeded
+            }
+        }
+        _ => capability.allows(op),
+    }
+}
+
+fn oauth_grant_covers(
+    granted_providers: &[String],
+    granted_scopes: &[String],
+    requested_provider: &str,
+    requested_scopes: &[String],
+) -> bool {
+    let provider_matches = granted_providers
+        .iter()
+        .any(|provider| provider == "*" || provider == requested_provider);
+    if !provider_matches {
+        return false;
+    }
+
+    if granted_scopes.iter().any(|scope| scope == "*") {
+        return true;
+    }
+
+    requested_scopes
+        .iter()
+        .all(|requested| granted_scopes.iter().any(|granted| granted == requested))
+}
+
 fn evaluate_grants(
     principal: &PrincipalId,
     op: &RequestedOp,
@@ -175,7 +218,7 @@ fn evaluate_grants(
 
     for grant in grants {
         for capability in &grant.capabilities {
-            match capability.allows(op) {
+            match evaluate_capability(capability, op) {
                 ScopeDecision::Allowed => {
                     saw_kind = true;
                     if grant.is_expired(now) {

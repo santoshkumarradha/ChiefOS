@@ -310,6 +310,18 @@ impl CapabilityKind {
         }
     }
 
+    pub fn net_oauth2(
+        providers: Vec<Provider>,
+        scopes: Vec<String>,
+        usage_reason: impl Into<String>,
+    ) -> Self {
+        Self::NetOauth2 {
+            providers,
+            scopes,
+            usage_reason: usage_reason.into(),
+        }
+    }
+
     pub fn name(&self) -> &'static str {
         match self {
             Self::MemRead { .. } => "mem.read",
@@ -378,6 +390,21 @@ impl CapabilityKind {
             }
             (Self::NetHttp { hosts, methods, .. }, RequestedOp::NetHttp { host, method }) => {
                 if allows_str(hosts, host) && allows_method(methods, method) {
+                    ScopeDecision::Allowed
+                } else {
+                    ScopeDecision::ScopeExceeded
+                }
+            }
+            (
+                Self::NetOauth2 {
+                    providers, scopes, ..
+                },
+                RequestedOp::NetOauth2 {
+                    provider,
+                    scopes: requested_scopes,
+                },
+            ) => {
+                if allows_oauth2(providers, scopes, provider, requested_scopes) {
                     ScopeDecision::Allowed
                 } else {
                     ScopeDecision::ScopeExceeded
@@ -557,10 +584,24 @@ pub enum ScopeDecision {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case")]
 pub enum RequestedOp {
-    AgentSpawn { pack_id: PackId, depth: u8 },
-    CeremonyRequest { category: CategoryId },
-    LedgerRead { category: CategoryId },
-    NetHttp { host: Hostname, method: HttpMethod },
+    AgentSpawn {
+        pack_id: PackId,
+        depth: u8,
+    },
+    CeremonyRequest {
+        category: CategoryId,
+    },
+    LedgerRead {
+        category: CategoryId,
+    },
+    NetHttp {
+        host: Hostname,
+        method: HttpMethod,
+    },
+    NetOauth2 {
+        provider: Provider,
+        scopes: Vec<String>,
+    },
 }
 
 impl RequestedOp {
@@ -590,12 +631,20 @@ impl RequestedOp {
         }
     }
 
+    pub fn net_oauth2(provider: impl Into<String>, scopes: Vec<String>) -> Self {
+        Self::NetOauth2 {
+            provider: provider.into(),
+            scopes,
+        }
+    }
+
     pub fn kind(&self) -> &'static str {
         match self {
             Self::AgentSpawn { .. } => "agent.spawn",
             Self::CeremonyRequest { .. } => "ceremony.request",
             Self::LedgerRead { .. } => "ledger.read",
             Self::NetHttp { .. } => "net.http",
+            Self::NetOauth2 { .. } => "net.oauth2",
         }
     }
 }
@@ -645,4 +694,26 @@ fn allows_method(allowed: &[HttpMethod], requested: &HttpMethod) -> bool {
     allowed
         .iter()
         .any(|method| matches!(method, HttpMethod::Any) || method == requested)
+}
+
+fn allows_oauth2(
+    allowed_providers: &[String],
+    allowed_scopes: &[String],
+    requested_provider: &str,
+    requested_scopes: &[String],
+) -> bool {
+    let provider_allowed = allowed_providers
+        .iter()
+        .any(|provider| provider == "*" || provider == requested_provider);
+    if !provider_allowed {
+        return false;
+    }
+
+    if allowed_scopes.iter().any(|scope| scope == "*") {
+        return true;
+    }
+
+    requested_scopes
+        .iter()
+        .all(|requested| allowed_scopes.iter().any(|allowed| allowed == requested))
 }

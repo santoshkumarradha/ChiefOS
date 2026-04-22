@@ -9,6 +9,7 @@ use chief_inference::attest::Attestor;
 use chief_inference::backends::{LocalLlamaCppStub, ModelBackend};
 use chief_inference::device_key::{DeviceKey, EphemeralDeviceKey};
 use chief_mem::ChiefMem;
+use chief_oauth::OAuthBroker;
 use chief_region_router_proto::RuleEngine;
 use chrono::{DateTime, Utc};
 use clap::ValueEnum;
@@ -93,6 +94,7 @@ pub struct AppState {
     pub broker: Arc<CapabilityBroker>,
     pub harness: Arc<NullHarness>,
     pub router: Arc<RuleEngine>,
+    pub oauth_broker: Arc<OAuthBroker>,
     pub queued_cards: Arc<Mutex<VecDeque<Card>>>,
     pub handled_cards: Arc<Mutex<Vec<Card>>>,
     pub event_tx: broadcast::Sender<BusEvent>,
@@ -117,6 +119,12 @@ impl AppState {
             CapabilityBroker::new(&state_dir, Arc::clone(&event_log))
                 .await
                 .context("open capability broker")?,
+        );
+
+        let oauth_broker = Arc::new(
+            OAuthBroker::new(&state_dir.join("oauth"))
+                .await
+                .context("open oauth broker")?,
         );
 
         let device_key = Arc::new(EphemeralDeviceKey::new());
@@ -157,6 +165,7 @@ impl AppState {
             broker,
             harness: Arc::new(NullHarness::new()),
             router: Arc::new(RuleEngine::default()),
+            oauth_broker,
             queued_cards: Arc::new(Mutex::new(VecDeque::new())),
             handled_cards: Arc::new(Mutex::new(Vec::new())),
             event_tx,
@@ -218,6 +227,7 @@ async fn create_layout(state_dir: &Path) -> Result<()> {
     for child in [
         "broker",
         "memory/blobs",
+        "oauth",
         "provenance/snapshots",
         "trust",
         "runtime/agents",

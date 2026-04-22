@@ -546,6 +546,39 @@ tasks:
   pre_hook: null
   post_hook: null
 - ref_id: task-38
+  title: 'Phase 1b: chief-sdk-ts 0.2 — TypeScript parity with Rust agent runtime surface'
+  description: |-
+    Phase 1 codex (PR #36) shipped Rust only. This task adds the TypeScript parallel bindings.
+
+    Deliverables:
+    1. packages/chief-sdk-ts/src/tier.ts — Tier literal union 'fast' | 'deep'.
+    2. packages/chief-sdk-ts/src/capability.ts — add 'llm.ai', 'llm.harness' to CapabilityKind literal. Keep 'llm.generate' with JSDoc @deprecated marker.
+    3. packages/chief-sdk-ts/src/ai.ts — AiBuilder class with prompt/input/schema/tier/maxTokens/call/stream.
+    4. packages/chief-sdk-ts/src/harness.ts — HarnessBuilder + HarnessTranscript/Turn/Role types.
+    5. packages/chief-sdk-ts/src/tool_handle.ts — opaque type via unique-symbol brand.
+    6. packages/chief-sdk-ts/src/errors.ts — AiError, HarnessError.
+    7. packages/chief-sdk-ts/tests/ — vitest mirroring Rust test matrix.
+    8. packages/chief-sdk-ts/package.json — bump to 0.2.0.
+    9. README updated.
+
+    Scope: packages/chief-sdk-ts/** only. NEVER touch crates/**, packages/chief-ui-ts/**, prototypes/**, docs/**.
+
+    Acceptance:
+    - npm --prefix packages/chief-sdk-ts run build clean.
+    - npm --prefix packages/chief-sdk-ts test passes.
+    - Types match Rust shape 1:1.
+    - Shadow the Rust deprecation discipline: 'llm.generate' stays as shim.
+    - No internal Radix/Shadcn/Tauri re-exports (not that this pkg has them; just sanity check).
+
+    Not blocking Phase 2/3 (Rust-only concerns). Useful for future TS-based packs.
+  kind: code
+  priority: 7
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-39
   title: Write docs/11-open-source-business.md
   description: 'Licensing tiers: AGPL-3.0 kernel+surfaces; Apache-2.0 first-party packs; author-choice community packs. Monetization: hosted cloud twin, managed pack registry, support contracts. Revenue model: 9/mo entry, 49/mo pro. COGS modeling. Enterprise path (v3+) via managed offering. Not selling the software.'
   kind: code
@@ -555,7 +588,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-39
+- ref_id: task-40
   title: Write docs/12-apple-design-principles.md
   description: '10 Apple-inspired product principles applied to Chief OS: one way to do each thing, hide complexity reveal power, defaults beautiful, rituals not workflows, typography as substance, sound as chrome, continuity, physics over animation, demo as gate, privacy as UX. Each with a Chief-OS-specific guardrail.'
   kind: code
@@ -565,7 +598,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-40
+- ref_id: task-41
   title: Write docs/15-regulatory-posture.md
   description: '''Machine as fax'' legal posture for v0-v1. Every external action requires signed approval token; human is legal actor. E-signature legality (ESIGN/UETA in US, eIDAS in EU). Money rails for v1+ (via licensed partners: Stripe Issuing, Plaid, Modern Treasury). KYC on human, not agent. Glide path to v2 money/legal ceremony. Jurisdictions of concern.'
   kind: code
@@ -575,7 +608,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-41
+- ref_id: task-42
   title: Write requirements/ (4 buckets)
   description: 'docs/requirements/*.md — 4 buckets: functional.md (what Chief OS does, Night Loop contract, Pack interface), non-functional.md (reliability, observability, extensibility), security.md (threat model, cap-based rules, supply chain), performance.md (boot <10s, Morning Brief render <3s, local-model latency targets). Each bucket: append-only table of requirement IDs.'
   kind: code
@@ -585,7 +618,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-42
+- ref_id: task-43
   title: 'Research: agent-native filesystem design'
   description: 'Deep-dive research: when AI is primary user, how should the filesystem be organized? Axes to investigate: (1) content-addressed primary layout (mem://file/<hash>) vs human folders; (2) local embedding model selection — fastembed-rs, ort+onnx, sentence-transformers, bge-m3, nomic-embed — benchmark speed vs quality on Chief-OS-class CPU; (3) at-rest vs indexed vs hot — what tier? (4) what agents see vs what humans see — two views over one substrate; (5) does ~/Downloads/ live as legacy shim or get absorbed? Output: docs/research/NNNN-agent-native-fs.md + proposed edits to docs/08-memory-substrate.md. Compare with how Plan9, Tahoe-LAFS, IPFS, Cassandra did content-naming. Also check prior art: Genode, Morello, Copland-attested FS.'
   kind: research
@@ -595,7 +628,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-43
+- ref_id: task-44
   title: Incorporate OS-primitives research findings on agent return
   description: When the background research agent returns with AI-native primitive rethinks findings, (1) flesh out docs/research/2026-04-21-ai-native-primitive-rethinks.md with full content, (2) propose edits to docs/02-architecture.md for top-5 picks, (3) open ADRs for any that commit us to a technical choice, (4) update docs/14-risks-open-questions.md with new open questions.
   kind: code
@@ -605,7 +638,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-44
+- ref_id: task-45
   title: 'Prototype: chief-mem memory stack (Rust + PyO3)'
   description: |-
     CRITICAL SETUP: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db BEFORE any plandb command. Worktree sits at labs/chief-os-mem, sibling to labs/nix; plandb will walk up wrong without this.
@@ -618,7 +651,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-45
+- ref_id: task-46
   title: 'Prototype: Signed Typed Event Log (Rust)'
   description: |-
     CRITICAL SETUP: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db BEFORE any plandb command. Worktree sits at labs/chief-os-events, sibling to labs/nix; plandb will walk up wrong without this.
@@ -631,7 +664,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-46
+- ref_id: task-47
   title: 'OAuth: wire chief-oauth into chief-core via CapabilityBroker'
   description: |-
     Wire the now-working chief-oauth crate into chief-core so packs can request OAuth grants via the standard CapabilityBroker flow.
@@ -656,7 +689,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-47
+- ref_id: task-48
   title: 'Agent Runtime Phase 4: migrate HN briefer to ctx.ai() + remove v0.1 stub'
   description: |-
     Migrate prototypes/hn-briefer from ctx.llm().generate() to ctx.ai(). Remove deprecation shim from chief-sdk. Bump chief-sdk to 0.3.0.
@@ -677,7 +710,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-48
+- ref_id: task-49
   title: Write ideation + research scaffolding
   description: 'docs/ideation/README.md (how to append ideation entries), docs/ideation/2026-04-21-initial-dump.md (capture brainstorm leftovers: federation ideas, physical puck v3, enterprise trust ledger, voice-first v2, ambient display hw, agent marketplace monetization). docs/research/README.md (how to add competitor analyses, prior art, academic refs).'
   kind: code
@@ -687,7 +720,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-49
+- ref_id: task-50
   title: Write scaffold READMEs (plans, prototypes, brand)
   description: 'plans/README.md (how to write implementation plans from design docs; dated format). prototypes/README.md (scratch spike policy: each prototype gets own README + CLEANUP date). brand/README.md (naming, wordmark, typography, color, voice — todo stubs).'
   kind: code
@@ -697,7 +730,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-50
+- ref_id: task-51
   title: Document polyglot language policy
   description: 'Add section in docs/02-architecture.md + docs/requirements/non-functional.md declaring polyglot code strategy: Rust for kernel, Go for network services, TypeScript for surfaces, Python for agents/ML. No OS-startup optimization required for v0.'
   kind: code
@@ -707,7 +740,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-51
+- ref_id: task-52
   title: 'Prototype: Region Router (Rust)'
   description: 'Hypothesis: deterministic rule-table classifier that maps (action_metadata, trust_ledger_snapshot, horizon) -> (region, surface, friction_tier). Rules are YAML loaded at boot. Files: prototypes/region-router/{Cargo.toml,src/main.rs,src/rules.rs,rules/default.yaml,tests/decision_table_test.rs,README.md}. Acceptance: 100% coverage on decision-table unit tests; p50 classify < 200us; rules changes require ADR (encoded in test). Worktree: proto/region-router. Parallel-safe. References: docs/01-hax-principles.md, docs/03-chief-kernel.md (service #6).'
   kind: code
@@ -717,7 +750,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-52
+- ref_id: task-53
   title: 'Prototype: Chief FS CAS + FUSE shim (Rust)'
   description: 'Hypothesis: blake3 CAS store + FUSE shim at /chief/ that presents legacy paths as pinned aliases. Capture daemon on fanotify writes. Files: prototypes/chief-fs/{Cargo.toml,src/main.rs,src/cas.rs,src/fuse_shim.rs,src/capture_daemon.rs,README.md,measurements.md}. Acceptance: ''ls ~/Downloads'' returns aliased CIDs; delete keeps CAS blob; rename updates graph edge not CID; capture daemon p99 < 10ms per write. Worktree: proto/chief-fs. References: adr-0006, docs/research/2026-04-21-agent-native-fs.md.'
   kind: code
@@ -727,7 +760,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-53
+- ref_id: task-54
   title: 'Prototype: Morning Brief surface (TypeScript)'
   description: 'Hypothesis: render Morning Brief from mock L2 state (static JSON) at 60fps with card animations using physics-based motion. Files: prototypes/morning-brief/{package.json,src/App.tsx,src/MorningBrief.tsx,src/cards/*,mock/brief-state.json,README.md}. Acceptance: render < 3s from cold; cards animate with spring physics; trust ledger bar increments animate; provenance click-through shows a chain. Worktree: proto/morning-brief. References: docs/05-surfaces.md, docs/12-apple-design-principles.md.'
   kind: code
@@ -737,7 +770,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-54
+- ref_id: task-55
   title: 'Prototype: opencode harness wrapper (Rust)'
   description: 'Hypothesis: Rust wrapper implementing Harness trait over opencode CLI; validates swappability by also stubbing a NullHarness that records calls. Files: prototypes/harness/{Cargo.toml,src/trait.rs,src/opencode_impl.rs,src/null_impl.rs,tests/swap_test.rs,README.md}. Acceptance: same tests pass against OpencodeHarness and NullHarness; harness can be swapped at boot via config. Worktree: proto/harness. References: docs/03-chief-kernel.md (service #1 harness interface), directives log.'
   kind: code
@@ -747,7 +780,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-55
+- ref_id: task-56
   title: 'Prototype: Chief FS CAS + FUSE shim (Rust)'
   description: 'Hypothesis: blake3 CAS store + FUSE shim at /chief/ that presents legacy paths as pinned aliases. Capture daemon on fanotify writes. Files: prototypes/chief-fs/{Cargo.toml,src/main.rs,src/cas.rs,src/fuse_shim.rs,src/capture_daemon.rs,README.md,measurements.md}. Acceptance: ''ls ~/Downloads'' returns aliased CIDs; delete keeps CAS blob; rename updates graph edge not CID; capture daemon p99 < 10ms per write. Worktree: proto/chief-fs. References: adr-0006, docs/research/2026-04-21-agent-native-fs.md. NOT on critical path for v0 — deferred after agent runtime lands.'
   kind: code
@@ -757,7 +790,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-56
+- ref_id: task-57
   title: Update docs/INDEX.md with final state
   description: 'After all docs land, update docs/INDEX.md to reflect actual state: statuses, last-updated dates, any renames. Verify all cross-links resolve.'
   kind: code
@@ -767,7 +800,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-57
+- ref_id: task-58
   title: Create docs/directives/ log for user notes and do periodic audit
   description: Create docs/directives/README.md (append-only log of verbal directives from user — time-stamped). Capture each user comment as an entry. Periodically run an 'audit pass' that cross-references existing docs against directives and flags where edits are needed. First audit scheduled after t-idx completes. This is the formal capture channel for the user's ongoing verbal direction.
   kind: generic
@@ -777,7 +810,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-58
+- ref_id: task-59
   title: 'Prototype: HAX Inbox surface (Rust TUI + Wayland overlay)'
   description: 'Hypothesis: single pane listing pending approvals with 4 affordances (approve/deny/delegate/defer). ratatui TUI + Iced/Slint Wayland overlay. Files: prototypes/hax-inbox/{Cargo.toml,src/main.rs,src/tui.rs,src/overlay.rs,README.md}. Acceptance: subscribes to event log (mock), renders queue; keyboard-only parity with mouse/touch. Worktree: proto/hax-inbox. References: adr-0007, docs/05-surfaces.md.'
   kind: code
@@ -787,7 +820,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-59
+- ref_id: task-60
   title: 'Follow-up research: incorporate primitive-rethink findings into docs 02/03/05/08/13'
   description: 'The background agent returned a substrate spine (5 primitives). Most already baked into v0-scope, architecture, and ADRs 0005-0007. Final polish pass: ensure docs/08-memory-substrate.md reflects ADR 0008 pure-OSS stack fully; ensure Clipboard Pane has a dedicated section in docs/05-surfaces.md; cross-link from docs/03-chief-kernel.md to ADR 0005-0008. Worktree: docs/substrate-polish. References: docs/research/2026-04-21-ai-native-primitive-rethinks.md.'
   kind: code
@@ -797,7 +830,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-60
+- ref_id: task-61
   title: Initial commit + track plandb.db
   description: 'git add -A; verify .plandb.db is tracked (explicit negation in .gitignore); initial commit with message ''init: Chief OS — axioms, architecture scaffold, v0 scope, plandb project''. Do NOT push yet — user decides. Record what was committed.'
   kind: shell
@@ -807,7 +840,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-61
+- ref_id: task-62
   title: 'Brand: pick typeface, sound palette, motion spec'
   description: 'Per docs/12-apple-design-principles.md: commissioned typeface vs licensed (Pitch/Söhne/Sentinel) vs open (Inter-adjacent). Sound partner (composer or licensed library). Motion spec grounded in physics (spring systems). Deliverable: brand/typeface.md, brand/sound.md, brand/motion.md + specimen screenshots. Deadline: day 30 per v0 scope. References: docs/12-apple-design-principles.md (guardrail 5,6,8), docs/05-surfaces.md.'
   kind: research
@@ -817,7 +850,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-62
+- ref_id: task-63
   title: 'Legal: draft Terms of Service encoding machine-as-fax posture'
   description: 'Per adr-0004 and docs/15-regulatory-posture.md: ToS must encode (1) every external action is cryptographically signed by user via ceremony, making human the legal actor; (2) ESIGN/UETA/eIDAS compatibility language; (3) GDPR controller/processor clarity (user is controller). External counsel review required before v0 public launch. Files: legal/terms-of-service.md (new dir), legal/privacy-policy.md. Cross-link from docs/15-regulatory-posture.md.'
   kind: generic
@@ -827,7 +860,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-63
+- ref_id: task-64
   title: 'LICENSE: replace placeholder with full AGPL-3.0-or-later text'
   description: 'Current /LICENSE is a placeholder pointing to gnu.org/licenses/agpl-3.0.txt. Replace with the full license text. Keep the prefix note about project copyright + replaced-Apache-from-GH-wizard. Acceptance: file contains verbatim AGPL-3.0-or-later text from gnu.org, plus our project notice at top. Worktree: docs/license-full.'
   kind: generic
@@ -837,7 +870,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-64
+- ref_id: task-65
   title: 'Future: prototype spikes (capability broker, region router, morning brief render, memory graph)'
   description: 'Placeholder for post-scaffold implementation work. Use codex on git worktrees for parallel spikes: (1) capability-broker proof — tiny Rust service with typed cap grants, (2) region-router rule-table — deterministic classifier + tests, (3) morning-brief render — React/Svelte surface over mock data, (4) memory-graph tri-store (SQLite + FAISS + edges). Each spike: own README + CLEANUP date. For agent harness inside these: use opencode (swappable interface).'
   kind: code
@@ -847,12 +880,12 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-65
+- ref_id: task-66
   title: 'Prototype: Capability Broker (Rust)'
   description: 'Hypothesis: build a minimal Capability Broker in Rust that (a) issues typed scoped bearer-style grants, (b) verifies every call via broker.check, (c) emits signed provenance entries to stdout in in-toto v1 format. Files expected: prototypes/capability-broker/{Cargo.toml,src/main.rs,src/grant.rs,src/check.rs,README.md,measurements.md}. Acceptance: 1000 check() ops in <100ms; grant revoke reflected in next check; fuzz at least 10k inputs with no panic. Worktree: branch proto/capability-broker; own plandb agent (PLANDB_AGENT=codex-cap-broker). Parallel-safe: no shared state with other prototype tasks. References: docs/03-chief-kernel.md (service #2), docs/06-security-model.md, adr/0002.'
   kind: generic
   priority: 0
-  parent_ref: task-64
+  parent_ref: task-65
   pre_condition: null
   post_condition: null
   pre_hook: null
@@ -895,7 +928,7 @@ dependencies:
   to_ref: task-34
   kind: feeds_into
 - from_ref: task-6
-  to_ref: task-41
+  to_ref: task-42
   kind: feeds_into
 - from_ref: task-11
   to_ref: task-7
@@ -910,7 +943,7 @@ dependencies:
   to_ref: task-25
   kind: feeds_into
 - from_ref: task-7
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-9
   to_ref: task-20
@@ -922,67 +955,67 @@ dependencies:
   to_ref: task-29
   kind: feeds_into
 - from_ref: task-11
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-12
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-22
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-23
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-24
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-25
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-28
   to_ref: task-29
   kind: feeds_into
 - from_ref: task-29
-  to_ref: task-47
+  to_ref: task-48
   kind: feeds_into
 - from_ref: task-30
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-31
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-32
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-33
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-34
-  to_ref: task-56
-  kind: feeds_into
-- from_ref: task-38
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-39
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-40
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-41
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
-- from_ref: task-48
-  to_ref: task-56
+- from_ref: task-42
+  to_ref: task-57
   kind: feeds_into
 - from_ref: task-49
-  to_ref: task-56
+  to_ref: task-57
   kind: feeds_into
-- from_ref: task-56
-  to_ref: task-60
+- from_ref: task-50
+  to_ref: task-57
   kind: feeds_into
-- from_ref: task-60
-  to_ref: task-64
+- from_ref: task-57
+  to_ref: task-61
+  kind: feeds_into
+- from_ref: task-61
+  to_ref: task-65
   kind: blocks
 context:
 - kind: discovery
@@ -992,11 +1025,11 @@ context:
 - kind: discovery
   content: 'HN Briefer dogfood: SDK surface was complete. No gaps found. Badge enum is properly closed. Grant validation works. InMemoryConnector stubs sufficient for integration testing.'
   tags: []
-  task_ref: task-52
+  task_ref: task-53
 - kind: discovery
   content: 't-mb-live-api complete: Morning Brief now polls chief-core /brief every 3s. Approval flow working (POST /approve) with offline graceful degradation. All 6 API endpoints wrapped with typed fetch + timeouts (5s default, 30s for /intent & /approve). Tests: api.test.ts (6 endpoints + errors) + useBriefState.test.tsx (polling, offline fallback, backoff reset). PR#26.'
   tags: []
-  task_ref: task-52
+  task_ref: task-53
 - kind: discovery
   content: 'Docker validation: 4 bugs found in original Dockerfile/compose: (1) placeholder SHA256 for Qwen model would fail on first build — real sha256 is 626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d (from HF Hub x-linked-etag); (2) Rust 1.82 base image too old — rmp 0.8.15 requires edition2024 (Rust 1.85+) — bumped to rust:1.89-slim-bookworm; (3) chief-core defaults to --bind 127.0.0.1:4711 which isn''t reachable from host port-mapping — wrap in entrypoint.sh that execs with --bind 0.0.0.0:4711; (4) no static-file server for Morning Brief on port 5173 — Dockerfile copied dist to /app/morning-brief but nothing served it — added busybox-static and run busybox httpd on :5173 from entrypoint. Also: Docker Desktop''s default IPv6 port mapping ''::]:5173->5173'' hijacks localhost-over-v6 since busybox httpd is IPv4-only; pin host side to ''0.0.0.0:PORT:PORT'' in compose to force IPv4-only host mapping. Fixed demo-docker.sh payload key (prompt -> text) to match routes.rs. Validation results: build ~200s cold, image 4.35GB, boot-to-healthy ~7s, memory 3MB (stub backend), all 4 endpoints pass.'
   tags: []

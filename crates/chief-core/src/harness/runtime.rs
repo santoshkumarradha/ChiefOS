@@ -1,5 +1,8 @@
 //! HarnessRuntime supervisor and chief-core session lifecycle.
 
+#[path = "dispatcher/mod.rs"]
+pub mod dispatcher;
+
 use super::attestation::{hash_json, AttestationChain, AttestationVerifier, KernelSigner};
 use super::budgets::{BudgetLimits, BudgetState};
 use super::ceremony_gate::{is_external_action, CeremonyOutcome, CeremonySurface, DraftedAction};
@@ -8,7 +11,7 @@ use super::engines::{
 };
 use super::meta_prompt::{child_result_json, evaluate_meta_prompt, MetaPromptDecision};
 use crate::broker::CapabilityBroker;
-use crate::capability::{PrincipalId, RequestedOp};
+use crate::capability::{CapabilityKind, PrincipalId, RequestedOp};
 use async_trait::async_trait;
 use chief_event_log_proto::schema::Event;
 use chief_event_log_proto::EventLog;
@@ -39,6 +42,8 @@ pub enum HarnessError {
     Engine(String),
     #[error("tool error: {0}")]
     Tool(String),
+    #[error("capability denied: {0}")]
+    CapabilityDenied(String),
 }
 
 #[derive(Debug, Clone)]
@@ -47,6 +52,7 @@ pub struct HarnessTool {
     pub description: String,
     pub schema: Value,
     pub requested_op: Option<RequestedOp>,
+    pub capability: Option<CapabilityKind>,
 }
 
 impl HarnessTool {
@@ -56,11 +62,17 @@ impl HarnessTool {
             description: String::new(),
             schema: json!({"type": "object"}),
             requested_op: None,
+            capability: None,
         }
     }
 
     pub fn with_op(mut self, requested_op: RequestedOp) -> Self {
         self.requested_op = Some(requested_op);
+        self
+    }
+
+    pub fn with_capability(mut self, capability: CapabilityKind) -> Self {
+        self.capability = Some(capability);
         self
     }
 }
@@ -381,12 +393,36 @@ impl HarnessRuntime {
                             call_id: call_id.clone(),
                             tool_name: tool_name.clone(),
                             arguments: arguments.clone(),
+                            principal: req.principal.clone(),
+                            requested_op: tool.requested_op.clone(),
+                            handle_scope: tool.capability.clone(),
                         };
-                        self.dispatcher
-                            .invoke(invocation)
-                            .await
-                            .map_err(|err| HarnessError::Tool(err.to_string()))?
-                            .value
+                        match self.dispatcher.invoke(invocation).await {
+                            Ok(output) => output.value,
+                            Err(HarnessError::CapabilityDenied(reason)) => {
+                                let result = ToolResult {
+                                    call_id: call_id.clone(),
+                                    tool_name: tool_name.clone(),
+                                    result: json!({
+                                        "error": "CapabilityDenied",
+                                        "reason": reason
+                                    }),
+                                };
+                                let _ = engine.submit_tool_result(&handle, result.clone()).await;
+                                push_tool_result_turn(
+                                    &mut turns,
+                                    &mut chain,
+                                    &self.signer,
+                                    session_id,
+                                    &result,
+                                    self.config.cost_per_turn_usd,
+                                );
+                                termination = TerminationReason::CapabilityDenied;
+                                final_output = result.result;
+                                break;
+                            }
+                            Err(err) => return Err(HarnessError::Tool(err.to_string())),
+                        }
                     };
 
                     let result = ToolResult {
@@ -459,6 +495,9 @@ pub struct ToolInvocation {
     pub call_id: String,
     pub tool_name: String,
     pub arguments: Value,
+    pub principal: PrincipalId,
+    pub requested_op: Option<RequestedOp>,
+    pub handle_scope: Option<CapabilityKind>,
 }
 
 #[derive(Debug, Clone)]
@@ -471,6 +510,13 @@ pub trait ToolDispatcher: Send + Sync {
     async fn invoke(&self, invocation: ToolInvocation) -> Result<ToolOutput, HarnessError>;
 }
 
+pub use dispatcher::HostToolDispatcher;
+
+/// Compatibility dispatcher for existing engine and budget tests.
+///
+/// Production callers should use [`HostToolDispatcher`]. This no-side-effect
+/// implementation keeps scripted harness tests focused on loop behavior while
+/// `tests/tool_dispatcher.rs` covers real host dispatch.
 #[derive(Default)]
 pub struct EchoToolDispatcher;
 

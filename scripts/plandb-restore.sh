@@ -54,4 +54,27 @@ fi
 rm -f "$DB"
 sqlite3 "$DB" < "$SRC"
 
+# FTS5 virtual tables survive .dump as regular table declarations + orphaned
+# shadow tables (_data/_idx/_docsize/_config). The restore leaves the vtable
+# entry in sqlite_master pointing at shadow tables that never match the
+# fts5 file format, so every subsequent query against learnings_fts or
+# tasks_fts errors with "vtable constructor failed". Fix: drop the stale
+# declarations via writable_schema, VACUUM to clean orphans, recreate the
+# vtables cleanly, then rebuild from content. This runs every restore so
+# the db is immediately usable for `plandb context`, `plandb search`, etc.
+sqlite3 "$DB" <<'SQL'
+PRAGMA writable_schema=ON;
+DELETE FROM sqlite_master WHERE name IN (
+  'learnings_fts','tasks_fts',
+  'learnings_fts_data','learnings_fts_idx','learnings_fts_docsize','learnings_fts_config',
+  'tasks_fts_data','tasks_fts_idx','tasks_fts_docsize','tasks_fts_config'
+);
+PRAGMA writable_schema=OFF;
+VACUUM;
+CREATE VIRTUAL TABLE learnings_fts USING fts5(content, kind, content='learnings', content_rowid='rowid');
+CREATE VIRTUAL TABLE tasks_fts     USING fts5(title, description, content='tasks', content_rowid='rowid');
+INSERT INTO learnings_fts(learnings_fts) VALUES('rebuild');
+INSERT INTO tasks_fts(tasks_fts)         VALUES('rebuild');
+SQL
+
 echo "plandb-restore: rebuilt $DB from $SRC"

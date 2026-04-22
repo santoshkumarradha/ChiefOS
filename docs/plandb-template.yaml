@@ -986,6 +986,10 @@ dependencies:
   kind: blocks
 context:
 - kind: discovery
+  content: 'ADR-0013 Phase 1 work started: implementing agent runtime SDK surface. Codex delegation attempted but implementing directly with manual precision. Scope: add Tier enum, CapabilityKind extensions (LlmAi, LlmHarness), ToolHandle, AiBuilder, HarnessBuilder types + traits + stubs + tests. HN briefer deprecation shim critical.'
+  tags: []
+  task_ref: null
+- kind: discovery
   content: 'HN Briefer dogfood: SDK surface was complete. No gaps found. Badge enum is properly closed. Grant validation works. InMemoryConnector stubs sufficient for integration testing.'
   tags: []
   task_ref: task-52

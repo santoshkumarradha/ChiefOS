@@ -14,6 +14,14 @@
 //! - [`Agent`] — autonomous pack code that acts on a schedule.
 //! - [`Pane`](pane::PaneDescriptor) — declarative UI surface.
 //!
+//! ## v0.2 — Agent runtime (ADR-0013)
+//!
+//! - [`AiBuilder`] — single-shot structured LLM inference (`ctx.ai()`).
+//! - [`HarnessBuilder`] — multi-turn tool-using LLM sessions (`ctx.harness()`).
+//! - [`Tier`] — closed enum: Fast, Deep.
+//! - [`ToolHandle`] — opaque capability handles for harness tools.
+//! - [`HarnessTranscript`] — complete record of a harness session.
+//!
 //! ## Quick start
 //!
 //! ```ignore
@@ -22,11 +30,19 @@
 //! #[async_trait::async_trait]
 //! impl Agent for MyAgent {
 //!     async fn on_tick(&self, ctx: CapabilityContext) -> Result<()> {
-//!         // Fetch via broker-enforced HTTP
-//!         let data = ctx.net().http_get("https://example.com").await?;
+//!         // Single-shot classification
+//!         let result = ctx.ai()
+//!             .prompt("Classify this")
+//!             .tier(Tier::Fast)
+//!             .call::<String>()
+//!             .await?;
 //!
-//!         // Write via broker-enforced Memory Graph
-//!         ctx.memory().put_node(data).await?;
+//!         // Multi-turn reasoning with tools
+//!         let transcript = ctx.harness()
+//!             .goal("Analyze the data")
+//!             .tools(&[ctx.memory_tool(&["thought"])])
+//!             .run()
+//!             .await?;
 //!
 //!         Ok(())
 //!     }
@@ -39,18 +55,32 @@
 //! See [`adr/0010-sdk-public-api-stability.md`](../../adr/0010-sdk-public-api-stability.md).
 
 pub mod agent;
+pub mod ai;
+pub mod ai_error;
 pub mod capability;
 pub mod connectors;
 pub mod context;
 pub mod error;
 pub mod grant;
+pub mod harness;
 pub mod ingester;
 pub mod manifest;
 pub mod pack;
 pub mod pane;
 pub mod prelude;
+pub mod tier;
 pub mod tool;
+pub mod tool_handle;
 
+pub use ai::{AiBackend, AiBuilder};
+pub use ai_error::{AiError, HarnessError};
+pub use capability::CapabilityKind;
+pub use context::CapabilityContext;
 pub use error::{Result, SdkError};
 pub use grant::Grant;
+pub use harness::{
+    HarnessBackend, HarnessBuilder, HarnessTranscript, Role, SignedAttestation, Turn, TurnContent,
+};
 pub use manifest::PackManifest;
+pub use tier::Tier;
+pub use tool_handle::ToolHandle;

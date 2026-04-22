@@ -21,11 +21,11 @@ impl ModelBackend for LocalLlamaCppStub {
     fn id(&self) -> BackendId {
         BackendId(format!("local:llama-cpp-{}", self.model_name))
     }
-    
+
     fn health(&self) -> Result<()> {
         Ok(())
     }
-    
+
     fn capabilities(&self) -> CapabilitySet {
         CapabilitySet {
             max_context: 4096,
@@ -33,8 +33,13 @@ impl ModelBackend for LocalLlamaCppStub {
             supports_tools: false,
         }
     }
-    
-    async fn infer(&self, prompt: &str, _temperature: Option<f32>, _top_p: Option<f32>) -> Result<String> {
+
+    async fn infer(
+        &self,
+        prompt: &str,
+        _temperature: Option<f32>,
+        _top_p: Option<f32>,
+    ) -> Result<String> {
         Ok(format!("ECHO: {}", prompt))
     }
 }

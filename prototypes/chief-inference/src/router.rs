@@ -23,12 +23,12 @@ impl InferenceRouter {
             system_default,
         }
     }
-    
+
     pub fn register_backend(&mut self, backend: Arc<dyn ModelBackend>) {
         let id = backend.id().0.clone();
         self.backends.insert(id, backend);
     }
-    
+
     pub fn resolve(
         &self,
         call_override: Option<&BackendId>,
@@ -41,10 +41,10 @@ impl InferenceRouter {
             .or(pack_policy)
             .or(category_policy)
             .unwrap_or(&self.system_default);
-        
+
         self.get_backend(selected_id)
     }
-    
+
     pub fn get_backend(&self, id: &BackendId) -> Result<Arc<dyn ModelBackend>> {
         self.backends
             .get(&id.0)

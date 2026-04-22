@@ -1,7 +1,7 @@
 //! Device key management — in-memory Ed25519 for prototype, TPM/SE sealed in production.
 
 use anyhow::Result;
-use ed25519_dalek::{SigningKey, VerifyingKey, Signer};
+use ed25519_dalek::{Signer, SigningKey, VerifyingKey};
 use rand::Rng;
 
 /// Device key interface.
@@ -26,7 +26,7 @@ impl EphemeralDeviceKey {
         let signing_key = SigningKey::from_bytes(&bytes);
         Self { signing_key }
     }
-    
+
     pub fn from_bytes(seed: &[u8; 32]) -> Self {
         let signing_key = SigningKey::from_bytes(seed);
         Self { signing_key }
@@ -44,7 +44,7 @@ impl DeviceKey for EphemeralDeviceKey {
         let signature = self.signing_key.sign(msg);
         Ok(signature.to_bytes())
     }
-    
+
     fn public_key(&self) -> [u8; 32] {
         let verifying_key: VerifyingKey = (&self.signing_key).into();
         verifying_key.to_bytes()

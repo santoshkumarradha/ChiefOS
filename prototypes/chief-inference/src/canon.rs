@@ -12,7 +12,12 @@ pub struct CanonicalPrompt {
 }
 
 impl CanonicalPrompt {
-    pub fn new(text: impl Into<String>, temperature: Option<f32>, top_p: Option<f32>, seed: Option<u64>) -> Self {
+    pub fn new(
+        text: impl Into<String>,
+        temperature: Option<f32>,
+        top_p: Option<f32>,
+        seed: Option<u64>,
+    ) -> Self {
         let text = text.into();
         let normalized = text.nfc().collect::<String>();
         Self {
@@ -37,9 +42,7 @@ impl CanonicalOutput {
     pub fn new(text: impl Into<String>) -> Self {
         let text = text.into();
         let normalized = text.nfc().collect::<String>();
-        Self {
-            text: normalized,
-        }
+        Self { text: normalized }
     }
 
     pub fn to_canonical_bytes(&self) -> Vec<u8> {

@@ -53,6 +53,19 @@ if [ ! -f "$DB" ]; then
   exit 1
 fi
 
+# Safety: the authoritative db MUST contain the chief-os project (p-gtte).
+# Sub-agents occasionally ran `plandb init` in their worktrees, creating a
+# fresh local .plandb.db with only their sub-project — their pre-commit
+# hook would then clobber docs/plandb-state.sql with a 200-line dump,
+# wiping all of chief-os state. Refuse to export if p-gtte is missing.
+if ! sqlite3 "$DB" "SELECT 1 FROM projects WHERE id='p-gtte' LIMIT 1;" 2>/dev/null | grep -q 1; then
+  echo "plandb-export: refusing to export — db at $DB does not contain project p-gtte (chief-os)." >&2
+  echo "plandb-export: if you see this in a worktree, your PLANDB_DB is pointing at a stray local db." >&2
+  echo "plandb-export: fix: export PLANDB_DB=\$(git rev-parse --show-toplevel)/.plandb.db (from main clone)" >&2
+  echo "plandb-export: or skip via: SKIP_PLANDB_HOOK=1 git commit ..." >&2
+  exit 3
+fi
+
 if [ "$WRITE_SQL" -eq 1 ]; then
   {
     echo "-- Chief OS PlanDB state snapshot — AUTHORITATIVE"

@@ -11,6 +11,8 @@ tags: [memory, graph, storage, retrieval]
 
 # Memory Substrate
 
+> **Canonical stack decision:** [ADR-0008](../adr/0008-pure-oss-memory-substrate.md) — pure-OSS composition at the kernel layer (SQLite + sqlite-vec + fastembed-rs + iroh-blobs). Blob CAS alignment: [ADR-0006](../adr/0006-cas-filesystem.md).
+
 ## TL;DR
 
 - Memory Graph is a **kernel service**, not a library. One substrate for every pack, every agent, every surface.
@@ -18,6 +20,7 @@ tags: [memory, graph, storage, retrieval]
 - Typed edges (derived-from, replied-to, depends-on, refers-to, authored-by, cites).
 - Stable URIs `mem://<type>/<content-hash>` — addressable forever, cite-able by agents.
 - Horizon tags drive retrieval: short (today/week), medium (project), long (multi-month), open (identity-level).
+- Backend is **pure-OSS by policy**: SQLite + sqlite-vec for nodes+edges+vectors, fastembed-rs for embeddings, iroh-blobs for content-addressed blobs. No startup-led OSS at this layer.
 
 ## Why a kernel service
 
@@ -42,7 +45,7 @@ node:
   confidence: 0.0–1.0        # agent self-reported; 1.0 for ground truth
   source: <ingester-id> | <agent-id> | <human>
   blob_ref: <optional>       # for large content
-  embedding_ref: <optional>  # vector id in FAISS
+  embedding_ref: <optional>  # vector id in sqlite-vec (ADR-0008)
   provenance_ref: <prov-entry-id>
   tombstoned: false          # soft delete for rollback
   body: <typed payload>
@@ -127,6 +130,12 @@ mem.search(
 - Caps are mandatory: if the caller lacks read scope for a node type, it is silently filtered out of results (not errored, to avoid oracle-style leaks).
 - Rerank: optional LLM rerank for top-K candidates; configurable per surface.
 
+## Why pure-OSS?
+
+At the kernel layer we refuse single-startup-led OSS. A startup-governed dependency is a one-company failure mode: license relicensing, dual-licensing pivots, abandonment, or acquisition all propagate directly into the substrate every agent depends on. Community- or consortium-governed libraries (SQLite, SQLite extensions, ONNX Runtime, Protocol Labs alumni projects) let us customize at OS level without vendor capture. Full rationale + rejected alternatives in [ADR-0008](../adr/0008-pure-oss-memory-substrate.md) and [`research/2026-04-21-pure-oss-memory-substrate.md`](./research/2026-04-21-pure-oss-memory-substrate.md).
+
+Blob-level content addressing aligns with the OS-wide CAS primitive — see [ADR-0006](../adr/0006-cas-filesystem.md) for the filesystem side of the same hash.
+
 ## Storage backends
 
 **Principle (directive 2026-04-21, codified in [ADR-0008](../adr/0008-pure-oss-memory-substrate.md)):** at the kernel layer, no single-startup-led OSS. Compose from community- or consortium-governed libraries so we can customize at OS level without vendor capture. Full rationale + rejected alternatives in [`research/2026-04-21-pure-oss-memory-substrate.md`](./research/2026-04-21-pure-oss-memory-substrate.md).
@@ -136,7 +145,7 @@ mem.search(
 | Nodes + edges | **SQLite** (hand-rolled typed-edge schema) | SQLite Consortium | Public domain |
 | Vectors | **sqlite-vec** | Alex Garcia + contributors, no parent co. | Apache-2.0 / MIT |
 | Embeddings inference | **fastembed-rs + ort (ONNX Runtime)** | fastembed community; ort via Microsoft ONNX upstream | Apache-2.0 |
-| Blobs | **iroh-blobs crate** (not the daemon) | Number 0 + Protocol Labs alumni | Apache-2.0 / MIT |
+| Blobs | **iroh-blobs crate** (not the daemon) — same content-hash plane as [ADR-0006](../adr/0006-cas-filesystem.md) CAS FS | Number 0 + Protocol Labs alumni | Apache-2.0 / MIT |
 | Full-text | **SQLite FTS5** | SQLite Consortium | Public domain |
 | Python binding | **PyO3** | Community | Apache-2.0 / MIT |
 | Startup-led libs at kernel | **Rejected.** (Letta, Mem0, Zep, Chroma-client, SurrealDB, Memgraph, Weaviate, Milvus, Vespa, Meilisearch, Typesense.) Acceptable only as optional pack-level backends. | — | — |

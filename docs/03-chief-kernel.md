@@ -17,7 +17,9 @@ tags: [kernel, services, api]
 - Agent Runtime hosts harnesses. **Harness interface is swappable** (opencode v0, AgentField / Claude Agent SDK / custom later).
 - Capability Broker is the single enforcement point for Axiom 2.
 - Region Router is deterministic rule-table code; no LLM in the hot path.
-- Provenance Log is append-only, Merkle-tree'd, signed.
+- Provenance Log is append-only, Merkle-tree'd, signed — the substrate event log ([ADR-0005](../adr/0005-signed-typed-event-log.md)).
+- Memory Graph composes the pure-OSS kernel stack ([ADR-0008](../adr/0008-pure-oss-memory-substrate.md)) over the CAS plane ([ADR-0006](../adr/0006-cas-filesystem.md)).
+- HAX Inbox ([ADR-0007](../adr/0007-hax-inbox-notifications.md)) is the single notification primitive — a view over Provenance Log entries of type `RequestCapability` / `RequestDecision`.
 - **`chief-inference` mediates every model call and emits a Signed Inference attestation** per call (ADR-0009).
 
 ## Services overview
@@ -106,17 +108,19 @@ grant:
 
 ### 3. Memory Graph (`chief-memory`)
 
-See [`memory-substrate`](./08-memory-substrate.md) for schema and URI design.
+See [`memory-substrate`](./08-memory-substrate.md) for schema and URI design. Pure-OSS stack per [ADR-0008](../adr/0008-pure-oss-memory-substrate.md); content-addressed blobs share the CAS plane defined in [ADR-0006](../adr/0006-cas-filesystem.md).
 
 | Aspect | Value |
 |---|---|
 | Purpose | Unified, typed, content-addressed graph of everything Chief knows |
 | Key ops | `mem.put(node)` · `mem.get(uri)` · `mem.link(from, kind, to)` · `mem.search(query, horizon)` |
-| Storage | SQLite (nodes + edges) + FAISS index (embeddings) + blob store (large files) |
+| Storage | SQLite (nodes + edges) + sqlite-vec (embeddings) + iroh-blobs (large files) — see [ADR-0008](../adr/0008-pure-oss-memory-substrate.md) |
 | Dependencies | Provenance Log (every write gets a receipt ref) |
 | Invariants | URIs are stable forever; nodes are append-only; edges deleteable only via rollback |
 
 ### 4. Provenance Log (`chief-provenance`)
+
+Canonical decision: [ADR-0005 — Signed Typed Event Log as the substrate](../adr/0005-signed-typed-event-log.md). Every other kernel service (Memory Graph, HAX Inbox, Trust Ledger, chief-inference) is a view or producer over this log.
 
 | Aspect | Value |
 |---|---|
@@ -166,6 +170,8 @@ See [`hax-principles`](./01-hax-principles.md) for semantics.
 Rules table lives at `chief-router/rules/*.yaml`; shipped packs can declare additional rules that scope only to their own categories.
 
 ### 7. Event Bus (`chief-bus`)
+
+Live fan-out layer on top of the substrate event log ([ADR-0005](../adr/0005-signed-typed-event-log.md)). The Provenance Log is the durable ledger; the Event Bus is the real-time subscription channel over it.
 
 | Aspect | Value |
 |---|---|
@@ -218,8 +224,8 @@ Canonical decision in [ADR-0009](../adr/0009-signed-inference.md). This service 
 ├── memory/
 │   ├── nodes.db      (SQLite: typed nodes)
 │   ├── edges.db      (SQLite: typed edges)
-│   ├── embed.faiss   (vector index)
-│   └── blobs/        (content-addressed)
+│   ├── vec.db        (sqlite-vec: embeddings — ADR-0008)
+│   └── blobs/        (iroh-blobs CAS — ADR-0006/0008)
 ├── provenance/
 │   ├── log.db        (append-only)
 │   └── snapshots/    (signed Merkle roots)
@@ -246,7 +252,7 @@ All under the user's encrypted volume (LUKS v0; Apple-style-per-file v1).
 ## Open questions
 
 1. Should the Event Bus be a real message broker (NATS) or in-proc pub/sub for v0? Bias: in-proc.
-2. Is FAISS the right vector index for a single-user device? Alternatives: sqlite-vss, LanceDB.
+2. Vector-index choice is **resolved**: sqlite-vec per [ADR-0008](../adr/0008-pure-oss-memory-substrate.md). Swap paths preserved via `VectorIndex` trait.
 3. Do we ship a privileged "kernel daemon" or run each service as its own systemd user unit?
 4. How does the harness interface handle streaming tool outputs (SSE vs. chunked JSON)?
 5. What's the default scope for mem-read grants — "everything the pack declared" or "just-in-time narrowing"?

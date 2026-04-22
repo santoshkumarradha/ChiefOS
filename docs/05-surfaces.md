@@ -133,6 +133,27 @@ Ad-hoc interaction. Voice or typing. Region 1/5 work.
 - Agents proposed from chat go through the same Broker path as any other action.
 - Chat is **not** the default surface — Morning Brief is. Chat is an accelerator, not the home.
 
+## Clipboard Pane
+
+Live-tailing, agent-readable, human-navigable view over the `kbd://` typed clipboard. Substrate-spine surface — copy/paste is the dominant human-to-agent handoff gesture today, so the OS must treat it as a first-class primitive, not a hidden buffer.
+
+Why substrate-spine (from [`research/2026-04-21-ai-native-primitive-rethinks.md`](./research/2026-04-21-ai-native-primitive-rethinks.md)): the clipboard is the cheapest, highest-frequency channel through which a human signals "this matters" to an agent. A typed, provenanced, live-visible clipboard turns that ambient gesture into structured intent the event log can reason over.
+
+| Aspect | v0 | v1+ (deferred) |
+|---|---|---|
+| Entries | Last N typed clips, MIME + semantic type + source-app capability receipt + TTL | Encrypted clipboard history (searchable across sessions) |
+| Rendering | Persistent pane + legacy `wl-clipboard` compatibility shim | OCR for image clips; inline thumbnails for files |
+| Agent transforms | One-click derivations (`kbd://<cid>/summary`, `/translated`, `/calendar-events`) from registered packs | Proactive auto-suggest transforms based on clip type + history |
+| Provenance | Every clip is a CAS entry with source-actor + grant receipt, logged to event log | Cross-device clip continuity via encrypted mirror |
+
+Interaction with other surfaces:
+
+- **Omnibar:** a clip can be promoted to a search scope (`search within kbd://<cid>`) or an Omnibar result can be pasted back as a new clip, round-tripping into an agent.
+- **Morning Brief:** unresolved clips from the previous day (≥ tier-2 semantic type) surface as a "you copied this — want me to do anything?" row in the Needs-You lane.
+- **HAX Inbox:** agent-triggered transforms land in the inbox; the clip stays in the pane until the transform is approved/denied.
+
+Deferred explicitly: encrypted persistent history, image OCR, cross-device sync, predictive transforms. No ADR yet for Clipboard Pane — a follow-up ADR is likely warranted given the surface's substrate-spine status; see [research primitive-rethinks §3](./research/2026-04-21-ai-native-primitive-rethinks.md).
+
 ## Quarterly Review
 
 A scheduled ritual. Triggered on the 90-day anniversary of setup (and every 90 days after).

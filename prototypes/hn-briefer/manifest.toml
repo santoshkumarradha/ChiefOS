@@ -31,12 +31,11 @@ kind = "surface.pane"
 surfaces = ["morning-brief"]
 usage_reason = "Render daily HN + Substack card in Brief surface"
 
-# Grant 5: LLM generate
+# Grant 5: LLM AI inference
 [[grants]]
-kind = "llm.generate"
-tier_min = "default"
-backends = ["default"]
-budget_usd_per_day = 1
+kind = "llm.ai"
+max_tokens = 500
+tier = "fast"
 usage_reason = "Summarize and score stories for relevance filtering"
 
 # Agents provided by this pack

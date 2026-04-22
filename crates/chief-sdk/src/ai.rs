@@ -151,8 +151,11 @@ pub struct InMemoryAiBackend;
 #[async_trait]
 impl AiBackend for InMemoryAiBackend {
     async fn call_one(&self, _req: &AiRequest) -> Result<AiResponse, AiError> {
+        // Return a simple string response that works for String deserialization.
+        // For structured types, return a JSON object.
+        let output = serde_json::json!("test response");
         Ok(AiResponse {
-            output: serde_json::json!({"result": "test response"}),
+            output,
             model: "in-memory-stub".to_string(),
             tokens_used: 42,
         })
@@ -166,7 +169,7 @@ impl AiBackend for InMemoryAiBackend {
         AiError,
     > {
         use futures::stream::{self, StreamExt};
-        let stream = stream::once(async { Ok(serde_json::json!({"token": "test"})) });
+        let stream = stream::once(async { Ok(serde_json::json!("test")) });
         Ok(Box::new(stream.boxed()))
     }
 }
@@ -181,7 +184,7 @@ mod tests {
         let result = AiBuilder::new(backend)
             .prompt("test")
             .tier(Tier::Deep)
-            .call::<serde_json::Value>()
+            .call::<String>()
             .await;
         assert!(result.is_ok());
     }

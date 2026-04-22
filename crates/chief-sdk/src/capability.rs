@@ -58,13 +58,6 @@ pub enum CapabilityKind {
         tier: String,
     },
 
-    #[deprecated(since = "0.2.0", note = "use LlmAi with Tier::Fast")]
-    #[serde(rename = "llm.generate")]
-    LlmGenerate {
-        tier_min: String,
-        backends: Vec<String>,
-        budget_usd_per_day: u32,
-    },
     #[serde(rename = "llm.embed")]
     LlmEmbed { backends: Vec<String> },
 
@@ -152,8 +145,6 @@ impl CapabilityKind {
             CapabilityKind::NetOAuth2 { .. } => "Use OAuth2 authentication",
             CapabilityKind::LlmAi { .. } => "Single-shot LLM inference",
             CapabilityKind::LlmHarness { .. } => "Multi-turn LLM agent",
-            #[allow(deprecated)]
-            CapabilityKind::LlmGenerate { .. } => "Generate text with LLM",
             CapabilityKind::LlmEmbed { .. } => "Generate embeddings",
             CapabilityKind::SurfacePane { .. } => "Render pane on surface",
             CapabilityKind::CeremonyRequest { .. } => "Request OS ceremony",
@@ -182,7 +173,6 @@ impl CapabilityKind {
     }
 
     /// Get the danger level.
-    #[allow(deprecated)]
     pub fn danger_level(&self) -> Danger {
         match self {
             CapabilityKind::MemRead { .. }
@@ -197,7 +187,6 @@ impl CapabilityKind {
             | CapabilityKind::NetHttp { .. }
             | CapabilityKind::NotifyInbox { .. }
             | CapabilityKind::LlmAi { .. }
-            | CapabilityKind::LlmGenerate { .. }
             | CapabilityKind::LlmEmbed { .. }
             | CapabilityKind::EventEmit { .. }
             | CapabilityKind::ToolInvoke { .. }

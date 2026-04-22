@@ -75,6 +75,8 @@ Unused-in-30-days grants get a secondary copper decoration; they're frequent cle
 
 **Top row**: includes OS-itself ("Chief Kernel") as a first-class pack with its own grants (keychain access, disk access, device keys). No hidden category.
 
+**Device identity.** `urn:chief:device:<pubkey>` is the sole ambient root-of-trust per [ADR-0016](../adr/0016-kernel-principal-identity.md). It is visible, non-revocable except via "Reset Chief" ceremony (device wipe + re-bind), and signs every boot-attestation. See the kernel boot log in Trust Ledger for auditable history.
+
 #### 2. By Capability
 
 Eight-pillar top-level grouping. Each pillar is a collapsed `<Widget>` showing: pillar name, total grants across all packs, last-7d activity.

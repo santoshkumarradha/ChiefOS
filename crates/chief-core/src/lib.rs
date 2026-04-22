@@ -5,6 +5,7 @@ pub mod broker;
 pub mod capability;
 pub mod dispatch;
 pub mod harness;
+pub mod kernel_principal;
 pub mod router;
 pub mod routes;
 pub mod state;

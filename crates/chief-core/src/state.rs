@@ -2,6 +2,7 @@
 
 use crate::broker::CapabilityBroker;
 use crate::capability::{Grant, PrincipalId};
+use crate::kernel_principal::boot_kernel_principal;
 use anyhow::{anyhow, Context, Result};
 use chief_event_log_proto::EventLog;
 use chief_harness_proto::NullHarness;
@@ -120,6 +121,17 @@ impl AppState {
                 .await
                 .context("open capability broker")?,
         );
+        let kernel_boot = boot_kernel_principal(&state_dir).context("boot kernel principal")?;
+        broker
+            .issue_kernel_grants(kernel_boot.attestation.clone())
+            .await
+            .context("issue boot-attested kernel grants")?;
+        info!(
+            first_run = kernel_boot.first_run,
+            device = %kernel_boot.identity.public_key,
+            boot_id = %kernel_boot.attestation.boot_id,
+            "boot-attested kernel principal grants issued"
+        );
 
         let oauth_broker = Arc::new(
             OAuthBroker::new(&state_dir.join("oauth"))
@@ -127,7 +139,9 @@ impl AppState {
                 .context("open oauth broker")?,
         );
 
-        let device_key = Arc::new(EphemeralDeviceKey::new());
+        let device_key = Arc::new(EphemeralDeviceKey::from_bytes(
+            &kernel_boot.identity.private_key,
+        ));
         let device_pubkey = device_key.public_key();
         let attestor = Arc::new(Attestor::new(device_key));
         let model_name = config

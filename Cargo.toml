@@ -14,6 +14,7 @@ members = [
     "prototypes/hello-world-pack",
     "prototypes/hn-briefer",
     "prototypes/file-watcher-briefer",
+    "tools/chief-ts-lint",
 ]
 exclude = [
     # Keep future exclusions explicit; empty for now.

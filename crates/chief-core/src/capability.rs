@@ -198,6 +198,9 @@ pub enum CapabilityKind {
         templates: Vec<TemplateId>,
         usage_reason: String,
     },
+    MetaRootOfTrust {
+        usage_reason: String,
+    },
     RegionRoute {
         regions: Vec<RegionId>,
         usage_reason: String,
@@ -341,6 +344,7 @@ impl CapabilityKind {
             Self::NotifyInbox { .. } => "notify.inbox",
             Self::AgentSpawn { .. } => "agent.spawn",
             Self::MetaPrompt { .. } => "meta.prompt",
+            Self::MetaRootOfTrust { .. } => "meta.root_of_trust",
             Self::RegionRoute { .. } => "region.route",
             Self::ClockSchedule { .. } => "clock.schedule",
             Self::EventEmit { .. } => "event.emit",
@@ -602,6 +606,7 @@ pub enum RequestedOp {
         provider: Provider,
         scopes: Vec<String>,
     },
+    MetaRootOfTrust,
 }
 
 impl RequestedOp {
@@ -638,6 +643,10 @@ impl RequestedOp {
         }
     }
 
+    pub fn meta_root_of_trust() -> Self {
+        Self::MetaRootOfTrust
+    }
+
     pub fn kind(&self) -> &'static str {
         match self {
             Self::AgentSpawn { .. } => "agent.spawn",
@@ -645,6 +654,7 @@ impl RequestedOp {
             Self::LedgerRead { .. } => "ledger.read",
             Self::NetHttp { .. } => "net.http",
             Self::NetOauth2 { .. } => "net.oauth2",
+            Self::MetaRootOfTrust => "meta.root_of_trust",
         }
     }
 }

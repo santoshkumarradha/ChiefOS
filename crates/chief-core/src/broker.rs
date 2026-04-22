@@ -1,6 +1,9 @@
 //! SQLite-backed capability broker.
 
 use crate::capability::{CapabilityKind, Grant, GrantId, PrincipalId, RequestedOp, ScopeDecision};
+use crate::kernel_principal::{
+    reset_chief_link, BootAttestation, ResetChiefLink, KERNEL_PRINCIPAL,
+};
 use anyhow::{Context, Result};
 use chief_event_log_proto::schema::Event;
 use chief_event_log_proto::EventLog;
@@ -12,6 +15,7 @@ use std::path::Path;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::warn;
+use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct CapabilityBroker {
@@ -38,7 +42,8 @@ impl CapabilityBroker {
                 grant_json TEXT NOT NULL,
                 issued_at TEXT NOT NULL,
                 expires_at TEXT,
-                revoked_at TEXT
+                revoked_at TEXT,
+                source TEXT NOT NULL DEFAULT 'User'
             );
 
             CREATE INDEX IF NOT EXISTS idx_grants_principal_active
@@ -46,6 +51,7 @@ impl CapabilityBroker {
             "#,
         )
         .context("initialize broker schema")?;
+        ensure_source_column(&conn)?;
 
         Ok(Self {
             conn: Arc::new(Mutex::new(conn)),
@@ -53,7 +59,47 @@ impl CapabilityBroker {
         })
     }
 
-    pub async fn issue(&self, principal: PrincipalId, mut grant: Grant) -> Result<GrantId> {
+    pub async fn issue(&self, principal: PrincipalId, grant: Grant) -> Result<GrantId> {
+        self.issue_with_source(principal, grant, GrantSource::User)
+            .await
+            .map(|handle| handle.id)
+    }
+
+    pub async fn issue_kernel_grants(
+        &self,
+        attestation: BootAttestation,
+    ) -> Result<Vec<GrantHandle>> {
+        attestation.verify_embedded_device_key()?;
+        let bundle = attestation.grant_bundle();
+        let mut handles = Vec::with_capacity(bundle.grants.len());
+
+        for grant in bundle.grants {
+            handles.push(
+                self.issue_with_source(
+                    PrincipalId::from(KERNEL_PRINCIPAL),
+                    grant,
+                    GrantSource::Kernel(bundle.boot_id),
+                )
+                .await?,
+            );
+        }
+
+        Ok(handles)
+    }
+
+    pub async fn revoke_kernel_grant_from_security_privacy(
+        &self,
+        _grant_id: &GrantId,
+    ) -> ResetChiefLink {
+        reset_chief_link()
+    }
+
+    async fn issue_with_source(
+        &self,
+        principal: PrincipalId,
+        mut grant: Grant,
+        source: GrantSource,
+    ) -> Result<GrantHandle> {
         if grant.id.as_str().is_empty() {
             grant.id = GrantId::new();
         }
@@ -62,30 +108,41 @@ impl CapabilityBroker {
         let grant_json = serde_json::to_string(&grant).context("serialize grant")?;
         let issued_at = grant.issued_at.to_rfc3339();
         let expires_at = grant.expires_at.map(|ts| ts.to_rfc3339());
+        let source_label = source.audit_label();
 
         {
             let conn = self.conn.lock().await;
             conn.execute(
                 r#"
                 INSERT OR REPLACE INTO grants
-                    (grant_id, principal, grant_json, issued_at, expires_at, revoked_at)
-                VALUES (?1, ?2, ?3, ?4, ?5, NULL)
+                    (grant_id, principal, grant_json, issued_at, expires_at, revoked_at, source)
+                VALUES (?1, ?2, ?3, ?4, ?5, NULL, ?6)
                 "#,
                 params![
                     grant_id.as_str(),
                     principal.as_str(),
                     grant_json,
                     issued_at,
-                    expires_at
+                    expires_at,
+                    source_label
                 ],
             )
             .context("insert capability grant")?;
         }
 
         self.append_event(Event::CapabilityIssued {
-            grant: format!("{}:{}", principal.as_str(), grant_id.as_str()),
+            grant: format!(
+                "{}:{} source={}",
+                principal.as_str(),
+                grant_id.as_str(),
+                source.audit_label()
+            ),
         });
-        Ok(grant_id)
+        Ok(GrantHandle {
+            id: grant_id,
+            principal,
+            source,
+        })
     }
 
     pub async fn revoke(&self, grant_id: GrantId) -> Result<()> {
@@ -109,13 +166,21 @@ impl CapabilityBroker {
         principal: &PrincipalId,
         op: &RequestedOp,
     ) -> std::result::Result<(), CapabilityDenied> {
-        let outcome = match self.active_grants(principal).await {
-            Ok(grants) => evaluate_grants(principal, op, &grants),
-            Err(err) => Err(CapabilityDenied::new(
+        let outcome = if matches!(op, RequestedOp::MetaRootOfTrust) {
+            Err(CapabilityDenied::new(
                 principal.clone(),
                 op.kind(),
-                DenialReason::StoreError(err.to_string()),
-            )),
+                DenialReason::RootOfTrustKernelOnly,
+            ))
+        } else {
+            match self.active_grants(principal).await {
+                Ok(grants) => evaluate_grants(principal, op, &grants),
+                Err(err) => Err(CapabilityDenied::new(
+                    principal.clone(),
+                    op.kind(),
+                    DenialReason::StoreError(err.to_string()),
+                )),
+            }
         };
 
         self.append_event(Event::CapabilityCheck {
@@ -160,6 +225,21 @@ impl CapabilityBroker {
         if let Err(err) = self.event_log.append(event) {
             warn!(error = %err, "failed to append capability broker event");
         }
+    }
+}
+
+fn ensure_source_column(conn: &Connection) -> Result<()> {
+    match conn.execute(
+        "ALTER TABLE grants ADD COLUMN source TEXT NOT NULL DEFAULT 'User'",
+        [],
+    ) {
+        Ok(_) => Ok(()),
+        Err(rusqlite::Error::SqliteFailure(_, Some(message)))
+            if message.contains("duplicate column name") =>
+        {
+            Ok(())
+        }
+        Err(err) => Err(err).context("add grant source column"),
     }
 }
 
@@ -248,6 +328,28 @@ fn evaluate_grants(
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct GrantHandle {
+    pub id: GrantId,
+    pub principal: PrincipalId,
+    pub source: GrantSource,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub enum GrantSource {
+    User,
+    Kernel(Uuid),
+}
+
+impl GrantSource {
+    fn audit_label(&self) -> String {
+        match self {
+            Self::User => "User".to_string(),
+            Self::Kernel(boot_id) => format!("Kernel({boot_id})"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct CapabilityDenied {
     principal: PrincipalId,
     kind: String,
@@ -298,6 +400,8 @@ pub enum DenialReason {
     NoGrant,
     ScopeExceeded,
     Expired,
+    #[serde(rename = "root-of-trust is kernel-only")]
+    RootOfTrustKernelOnly,
     StoreError(String),
 }
 
@@ -307,6 +411,7 @@ impl fmt::Display for DenialReason {
             Self::NoGrant => f.write_str("NoGrant"),
             Self::ScopeExceeded => f.write_str("ScopeExceeded"),
             Self::Expired => f.write_str("Expired"),
+            Self::RootOfTrustKernelOnly => f.write_str("root-of-trust is kernel-only"),
             Self::StoreError(err) => write!(f, "StoreError: {err}"),
         }
     }

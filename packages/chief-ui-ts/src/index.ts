@@ -14,6 +14,7 @@ export {
   OmnibarPalette,
   Pane,
   Row,
+  Select,
   SectionHeader,
   SourceAvatar,
   Sparkline,

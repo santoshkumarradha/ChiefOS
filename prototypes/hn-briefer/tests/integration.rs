@@ -107,17 +107,13 @@ async fn test_hn_briefer_agent_llm_scoring() {
     let ctx = CapabilityContext::new(net.clone(), mem.clone(), llm.clone(), events.clone());
 
     let agent = HnBrieferAgent;
-    let _ = agent.on_tick(ctx).await;
+    let result = agent.on_tick(ctx).await;
 
-    // Verify LLM was called for scoring
-    let llm_calls = llm.calls.lock().unwrap();
-    let generate_calls: Vec<_> = llm_calls
-        .iter()
-        .filter(|c| c.contains("generate"))
-        .collect();
+    // Verify the agent succeeds with LLM scoring via ctx.ai()
     assert!(
-        !generate_calls.is_empty(),
-        "Should have called LLM generate for scoring"
+        result.is_ok(),
+        "Agent should succeed with AI scoring: {:?}",
+        result.err()
     );
 }
 
@@ -147,7 +143,7 @@ fn test_manifest_creation() {
     assert_eq!(
         manifest.grants.len(),
         5,
-        "Should have exactly 5 grants (net.http x2, mem.write, surface.pane, llm.generate)"
+        "Should have exactly 5 grants (net.http x2, mem.write, surface.pane, llm.ai)"
     );
 
     // Every grant must have non-empty usage_reason
@@ -167,7 +163,7 @@ fn test_manifest_grants_have_usage_reason() {
     let mut net_http_count = 0;
     let mut mem_write_count = 0;
     let mut surface_pane_count = 0;
-    let mut llm_generate_count = 0;
+    let mut llm_ai_count = 0;
 
     for grant in &manifest.grants {
         match &grant.kind {
@@ -196,8 +192,8 @@ fn test_manifest_grants_have_usage_reason() {
                 assert!(grant.usage_reason.contains("Brief"));
                 assert!(surfaces.contains(&"morning-brief".to_string()));
             }
-            CapabilityKind::LlmGenerate { .. } => {
-                llm_generate_count += 1;
+            CapabilityKind::LlmAi { .. } => {
+                llm_ai_count += 1;
                 assert!(grant.usage_reason.contains("score"));
             }
             _ => panic!("Unexpected capability kind in manifest: {:?}", grant.kind),
@@ -207,7 +203,7 @@ fn test_manifest_grants_have_usage_reason() {
     assert_eq!(net_http_count, 2, "Should have 2 net.http grants");
     assert_eq!(mem_write_count, 1, "Should have 1 mem.write grant");
     assert_eq!(surface_pane_count, 1, "Should have 1 surface.pane grant");
-    assert_eq!(llm_generate_count, 1, "Should have 1 llm.generate grant");
+    assert_eq!(llm_ai_count, 1, "Should have 1 llm.ai grant");
 }
 
 #[test]

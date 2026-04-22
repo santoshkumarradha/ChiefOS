@@ -18,4 +18,10 @@ pub enum SdkError {
 
     #[error("serialization error: {0}")]
     Serialization(String),
+
+    #[error("ai error: {0}")]
+    Ai(#[from] crate::ai_error::AiError),
+
+    #[error("harness error: {0}")]
+    Harness(#[from] crate::ai_error::HarnessError),
 }

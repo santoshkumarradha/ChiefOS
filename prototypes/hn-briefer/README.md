@@ -14,7 +14,7 @@ All 5 required grants with usage reasons:
 2. **net.http** (Substack): `Fetch user subscribed Substack feeds`
 3. **mem.write**: `Persist briefed items and daily digest card to Memory Graph`
 4. **surface.pane**: `Render daily HN + Substack card in Brief surface`
-5. **llm.generate**: `Summarize and score stories for relevance filtering`
+5. **llm.ai**: `Summarize and score stories for relevance filtering`
 
 ## Example Card Output
 
@@ -54,6 +54,10 @@ cargo test -p hn-briefer
 
 - **V0 scope**: Hardcoded Substack URLs; user-configurable feeds are a later task.
 - **OAuth**: Not needed — HN and Substack RSS are public.
-- **LLM routing**: Uses SDK's `ctx.llm()` stub; real model selection is kernel concern.
+- **LLM routing**: Uses SDK's `ctx.ai()` API (ADR-0013); real model selection is kernel concern.
 - **UI rendering**: Pack emits Card data; Brief consumer renders via chief-ui primitives.
 - **Public API discipline**: Consumes ONLY `chief_sdk::*` exports — validates ADR-0010 and ADR-0011.
+
+## Migration
+
+Migrated 2026-04-21 to ADR-0013 agent runtime. Previously used `ctx.llm().generate()` stub; now uses `ctx.ai().prompt(...).tier(Tier::Fast).call::<String>()` for structured LLM inference. Grant updated from `llm.generate` to `llm.ai` with `tier = "fast"`.

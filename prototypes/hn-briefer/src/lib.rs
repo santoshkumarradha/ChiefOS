@@ -4,6 +4,7 @@
 //! filter/score via on-device LLM, persist as memory nodes, emit one daily brief card.
 
 use chief_sdk::prelude::*;
+use chief_sdk::Tier;
 use serde_json::json;
 
 /// The main briefer agent — runs on morning trigger.
@@ -216,7 +217,13 @@ async fn score_item(
         source, title
     );
 
-    let response = ctx.llm().generate(&prompt, "default").await?;
+    let response = ctx
+        .ai()
+        .prompt(&prompt)
+        .max_tokens(500)
+        .tier(Tier::Fast)
+        .call::<String>()
+        .await?;
 
     // Try to parse as number; fallback to baseline if parse fails.
     let llm_score: f32 = response.trim().parse().unwrap_or(baseline_score as f32);
@@ -291,10 +298,9 @@ pub fn make_manifest() -> PackManifest {
             )
             .expect("valid grant"),
             Grant::new(
-                CapabilityKind::LlmGenerate {
-                    tier_min: "default".to_string(),
-                    backends: vec!["default".to_string()],
-                    budget_usd_per_day: 1,
+                CapabilityKind::LlmAi {
+                    max_tokens: 500,
+                    tier: "fast".to_string(),
                 },
                 "Summarize and score stories for relevance filtering",
             )

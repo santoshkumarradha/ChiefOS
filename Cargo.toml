@@ -12,6 +12,7 @@ members = [
     "crates/chief-sdk",
     "crates/chief-ui",
     "prototypes/hello-world-pack",
+    "prototypes/hn-briefer",
 ]
 exclude = [
     # Keep future exclusions explicit; empty for now.

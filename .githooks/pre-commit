@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Chief OS pre-commit hook
 #
-# Keeps docs/plandb-state.sql (authoritative) and docs/plandb-template.yaml
+# Keeps .plandb/state.sql (authoritative) and .plandb/template.yaml
 # (human sidecar) in sync with the local .plandb.db on every commit.
 #
 # Behaviour:
@@ -68,8 +68,8 @@ hash_or_empty() {
   fi
 }
 
-SQL_FILE="$ROOT/docs/plandb-state.sql"
-YAML_FILE="$ROOT/docs/plandb-template.yaml"
+SQL_FILE="$ROOT/.plandb/state.sql"
+YAML_FILE="$ROOT/.plandb/template.yaml"
 SQL_BEFORE="$(hash_or_empty "$SQL_FILE")"
 YAML_BEFORE="$(hash_or_empty "$YAML_FILE")"
 
@@ -95,24 +95,24 @@ body_hash() {
 changed=0
 if [ -n "$SQL_AFTER" ] && [ "$SQL_BEFORE" != "$SQL_AFTER" ]; then
   # Recompute body-only hashes to decide.
-  BEFORE_BODY="$(git show HEAD:docs/plandb-state.sql 2>/dev/null | grep -v -E '^(-- Generated:|-- Source:)' | shasum -a 256 | awk '{print $1}')" || BEFORE_BODY=""
+  BEFORE_BODY="$(git show HEAD:.plandb/state.sql 2>/dev/null | grep -v -E '^(-- Generated:|-- Source:)' | shasum -a 256 | awk '{print $1}')" || BEFORE_BODY=""
   AFTER_BODY="$(body_hash "$SQL_FILE")"
   if [ "$BEFORE_BODY" != "$AFTER_BODY" ]; then
-    git add -- "docs/plandb-state.sql"
+    git add -- ".plandb/state.sql"
     changed=1
   fi
 fi
 if [ -n "$YAML_AFTER" ] && [ "$YAML_BEFORE" != "$YAML_AFTER" ]; then
-  BEFORE_BODY="$(git show HEAD:docs/plandb-template.yaml 2>/dev/null | grep -v -E '^(# Generated|# Source)' | shasum -a 256 | awk '{print $1}')" || BEFORE_BODY=""
+  BEFORE_BODY="$(git show HEAD:.plandb/template.yaml 2>/dev/null | grep -v -E '^(# Generated|# Source)' | shasum -a 256 | awk '{print $1}')" || BEFORE_BODY=""
   AFTER_BODY="$(body_hash "$YAML_FILE")"
   if [ "$BEFORE_BODY" != "$AFTER_BODY" ]; then
-    git add -- "docs/plandb-template.yaml"
+    git add -- ".plandb/template.yaml"
     changed=1
   fi
 fi
 
 if [ "$changed" = "1" ]; then
-  echo "pre-commit (plandb): re-exported + staged docs/plandb-state.sql and/or docs/plandb-template.yaml"
+  echo "pre-commit (plandb): re-exported + staged .plandb/state.sql and/or .plandb/template.yaml"
 fi
 
 exit 0

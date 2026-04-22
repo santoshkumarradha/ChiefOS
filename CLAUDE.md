@@ -52,8 +52,8 @@ plandb done t-<id> --result '{"pr":"<url>","summary":"..."}'
 
 **The binary `.plandb.db` is NOT tracked in git.** It's gitignored. Parallel-worktree writes to a binary file caused merge conflicts and state loss; we fixed that by committing a text SQL dump instead.
 
-- **`docs/plandb-state.sql`** — authoritative full state (status, results, contexts, events). Committed. Mergeable text. Used by the restore script.
-- **`docs/plandb-template.yaml`** — human-readable sidecar (plandb's native `export`). Graph shape only. **Lossy** — drops status, results, and contexts. Great for PR reviewers to see the task graph at a glance, never used for restore.
+- **`.plandb/state.sql`** — authoritative full state (status, results, contexts, events). Committed. Mergeable text. Used by the restore script.
+- **`.plandb/template.yaml`** — human-readable sidecar (plandb's native `export`). Graph shape only. **Lossy** — drops status, results, and contexts. Great for PR reviewers to see the task graph at a glance, never used for restore.
 - **`.plandb.db`** — local binary, ephemeral, gitignored. Each clone / worktree rebuilds from the SQL dump.
 
 **Why both?** `plandb export` produces clean YAML but intentionally only captures the graph shape — designed as a reusable decomposition template, not a state snapshot. We need full state (is task X done? what was the result? what contexts did agents record?), so we commit the SQL dump too.
@@ -74,7 +74,7 @@ scripts/plandb-restore.sh --force    # replaces (auto-backs-up the old one)
 
 #### Pre-commit hook
 
-`scripts/install-hooks.sh` points `git config core.hooksPath` at `.githooks/`. Then on every commit, `.githooks/pre-commit` runs `plandb-export.sh` and auto-stages `docs/plandb-state.sql` + `docs/plandb-template.yaml` if their content changed.
+`scripts/install-hooks.sh` points `git config core.hooksPath` at `.githooks/`. Then on every commit, `.githooks/pre-commit` runs `plandb-export.sh` and auto-stages `.plandb/state.sql` + `.plandb/template.yaml` if their content changed.
 
 Skip in one-off cases with `SKIP_PLANDB_HOOK=1 git commit ...`.
 
@@ -98,7 +98,7 @@ On an existing clone, `git pull` pulls the updated SQL; re-run `scripts/plandb-r
 ```bash
 # Export the current state so downstream agents pick it up
 scripts/plandb-export.sh
-git add docs/plandb-state.sql
+git add .plandb/state.sql
 git commit -m "chore(plandb): export state"
 # Then open/merge the PR as usual.
 ```
@@ -303,7 +303,7 @@ plandb search "keyword"                 # find relevant context
 plandb task claim t-<id> --agent <your-handle> && plandb task start t-<id> --agent <your-handle>
 ```
 
-All state persists in `docs/plandb-state.sql` (text, in git). The binary `.plandb.db` is rebuilt from it on demand. If you need to re-read context that was recorded earlier:
+All state persists in `.plandb/state.sql` (text, in git). The binary `.plandb.db` is rebuilt from it on demand. If you need to re-read context that was recorded earlier:
 
 ```bash
 plandb contexts                        # list all context entries

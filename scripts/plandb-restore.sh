@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# plandb-restore.sh — rebuild .plandb.db from docs/plandb-state.sql.
+# plandb-restore.sh — rebuild .plandb.db from .plandb/state.sql.
 #
 # When to run:
 #   - Fresh clone (no .plandb.db exists).
 #   - Something broke the local db and you want to reset to the repo's
 #     canonical state.
-#   - After a pull that changed docs/plandb-state.sql and you want the
+#   - After a pull that changed .plandb/state.sql and you want the
 #     binary db to match.
 #
 # Safe: refuses to overwrite an existing .plandb.db unless --force is passed.
@@ -18,7 +18,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DB="${ROOT}/.plandb.db"
-SRC="${ROOT}/docs/plandb-state.sql"
+SRC="${ROOT}/.plandb/state.sql"
 FORCE=0
 
 for arg in "$@"; do

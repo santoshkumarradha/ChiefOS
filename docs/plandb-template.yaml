@@ -140,6 +140,20 @@ tasks:
   pre_hook: null
   post_hook: null
 - ref_id: task-11
+  title: 'Hardening: real ToolDispatcher — fs.*, net.http, mem.* (replaces EchoToolDispatcher stub)'
+  description: |-
+    Replace EchoToolDispatcher stub (in crates/chief-core/src/harness/runtime.rs) with real ToolDispatcher impl that actually executes fs.read / fs.write / net.http / mem.read / mem.write / surface.pane / notify.inbox calls.
+    Each capability kind → real handler: fs.* via std::fs gated by grant paths; net.http via reqwest gated by grant hosts; mem.* via chief-mem (SQLite + vec) if landed, else in-memory graph stub; surface.pane emits events to the Brief; notify.inbox pushes to HAX Inbox backend.
+    Scope: crates/chief-core/**. Waits on oauth-wire (file-scope overlap).
+    Tests: real filesystem sandbox + real HTTP mock server + memory graph roundtrip + scope denial paths. Must also exercise Broker.check denying wrong hosts/paths/types.
+  kind: code
+  priority: 10
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-12
   title: Write docs/03-chief-kernel.md
   description: 'L2 kernel services deep-dive. 6 services: Agent Runtime, Capability Broker, Memory Graph, Provenance Log, Trust Ledger, Region Router, Event Bus. Each service: responsibilities, API contract, storage, dependencies, acceptance. Include mermaid service diagram. CRITICAL: document the agent-harness abstraction point (opencode v0, swappable). Dense tables.'
   kind: code
@@ -149,7 +163,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-12
+- ref_id: task-13
   title: Write docs/06-security-model.md
   description: 'Capability-based security from hardware up. Trust chain: TPM/Secure Enclave -> user key -> principal -> capability set -> call-site check -> sandbox -> provenance. Threat model: malicious packs, compromised cloud twin, stolen device, supply chain. Approval ceremony cryptography. Include approval-flow mermaid.'
   kind: code
@@ -159,7 +173,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-13
+- ref_id: task-14
   title: 'Integration: real llama.cpp backend (MERGED PR #20)'
   description: 'History marker: real llama.cpp backend for chief-inference merged in PR #20 (commit a3fcbf6). See adr/0009, scripts/fetch-model.sh, prototypes/chief-inference/src/backends/local.rs.'
   kind: code
@@ -169,7 +183,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-14
+- ref_id: task-15
   title: 'Integration: Docker-as-OS image (MERGED PR #19)'
   description: 'History marker: Docker-as-OS packaging merged in PR #19 (commit 1610fe4). See Dockerfile, docker-compose.yaml, scripts/demo-docker.sh.'
   kind: code
@@ -179,7 +193,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-15
+- ref_id: task-16
   title: 'Integration: Tauri-wrap Morning Brief (native desktop binary)'
   description: 'CRITICAL: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db before any plandb. Worktree: labs/chief-os-tauri. Wrap prototypes/morning-brief in Tauri v2 so it ships as a native desktop binary. Per docs/brand/visual-language.md — non-negotiable design rules. Create ONLY files under prototypes/morning-brief/src-tauri/ (scaffold via tauri init) + tauri.conf.json + update prototypes/morning-brief/package.json with tauri scripts. Do NOT modify prototypes/morning-brief/src/ — that''s another agent''s work (mb-live-api). Bundle fonts in binary at build time (Inter from rsms.me/inter or SIL OFL Inter tarball), drop into src-tauri/fonts/. Register keyboard shortcuts via tauri-plugin-global-shortcut (⌘ Space / Ctrl+Space for Omnibar placeholder, ⌘ . for HAX Inbox placeholder, Esc to reset focus). Native window config: fullscreen flag on release, 1280x800 in dev, titleBarStyle=overlay on mac, decorations=false on Linux kiosk build. Install tauri-plugin-context-menu, tauri-plugin-window-vibrancy. Add build target: ''npm run tauri build'' produces a .app bundle on mac, .AppImage+.deb on Linux. Add a README section ''Running as native app''. Acceptance: npm run tauri dev opens a native window displaying Morning Brief; window is fullscreen in prod; no browser chrome visible; font is bundled (verify via devtools); ⌘+Space logs a ''TODO'' to console (real surface comes later); cargo build of the src-tauri Rust code succeeds; npm run tauri build produces a platform-native bundle. Worktree: branch int/mb-tauri. References: docs/brand/visual-language.md (ESPECIALLY sections 1, 2, 3, 7, 8, 9, 15, 16).'
   kind: code
@@ -189,7 +203,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-16
+- ref_id: task-17
   title: 'Integration: Morning Brief wired to chief-core HTTP API'
   description: 'CRITICAL: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db before any plandb. Worktree: labs/chief-os-mb-api. Only modify files under prototypes/morning-brief/src/ + vite.config.ts + package.json deps. Do NOT touch prototypes/morning-brief/src-tauri/ — that''s another agent''s work (mb-tauri). Add src/api.ts: typed fetch wrapper around chief-core''s 6 routes. Add src/hooks/useBriefState.ts: polls /brief every 3s (SSE later); returns BriefState or loading/error. Modify MorningBrief.tsx to useBriefState() instead of loading mock/brief-state.json directly. Wire NeedsYouCard Review button → POST /approve (ceremony: false for tier-1, true for tier-3). Wire Rewind slider → POST /rewind with duration. Wire CeremonyModal Confirm → POST /approve with ceremony:true. Env: VITE_CHIEF_CORE_URL (default http://127.0.0.1:4711). Fallback behaviour: if /status fails, fall back to mock/brief-state.json with a visible banner at top ''demo mode (no chief-core running)''. Write vitest tests for api.ts and useBriefState with mocked fetch. Keep existing UI look-and-feel; do not redesign. Acceptance: with chief-core running locally, Morning Brief shows live cards generated from POST /intent calls; without, demo-mode banner shows. Approval button actually ships and returns attestation id. Rewind actually reverts state. npm run build clean. Worktree: branch int/mb-live-api.'
   kind: code
@@ -199,7 +213,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-17
+- ref_id: task-18
   title: 'Wave 4: chief-sdk Rust + TS + hello-world pack'
   description: Build crates/chief-sdk (Rust) + packages/chief-sdk-ts (TypeScript) + prototypes/hello-world-pack (reference dogfood pack). Branch int/sdk-crate. Full spec in GH issue. Follows adr/0010 + docs/16 + docs/17. No touch outside scope.
   kind: code
@@ -209,7 +223,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-18
+- ref_id: task-19
   title: 'Wave 4: Capability Broker real enforcement in chief-core'
   description: 'Replace allow-all stub in crates/chief-core/src/state.rs with real Capability Broker enforcement. Deny on missing or un-scoped grants. Branch int/broker-enforce. Full spec in GH issue. Scope: crates/chief-core/** only.'
   kind: code
@@ -219,7 +233,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-19
+- ref_id: task-20
   title: 'Wave 4: OAuth session broker (crates/chief-oauth)'
   description: 'New crate crates/chief-oauth implementing the ''broker holds tokens, pack gets SessionHandle'' pattern from docs/17 Layer 1. OS-owned token storage, scoped request signing. Branch int/oauth-broker. Full spec in GH issue. Scope: crates/chief-oauth/** + root Cargo.toml (add member) only.'
   kind: code
@@ -229,7 +243,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-20
+- ref_id: task-21
   title: 'Wave 5a: HN / Substack briefer pack (first dogfood)'
   description: |-
     Build the first dogfood pack: HN / Substack Briefer.
@@ -264,7 +278,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-21
+- ref_id: task-22
   title: 'Wave 5a: HN / Substack briefer pack (first dogfood, uses chief-ui v0)'
   description: |-
     FIRST DOGFOOD PACK — validates the public SDK + UI kit by consuming only their exported surface.
@@ -349,7 +363,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-22
+- ref_id: task-23
   title: 'Agent Runtime Phase 3a: CustomEngine — in-tree Rust fallback for HarnessEngine (ADR-0014)'
   description: |-
     Per ADR-0014, CustomEngine must ship at v0 as a fallback (not deferred).
@@ -369,7 +383,33 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-23
+- ref_id: task-24
+  title: 'Hardening: kernel principal identity + boot attestation (ADR-0016 impl)'
+  description: |-
+    Implement ADR-0016: urn:chief:device:<pubkey> holds meta.root_of_trust; urn:chief:kernel receives grants at every boot via signed boot-attestation. First-run Ceremony binds device identity to user.
+    Scope: crates/chief-core/src/kernel_principal/ (new) + integration with broker (new CapabilityKind::MetaRootOfTrust already in sdk).
+    Tests: boot replay produces expected kernel grants; revoke-kernel-grant surfaces a 'Reset Chief' ceremony link instead of actually revoking; meta.root_of_trust cannot be requested by any pack.
+  kind: code
+  priority: 9
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-25
+  title: 'Hardening: systemd-nspawn sandbox for pack and engine processes (Linux deploy)'
+  description: |-
+    Implement the systemd-nspawn wrapper for (a) opencode engine subprocess, (b) pack agent processes on Linux/NixOS deploy. Per ADR-0002 + ADR-0014. macOS dev runs unsandboxed per explicit v0 concession; NixOS CI exercises real nspawn.
+    Scope: crates/chief-core/src/sandbox/ (new) + flake.nix updates.
+    Tests: nspawn-gated acceptance that fails if sandboxed process reaches outside declared FS/net namespace. Mark nixos-only.
+  kind: code
+  priority: 9
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-26
   title: Write docs/04-module-system.md
   description: Capability Packs as Nix flakes. Pack schema (agents, tools, ingesters, panes, rituals, policies, grants). Registry design (official/community/private tiers). Stacks (forkable bundles). Governance UI. Include example pack flake + pack-lifecycle mermaid. Tie to Chief-of-Staff Stack as flagship.
   kind: code
@@ -379,7 +419,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-24
+- ref_id: task-27
   title: Write docs/05-surfaces.md
   description: 'L4 surfaces: Morning Brief, Live Agent View, Provenance Explorer, Ceremony UI, Chat, Trust Ledger viewer, Quarterly Review. Each: purpose, inputs (reads from L2), interactions, friction tier mapping. Apple-design principles applied. Mermaid for Morning Brief render flow.'
   kind: code
@@ -389,7 +429,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-25
+- ref_id: task-28
   title: Write docs/08-memory-substrate.md
   description: 'Memory graph as kernel service (not a lib). Schema: nodes (email, file, person, event, decision, artifact, thought, finding), edges (derived-from, replied-to, depends-on, refers-to). URI scheme mem://<type>/<hash>. Horizon tags (short/medium/long/open). Retrieval strategies per surface. Embeddings policy. Backup/encryption. Mermaid schema diagram.'
   kind: code
@@ -399,7 +439,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-26
+- ref_id: task-29
   title: Write docs/14-risks-open-questions.md
   description: 'Honest punch list. Technical risks: boot time, local model quality, Wayland compat, microVM perf, memory graph scale. Product risks: install friction, cold start, demo fidelity. Supply-chain risks for packs. Regulatory unknowns. Business risks: COGS at scale, competitive response. Each with mitigation or open question. Decisions-needed table.'
   kind: code
@@ -409,7 +449,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-27
+- ref_id: task-30
   title: Write CLAUDE.md for this repo (dev workflow for AI agents)
   description: 'Create /CLAUDE.md at repo root that any AI agent (Claude, Gemini, Codex, etc.) entering this repo reads first. Content: (1) project summary (1 sentence), (2) read-order: AGENTS.md -> CHARTER.md -> docs/INDEX.md -> docs/13-v0-scope-90-day.md, (3) PlanDB usage as source of truth for tasks (commands, conventions), (4) worktree + branch conventions (proto/<slug>, docs/<slug>), (5) how to claim a task (plandb go --agent <handle>), (6) commit-message format, (7) how to restart work in a new session (plandb status --detail), (8) where logs/research/directives land, (9) how to escalate or flag decisions (add to docs/14-risks-open-questions.md decisions-needed table or open ADR).'
   kind: code
@@ -419,7 +459,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-28
+- ref_id: task-31
   title: 'OAuth broker crate: finish storage.rs rewrite + add to workspace'
   description: |-
     Rescue OAuth work left by codex in broken state (see t-w4-oauth).
@@ -439,7 +479,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-29
+- ref_id: task-32
   title: 'Agent Runtime Phase 2: model router + Controls -> Models UI'
   description: |-
     Implement ADR-0013 Phase 2. Reference: docs/20-agent-runtime.md §Model router, §Controls -> Models sub-surface.
@@ -462,7 +502,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-30
+- ref_id: task-33
   title: 'Agent Runtime Phase 3: chief-core harness runtime + opencode adapter (largest v0 build)'
   description: |-
     CONSOLIDATED 2026-04-21: t-w6-custom-engine merged into this task. Per ADR-0014, CustomEngine must ship in the same PR as OpencodeEngine so the engine-swap abstraction is proven (parity test: same transcript against both). Deliver BOTH engine impls + the runtime that uses them.
@@ -487,7 +527,43 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-31
+- ref_id: task-34
+  title: 'Wave 5b: File-watcher briefer pack (second dogfood)'
+  description: Second dogfood pack. Proves SDK scales beyond HN briefer's net.http-centric shape by using fs.watch / fs.read / llm.ai instead. See /tmp/chief-os-file-watcher-brief.md for spec.
+  kind: code
+  priority: 8
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-35
+  title: 'Hardening: real opencode subprocess binary integration (not HTTP stub)'
+  description: |-
+    Per ADR-0014: v0 OpencodeEngine uses httpmock stub; this wires the REAL opencode binary as a child subprocess supervised by chief-core (under systemd-nspawn on Linux).
+    Scope: crates/chief-core/src/harness/engines/opencode.rs + opencode_supervisor.rs. NixOS flake: add opencode + nodejs_20 runtime deps.
+    Tests: live subprocess spawn-connect-tool-call-kill cycle. Mark nixos-only.
+  kind: code
+  priority: 8
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-36
+  title: 'Hardening: wire Models surface config → ChiefCoreAiBackend provider dispatch'
+  description: |-
+    When user binds a cloud provider via Controls → Models UI, ChiefCoreAiBackend routes Cloud-tier calls through that provider using chief-oauth sealed storage for API keys.
+    Scope: crates/chief-core/src/router/picker.rs + harness/backend.rs — extend ModelChoice::Cloud dispatch.
+    Tests: end-to-end with OpenRouter via ModelChoice::Cloud path. Gated behind OPENROUTER_API_KEY + #[ignore].
+  kind: code
+  priority: 8
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-37
   title: Write docs/07-base-and-hardware.md
   description: NixOS choice justified (scoring table vs Fuchsia, seL4, FreeBSD+Capsicum, illumos, custom). Deploy targets (bare-metal ISO, macOS-host VM image, bootable USB — all from one Nix flake). Hardware requirements (TPM/Secure Enclave mandatory, YubiKey optional). Wayland reasoning. microVM reasoning. Boot time target (<10s). Link adr-0001.
   kind: code
@@ -497,7 +573,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-32
+- ref_id: task-38
   title: Write docs/09-local-vs-cloud.md
   description: 'Hybrid runtime split. Three classes: hot-path reasoning (cloud), sensitive reasoning (local), always-on state (local with cloud encrypted replica). Routing rules. Local model spec (Qwen/Llama quantized, 13-32B). Cloud twin spec (stateless, agent-ephemeral). Network-cable-yank demo guarantees.'
   kind: code
@@ -507,7 +583,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-33
+- ref_id: task-39
   title: Write docs/10-viral-loop.md
   description: The Morning Reveal hero video (90s storyboard, beat-by-beat). 'Try your own Morning Brief' web preview funnel (OAuth -> cloud-rendered preview -> shareable signed artifact). Forkable Stacks as second viral loop. Public Stack registry. Social mechanics. Reference diagrams/night-morning-loop.mmd.
   kind: code
@@ -517,7 +593,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-34
+- ref_id: task-40
   title: Write ADRs (template + 0001-0004)
   description: 'Create adr/README.md (process), adr/template.md (ADR template), and 4 accepted ADRs: 0001-nixos-linux-base (base choice), 0002-capability-based-security (cap-model over UID/GID), 0003-wayland-not-x11 (surface isolation), 0004-machine-as-fax-posture (legal posture for v0-v1). Each ADR: context, decision, alternatives considered (table), consequences.'
   kind: code
@@ -527,7 +603,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-35
+- ref_id: task-41
   title: Write mermaid diagrams (7 files)
   description: 'docs/diagrams/*.mmd: layers.mmd (L0-L4), kernel-services.mmd (6 services + edges), approval-flow.mmd (action->broker->router->surface->ceremony), hax-regions.mmd (8 regions with boundary crossings), pack-lifecycle.mmd (install->grants->exec->audit), night-morning-loop.mmd (sequence diagram), memory-schema.mmd (nodes+edges).'
   kind: code
@@ -537,7 +613,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-36
+- ref_id: task-42
   title: Strengthen model-routing swappability in local-vs-cloud + architecture
   description: 'Edit docs/09-local-vs-cloud.md and docs/02-architecture.md to make ModelBackend abstraction explicit as a first-class architectural primitive. Granularity: system-wide, per-category, per-pack, per-agent, per-call. Control plane deferred to later. Add requirement in docs/requirements/non-functional.md.'
   kind: code
@@ -547,7 +623,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-37
+- ref_id: task-43
   title: 'Research: AI-native rethink across ALL OS primitives'
   description: 'Broad research and filter: for each OS primitive (filesystem, scheduler, memory, clipboard, shell, notifications, logging, observability, search, sessions, compositor, drivers, DNS, timekeeping, mail, calendar, browser, media), evaluate (a) what changes if AI is primary user, (b) strategic uniqueness vs just ''ported'', (c) v0/v1/v2 impact, (d) viral-demo leverage. Rank by (strategic value × demo leverage) / (engineering cost). Output: docs/research/NNNN-ai-native-primitive-rethinks.md with a prioritized table + picks for v0-v1 integration. Companion edits in docs/02-architecture.md for the top 3.'
   kind: research
@@ -557,7 +633,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-38
+- ref_id: task-44
   title: 'Prototype: chief-inference Signed Inference (Rust)'
   description: 'Implement ADR-0009 chief-inference service. Files: prototypes/chief-inference/{Cargo.toml,src/lib.rs,src/attest.rs,src/backends/local.rs,src/backends/cloud_stub.rs,tests/sign_verify_test.rs,README.md}. Key types: InferenceAttestation{model_id,prompt_hash(blake3),output_hash(blake3),timestamp,device_id,seed,temperature,top_p,provider_attest?,signature(ed25519 64B)}. Three claim tiers (Generated/Co-signed/Custody). Backends: LocalLlamaCppStub (CPU-only v0; use a deterministic fake LLM that echoes with prefix for test determinism), CloudAnthropicStub (returns canned text). Verification API: chief-inference verify <attestation.json> -> (tier, ok/err). Acceptance: sign+verify roundtrip passes; overhead <5ms per call (criterion bench); tier labeling correct for each backend. Worktree: proto/chief-inference. BEFORE plandb cmds: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db. References: adr-0009, docs/03-chief-kernel.md section 8, docs/09-local-vs-cloud.md.'
   kind: code
@@ -567,7 +643,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-39
+- ref_id: task-45
   title: 'Phase 1b: chief-sdk-ts 0.2 — TypeScript parity with Rust agent runtime surface'
   description: |-
     Phase 1 codex (PR #36) shipped Rust only. This task adds the TypeScript parallel bindings.
@@ -600,7 +676,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-40
+- ref_id: task-46
   title: 'Dev Ops: NixOS VM CI — run eBPF/nspawn/Wayland acceptance tests from day 1'
   description: |-
     Per review feedback + ADR-0011 Linux-only concerns: set up a NixOS VM GitHub Action (or equivalent CI) that boots the NixOS flake and runs all acceptance tests that depend on Linux-only primitives.
@@ -628,7 +704,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-41
+- ref_id: task-47
   title: 'Phase 1b redo: chief-sdk-ts 0.2 — TypeScript parity with Rust agent runtime surface'
   description: 'Re-queued after codex-harness''s stale claim was cancelled (auto-claim via done --next then exit). See earlier t-w6-sdk-ts description: add Tier literal union, CapabilityKind llm.ai/llm.harness, AiBuilder/HarnessBuilder TS classes, opaque ToolHandle brand type, vitest tests mirroring Rust matrix. Scope: packages/chief-sdk-ts/** only. Bump to 0.2.0. See chief-sdk Rust impl (PR #36) for the 1:1 shape.'
   kind: code
@@ -638,7 +714,33 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-42
+- ref_id: task-48
+  title: 'Hardening: package Hyprland + chief-compositor.nix blur preset (ADR-0015 impl)'
+  description: |-
+    Per ADR-0015: bundle Hyprland as the Chief OS shipping Wayland compositor with a pinned version + chief-compositor.nix module with blur preset matching brand/visual-language.md §6.
+    Scope: flake.nix + new nix/chief-compositor.nix module. No code changes to any crate. Disables Hyprland tiling UX per ADR (single-surface-at-a-time).
+    Acceptance: nix flake check passes; nixos-vm-test can boot the compositor; blur matches reference screenshots within visual tolerance.
+  kind: shell
+  priority: 7
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-49
+  title: 'Hardening: HN briefer real network integration (replace stubs with real HN/Substack)'
+  description: |-
+    After t-h-tools lands, HN briefer's integration test can hit real news.ycombinator.com + Substack. Replace stub paths in tests with #[ignore]-gated live test.
+    Scope: prototypes/hn-briefer/tests/**.
+    Tests: live HN top stories fetched, scored via ctx.ai(), Card emitted with real data. Mark #[ignore].
+  kind: code
+  priority: 7
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-50
   title: Write docs/11-open-source-business.md
   description: 'Licensing tiers: AGPL-3.0 kernel+surfaces; Apache-2.0 first-party packs; author-choice community packs. Monetization: hosted cloud twin, managed pack registry, support contracts. Revenue model: 9/mo entry, 49/mo pro. COGS modeling. Enterprise path (v3+) via managed offering. Not selling the software.'
   kind: code
@@ -648,7 +750,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-43
+- ref_id: task-51
   title: Write docs/12-apple-design-principles.md
   description: '10 Apple-inspired product principles applied to Chief OS: one way to do each thing, hide complexity reveal power, defaults beautiful, rituals not workflows, typography as substance, sound as chrome, continuity, physics over animation, demo as gate, privacy as UX. Each with a Chief-OS-specific guardrail.'
   kind: code
@@ -658,7 +760,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-44
+- ref_id: task-52
   title: Write docs/15-regulatory-posture.md
   description: '''Machine as fax'' legal posture for v0-v1. Every external action requires signed approval token; human is legal actor. E-signature legality (ESIGN/UETA in US, eIDAS in EU). Money rails for v1+ (via licensed partners: Stripe Issuing, Plaid, Modern Treasury). KYC on human, not agent. Glide path to v2 money/legal ceremony. Jurisdictions of concern.'
   kind: code
@@ -668,7 +770,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-45
+- ref_id: task-53
   title: Write requirements/ (4 buckets)
   description: 'docs/requirements/*.md — 4 buckets: functional.md (what Chief OS does, Night Loop contract, Pack interface), non-functional.md (reliability, observability, extensibility), security.md (threat model, cap-based rules, supply chain), performance.md (boot <10s, Morning Brief render <3s, local-model latency targets). Each bucket: append-only table of requirement IDs.'
   kind: code
@@ -678,7 +780,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-46
+- ref_id: task-54
   title: 'Research: agent-native filesystem design'
   description: 'Deep-dive research: when AI is primary user, how should the filesystem be organized? Axes to investigate: (1) content-addressed primary layout (mem://file/<hash>) vs human folders; (2) local embedding model selection — fastembed-rs, ort+onnx, sentence-transformers, bge-m3, nomic-embed — benchmark speed vs quality on Chief-OS-class CPU; (3) at-rest vs indexed vs hot — what tier? (4) what agents see vs what humans see — two views over one substrate; (5) does ~/Downloads/ live as legacy shim or get absorbed? Output: docs/research/NNNN-agent-native-fs.md + proposed edits to docs/08-memory-substrate.md. Compare with how Plan9, Tahoe-LAFS, IPFS, Cassandra did content-naming. Also check prior art: Genode, Morello, Copland-attested FS.'
   kind: research
@@ -688,7 +790,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-47
+- ref_id: task-55
   title: Incorporate OS-primitives research findings on agent return
   description: When the background research agent returns with AI-native primitive rethinks findings, (1) flesh out docs/research/2026-04-21-ai-native-primitive-rethinks.md with full content, (2) propose edits to docs/02-architecture.md for top-5 picks, (3) open ADRs for any that commit us to a technical choice, (4) update docs/14-risks-open-questions.md with new open questions.
   kind: code
@@ -698,7 +800,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-48
+- ref_id: task-56
   title: 'Prototype: chief-mem memory stack (Rust + PyO3)'
   description: |-
     CRITICAL SETUP: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db BEFORE any plandb command. Worktree sits at labs/chief-os-mem, sibling to labs/nix; plandb will walk up wrong without this.
@@ -711,7 +813,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-49
+- ref_id: task-57
   title: 'Prototype: Signed Typed Event Log (Rust)'
   description: |-
     CRITICAL SETUP: export PLANDB_DB=/Users/santoshkumarradha/Documents/agentfield/code/labs/nix/.plandb.db BEFORE any plandb command. Worktree sits at labs/chief-os-events, sibling to labs/nix; plandb will walk up wrong without this.
@@ -724,7 +826,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-50
+- ref_id: task-58
   title: 'OAuth: wire chief-oauth into chief-core via CapabilityBroker'
   description: |-
     Wire the now-working chief-oauth crate into chief-core so packs can request OAuth grants via the standard CapabilityBroker flow.
@@ -749,7 +851,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-51
+- ref_id: task-59
   title: 'Agent Runtime Phase 4: migrate HN briefer to ctx.ai() + remove v0.1 stub'
   description: |-
     Migrate prototypes/hn-briefer from ctx.llm().generate() to ctx.ai(). Remove deprecation shim from chief-sdk. Bump chief-sdk to 0.3.0.
@@ -770,7 +872,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-52
+- ref_id: task-60
   title: 'Tooling: chief-ts-lint — build-time import scanner for TS packs (ADR-0011 enforcement)'
   description: |-
     Per review feedback: the 'Nix-flake build pipeline blocks non-whitelisted imports' claim in docs/18-ui-standardization.md is not self-executing. Ship a real tool.
@@ -796,7 +898,20 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-53
+- ref_id: task-61
+  title: 'Hardening: eBPF fs + net cap enforcement prototype (Linux defense-in-depth)'
+  description: |-
+    Per docs/06-security-model.md: 'eBPF enforces fs + net caps even if nspawn/namespace is misconfigured'. Build the prototype.
+    Scope: prototypes/chief-ebpf/ (new). Rust + libbpf-rs or aya. One .bpf.c program that denies file opens outside an allowlist + net connects outside allowed hosts.
+    Tests: nixos-only. Smoke test with two busy-box processes: one inside the policy, one attempting bypass; verify bypass is killed with EPERM.
+  kind: code
+  priority: 6
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-62
   title: Write ideation + research scaffolding
   description: 'docs/ideation/README.md (how to append ideation entries), docs/ideation/2026-04-21-initial-dump.md (capture brainstorm leftovers: federation ideas, physical puck v3, enterprise trust ledger, voice-first v2, ambient display hw, agent marketplace monetization). docs/research/README.md (how to add competitor analyses, prior art, academic refs).'
   kind: code
@@ -806,7 +921,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-54
+- ref_id: task-63
   title: Write scaffold READMEs (plans, prototypes, brand)
   description: 'plans/README.md (how to write implementation plans from design docs; dated format). prototypes/README.md (scratch spike policy: each prototype gets own README + CLEANUP date). brand/README.md (naming, wordmark, typography, color, voice — todo stubs).'
   kind: code
@@ -816,7 +931,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-55
+- ref_id: task-64
   title: Document polyglot language policy
   description: 'Add section in docs/02-architecture.md + docs/requirements/non-functional.md declaring polyglot code strategy: Rust for kernel, Go for network services, TypeScript for surfaces, Python for agents/ML. No OS-startup optimization required for v0.'
   kind: code
@@ -826,7 +941,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-56
+- ref_id: task-65
   title: 'Prototype: Region Router (Rust)'
   description: 'Hypothesis: deterministic rule-table classifier that maps (action_metadata, trust_ledger_snapshot, horizon) -> (region, surface, friction_tier). Rules are YAML loaded at boot. Files: prototypes/region-router/{Cargo.toml,src/main.rs,src/rules.rs,rules/default.yaml,tests/decision_table_test.rs,README.md}. Acceptance: 100% coverage on decision-table unit tests; p50 classify < 200us; rules changes require ADR (encoded in test). Worktree: proto/region-router. Parallel-safe. References: docs/01-hax-principles.md, docs/03-chief-kernel.md (service #6).'
   kind: code
@@ -836,7 +951,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-57
+- ref_id: task-66
   title: 'Prototype: Chief FS CAS + FUSE shim (Rust)'
   description: 'Hypothesis: blake3 CAS store + FUSE shim at /chief/ that presents legacy paths as pinned aliases. Capture daemon on fanotify writes. Files: prototypes/chief-fs/{Cargo.toml,src/main.rs,src/cas.rs,src/fuse_shim.rs,src/capture_daemon.rs,README.md,measurements.md}. Acceptance: ''ls ~/Downloads'' returns aliased CIDs; delete keeps CAS blob; rename updates graph edge not CID; capture daemon p99 < 10ms per write. Worktree: proto/chief-fs. References: adr-0006, docs/research/2026-04-21-agent-native-fs.md.'
   kind: code
@@ -846,7 +961,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-58
+- ref_id: task-67
   title: 'Prototype: Morning Brief surface (TypeScript)'
   description: 'Hypothesis: render Morning Brief from mock L2 state (static JSON) at 60fps with card animations using physics-based motion. Files: prototypes/morning-brief/{package.json,src/App.tsx,src/MorningBrief.tsx,src/cards/*,mock/brief-state.json,README.md}. Acceptance: render < 3s from cold; cards animate with spring physics; trust ledger bar increments animate; provenance click-through shows a chain. Worktree: proto/morning-brief. References: docs/05-surfaces.md, docs/12-apple-design-principles.md.'
   kind: code
@@ -856,7 +971,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-59
+- ref_id: task-68
   title: 'Prototype: opencode harness wrapper (Rust)'
   description: 'Hypothesis: Rust wrapper implementing Harness trait over opencode CLI; validates swappability by also stubbing a NullHarness that records calls. Files: prototypes/harness/{Cargo.toml,src/trait.rs,src/opencode_impl.rs,src/null_impl.rs,tests/swap_test.rs,README.md}. Acceptance: same tests pass against OpencodeHarness and NullHarness; harness can be swapped at boot via config. Worktree: proto/harness. References: docs/03-chief-kernel.md (service #1 harness interface), directives log.'
   kind: code
@@ -866,7 +981,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-60
+- ref_id: task-69
   title: 'Prototype: Chief FS CAS + FUSE shim (Rust)'
   description: 'Hypothesis: blake3 CAS store + FUSE shim at /chief/ that presents legacy paths as pinned aliases. Capture daemon on fanotify writes. Files: prototypes/chief-fs/{Cargo.toml,src/main.rs,src/cas.rs,src/fuse_shim.rs,src/capture_daemon.rs,README.md,measurements.md}. Acceptance: ''ls ~/Downloads'' returns aliased CIDs; delete keeps CAS blob; rename updates graph edge not CID; capture daemon p99 < 10ms per write. Worktree: proto/chief-fs. References: adr-0006, docs/research/2026-04-21-agent-native-fs.md. NOT on critical path for v0 — deferred after agent runtime lands.'
   kind: code
@@ -876,7 +991,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-61
+- ref_id: task-70
   title: Update docs/INDEX.md with final state
   description: 'After all docs land, update docs/INDEX.md to reflect actual state: statuses, last-updated dates, any renames. Verify all cross-links resolve.'
   kind: code
@@ -886,7 +1001,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-62
+- ref_id: task-71
   title: Create docs/directives/ log for user notes and do periodic audit
   description: Create docs/directives/README.md (append-only log of verbal directives from user — time-stamped). Capture each user comment as an entry. Periodically run an 'audit pass' that cross-references existing docs against directives and flags where edits are needed. First audit scheduled after t-idx completes. This is the formal capture channel for the user's ongoing verbal direction.
   kind: generic
@@ -896,7 +1011,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-63
+- ref_id: task-72
   title: 'Prototype: HAX Inbox surface (Rust TUI + Wayland overlay)'
   description: 'Hypothesis: single pane listing pending approvals with 4 affordances (approve/deny/delegate/defer). ratatui TUI + Iced/Slint Wayland overlay. Files: prototypes/hax-inbox/{Cargo.toml,src/main.rs,src/tui.rs,src/overlay.rs,README.md}. Acceptance: subscribes to event log (mock), renders queue; keyboard-only parity with mouse/touch. Worktree: proto/hax-inbox. References: adr-0007, docs/05-surfaces.md.'
   kind: code
@@ -906,7 +1021,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-64
+- ref_id: task-73
   title: 'Follow-up research: incorporate primitive-rethink findings into docs 02/03/05/08/13'
   description: 'The background agent returned a substrate spine (5 primitives). Most already baked into v0-scope, architecture, and ADRs 0005-0007. Final polish pass: ensure docs/08-memory-substrate.md reflects ADR 0008 pure-OSS stack fully; ensure Clipboard Pane has a dedicated section in docs/05-surfaces.md; cross-link from docs/03-chief-kernel.md to ADR 0005-0008. Worktree: docs/substrate-polish. References: docs/research/2026-04-21-ai-native-primitive-rethinks.md.'
   kind: code
@@ -916,7 +1031,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-65
+- ref_id: task-74
   title: Initial commit + track plandb.db
   description: 'git add -A; verify .plandb.db is tracked (explicit negation in .gitignore); initial commit with message ''init: Chief OS — axioms, architecture scaffold, v0 scope, plandb project''. Do NOT push yet — user decides. Record what was committed.'
   kind: shell
@@ -926,7 +1041,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-66
+- ref_id: task-75
   title: 'Brand: pick typeface, sound palette, motion spec'
   description: 'Per docs/12-apple-design-principles.md: commissioned typeface vs licensed (Pitch/Söhne/Sentinel) vs open (Inter-adjacent). Sound partner (composer or licensed library). Motion spec grounded in physics (spring systems). Deliverable: brand/typeface.md, brand/sound.md, brand/motion.md + specimen screenshots. Deadline: day 30 per v0 scope. References: docs/12-apple-design-principles.md (guardrail 5,6,8), docs/05-surfaces.md.'
   kind: research
@@ -936,7 +1051,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-67
+- ref_id: task-76
   title: 'Legal: draft Terms of Service encoding machine-as-fax posture'
   description: 'Per adr-0004 and docs/15-regulatory-posture.md: ToS must encode (1) every external action is cryptographically signed by user via ceremony, making human the legal actor; (2) ESIGN/UETA/eIDAS compatibility language; (3) GDPR controller/processor clarity (user is controller). External counsel review required before v0 public launch. Files: legal/terms-of-service.md (new dir), legal/privacy-policy.md. Cross-link from docs/15-regulatory-posture.md.'
   kind: generic
@@ -946,7 +1061,7 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-68
+- ref_id: task-77
   title: 'LICENSE: replace placeholder with full AGPL-3.0-or-later text'
   description: 'Current /LICENSE is a placeholder pointing to gnu.org/licenses/agpl-3.0.txt. Replace with the full license text. Keep the prefix note about project copyright + replaced-Apache-from-GH-wizard. Acceptance: file contains verbatim AGPL-3.0-or-later text from gnu.org, plus our project notice at top. Worktree: docs/license-full.'
   kind: generic
@@ -956,7 +1071,20 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-69
+- ref_id: task-78
+  title: 'Hardening: Firecracker microVM evaluation spike (v1 planning)'
+  description: |-
+    NOT implementation — evaluation spike per ADR-0014 v1+ deferral. Measure Firecracker boot time for a Chief-pack microVM on reference hardware; document findings in docs/research/.
+    Scope: docs/research/YYYY-MM-DD-firecracker-spike.md. Maybe a small harness in prototypes/fc-spike/. Do NOT wire into chief-core; this informs v1+ not v0.
+    Acceptance: reported boot time ± variance + recommended cold-boot-vs-snapshot strategy for v1+ sequencing.
+  kind: research
+  priority: 3
+  parent_ref: null
+  pre_condition: null
+  post_condition: null
+  pre_hook: null
+  post_hook: null
+- ref_id: task-79
   title: 'Future: prototype spikes (capability broker, region router, morning brief render, memory graph)'
   description: 'Placeholder for post-scaffold implementation work. Use codex on git worktrees for parallel spikes: (1) capability-broker proof — tiny Rust service with typed cap grants, (2) region-router rule-table — deterministic classifier + tests, (3) morning-brief render — React/Svelte surface over mock data, (4) memory-graph tri-store (SQLite + FAISS + edges). Each spike: own README + CLEANUP date. For agent harness inside these: use opencode (swappable interface).'
   kind: code
@@ -966,12 +1094,12 @@ tasks:
   post_condition: null
   pre_hook: null
   post_hook: null
-- ref_id: task-70
+- ref_id: task-80
   title: 'Prototype: Capability Broker (Rust)'
   description: 'Hypothesis: build a minimal Capability Broker in Rust that (a) issues typed scoped bearer-style grants, (b) verifies every call via broker.check, (c) emits signed provenance entries to stdout in in-toto v1 format. Files expected: prototypes/capability-broker/{Cargo.toml,src/main.rs,src/grant.rs,src/check.rs,README.md,measurements.md}. Acceptance: 1000 check() ops in <100ms; grant revoke reflected in next check; fuzz at least 10k inputs with no panic. Worktree: branch proto/capability-broker; own plandb agent (PLANDB_AGENT=codex-cap-broker). Parallel-safe: no shared state with other prototype tasks. References: docs/03-chief-kernel.md (service #2), docs/06-security-model.md, adr/0002.'
   kind: generic
   priority: 0
-  parent_ref: task-69
+  parent_ref: task-79
   pre_condition: null
   post_condition: null
   pre_hook: null
@@ -987,124 +1115,145 @@ dependencies:
   to_ref: task-5
   kind: feeds_into
 - from_ref: task-6
-  to_ref: task-11
-  kind: feeds_into
-- from_ref: task-6
-  to_ref: task-23
-  kind: feeds_into
-- from_ref: task-6
-  to_ref: task-24
-  kind: feeds_into
-- from_ref: task-6
   to_ref: task-12
   kind: feeds_into
 - from_ref: task-6
-  to_ref: task-31
-  kind: feeds_into
-- from_ref: task-6
-  to_ref: task-25
-  kind: feeds_into
-- from_ref: task-6
-  to_ref: task-32
-  kind: feeds_into
-- from_ref: task-6
-  to_ref: task-34
-  kind: feeds_into
-- from_ref: task-6
-  to_ref: task-35
-  kind: feeds_into
-- from_ref: task-6
-  to_ref: task-45
-  kind: feeds_into
-- from_ref: task-11
-  to_ref: task-7
-  kind: feeds_into
-- from_ref: task-12
-  to_ref: task-7
-  kind: feeds_into
-- from_ref: task-31
-  to_ref: task-7
-  kind: feeds_into
-- from_ref: task-7
   to_ref: task-26
   kind: feeds_into
-- from_ref: task-7
-  to_ref: task-61
+- from_ref: task-6
+  to_ref: task-27
   kind: feeds_into
-- from_ref: task-9
-  to_ref: task-20
+- from_ref: task-6
+  to_ref: task-13
   kind: feeds_into
-- from_ref: task-10
-  to_ref: task-29
+- from_ref: task-6
+  to_ref: task-37
   kind: feeds_into
-- from_ref: task-10
-  to_ref: task-30
+- from_ref: task-6
+  to_ref: task-28
   kind: feeds_into
-- from_ref: task-10
-  to_ref: task-22
+- from_ref: task-6
+  to_ref: task-38
   kind: feeds_into
-- from_ref: task-11
-  to_ref: task-61
+- from_ref: task-6
+  to_ref: task-40
+  kind: feeds_into
+- from_ref: task-6
+  to_ref: task-41
+  kind: feeds_into
+- from_ref: task-6
+  to_ref: task-53
   kind: feeds_into
 - from_ref: task-12
-  to_ref: task-61
+  to_ref: task-7
   kind: feeds_into
-- from_ref: task-23
-  to_ref: task-61
+- from_ref: task-13
+  to_ref: task-7
   kind: feeds_into
-- from_ref: task-24
-  to_ref: task-61
+- from_ref: task-37
+  to_ref: task-7
+  kind: feeds_into
+- from_ref: task-7
+  to_ref: task-29
+  kind: feeds_into
+- from_ref: task-7
+  to_ref: task-70
+  kind: feeds_into
+- from_ref: task-9
+  to_ref: task-21
+  kind: feeds_into
+- from_ref: task-10
+  to_ref: task-32
+  kind: feeds_into
+- from_ref: task-10
+  to_ref: task-33
+  kind: feeds_into
+- from_ref: task-10
+  to_ref: task-23
+  kind: feeds_into
+- from_ref: task-58
+  to_ref: task-11
+  kind: feeds_into
+- from_ref: task-11
+  to_ref: task-25
+  kind: feeds_into
+- from_ref: task-11
+  to_ref: task-36
+  kind: feeds_into
+- from_ref: task-11
+  to_ref: task-49
+  kind: feeds_into
+- from_ref: task-12
+  to_ref: task-70
+  kind: feeds_into
+- from_ref: task-13
+  to_ref: task-70
+  kind: feeds_into
+- from_ref: task-58
+  to_ref: task-24
+  kind: feeds_into
+- from_ref: task-58
+  to_ref: task-25
   kind: feeds_into
 - from_ref: task-25
-  to_ref: task-61
+  to_ref: task-35
   kind: feeds_into
 - from_ref: task-26
-  to_ref: task-61
+  to_ref: task-70
+  kind: feeds_into
+- from_ref: task-27
+  to_ref: task-70
+  kind: feeds_into
+- from_ref: task-28
+  to_ref: task-70
   kind: feeds_into
 - from_ref: task-29
-  to_ref: task-30
-  kind: feeds_into
-- from_ref: task-30
-  to_ref: task-51
-  kind: feeds_into
-- from_ref: task-31
-  to_ref: task-61
+  to_ref: task-70
   kind: feeds_into
 - from_ref: task-32
-  to_ref: task-61
+  to_ref: task-33
   kind: feeds_into
 - from_ref: task-33
-  to_ref: task-61
+  to_ref: task-59
   kind: feeds_into
-- from_ref: task-34
-  to_ref: task-61
+- from_ref: task-37
+  to_ref: task-70
   kind: feeds_into
-- from_ref: task-35
-  to_ref: task-61
+- from_ref: task-38
+  to_ref: task-70
   kind: feeds_into
-- from_ref: task-42
-  to_ref: task-61
+- from_ref: task-39
+  to_ref: task-70
   kind: feeds_into
-- from_ref: task-43
-  to_ref: task-61
+- from_ref: task-40
+  to_ref: task-70
   kind: feeds_into
-- from_ref: task-44
-  to_ref: task-61
+- from_ref: task-41
+  to_ref: task-70
   kind: feeds_into
-- from_ref: task-45
-  to_ref: task-61
+- from_ref: task-50
+  to_ref: task-70
+  kind: feeds_into
+- from_ref: task-51
+  to_ref: task-70
+  kind: feeds_into
+- from_ref: task-52
+  to_ref: task-70
   kind: feeds_into
 - from_ref: task-53
-  to_ref: task-61
+  to_ref: task-70
   kind: feeds_into
-- from_ref: task-54
-  to_ref: task-61
+- from_ref: task-62
+  to_ref: task-70
   kind: feeds_into
-- from_ref: task-61
-  to_ref: task-65
+- from_ref: task-63
+  to_ref: task-70
   kind: feeds_into
-- from_ref: task-65
-  to_ref: task-69
+- from_ref: task-70
+  to_ref: task-74
+  kind: feeds_into
+- from_ref: task-74
+  to_ref: task-79
   kind: blocks
 context:
 - kind: discovery
@@ -1114,11 +1263,11 @@ context:
 - kind: discovery
   content: 'HN Briefer dogfood: SDK surface was complete. No gaps found. Badge enum is properly closed. Grant validation works. InMemoryConnector stubs sufficient for integration testing.'
   tags: []
-  task_ref: task-57
+  task_ref: task-66
 - kind: discovery
   content: 't-mb-live-api complete: Morning Brief now polls chief-core /brief every 3s. Approval flow working (POST /approve) with offline graceful degradation. All 6 API endpoints wrapped with typed fetch + timeouts (5s default, 30s for /intent & /approve). Tests: api.test.ts (6 endpoints + errors) + useBriefState.test.tsx (polling, offline fallback, backoff reset). PR#26.'
   tags: []
-  task_ref: task-57
+  task_ref: task-66
 - kind: discovery
   content: 'Docker validation: 4 bugs found in original Dockerfile/compose: (1) placeholder SHA256 for Qwen model would fail on first build — real sha256 is 626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d (from HF Hub x-linked-etag); (2) Rust 1.82 base image too old — rmp 0.8.15 requires edition2024 (Rust 1.85+) — bumped to rust:1.89-slim-bookworm; (3) chief-core defaults to --bind 127.0.0.1:4711 which isn''t reachable from host port-mapping — wrap in entrypoint.sh that execs with --bind 0.0.0.0:4711; (4) no static-file server for Morning Brief on port 5173 — Dockerfile copied dist to /app/morning-brief but nothing served it — added busybox-static and run busybox httpd on :5173 from entrypoint. Also: Docker Desktop''s default IPv6 port mapping ''::]:5173->5173'' hijacks localhost-over-v6 since busybox httpd is IPv4-only; pin host side to ''0.0.0.0:PORT:PORT'' in compose to force IPv4-only host mapping. Fixed demo-docker.sh payload key (prompt -> text) to match routes.rs. Validation results: build ~200s cold, image 4.35GB, boot-to-healthy ~7s, memory 3MB (stub backend), all 4 endpoints pass.'
   tags: []

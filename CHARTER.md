@@ -14,7 +14,7 @@ tags: [constitution, axioms]
 | # | Axiom | One-line test |
 |---|---|---|
 | 1 | AI is the primary user; humans are approvers and editors. | Is every resource agent-addressable before it is human-viewable? |
-| 2 | No ambient authority. Ever. | Does this action flow through an explicit capability grant? |
+| 2 | No *software-ambient* authority. The device's hardware-sealed identity key is the sole permitted root-of-trust ambient authority; it is visible in Security & Privacy, revocable only by device wipe, and replayable via signed boot-attestation. Every other action — including the kernel's own — flows through an explicit capability grant. | Does this action flow through an explicit capability grant (or, for kernel-self actions, through a boot-attested grant issued by the device identity key)? |
 | 3 | Provenance is unforgeable and total. | Can every artifact be traced to every agent and source that touched it? |
 | 4 | Trust is calibrated, not granted. | Does this delegation decision read from the Trust Ledger? |
 | 5 | Reversibility is a kernel primitive. | Can we rewind this action across files, state, and agent memory in one step? |
@@ -34,5 +34,9 @@ New ADR in [`adr/`](./adr/) must:
 4. List downstream decisions that shift.
 
 Merge requires explicit approval from the steward until governance is established.
+
+## Amendment log
+
+- **2026-04-21**: Axiom 2 refined per [ADR-0016](./adr/0016-kernel-principal-identity.md) to distinguish software-ambient authority (forbidden) from hardware-rooted identity (permitted root of trust, auditable, wipe-revocable).
 
 *Etched: 2026-04-21.*

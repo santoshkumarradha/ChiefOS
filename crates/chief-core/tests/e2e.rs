@@ -27,7 +27,7 @@ async fn test_intent_and_brief_flow() {
     let state = Arc::new(state);
 
     let intent_text = "draft an email to alice@example.com";
-    let cards = chief_core::dispatch::dispatch_intent(&intent_text, "intent-1", &state)
+    let cards = chief_core::dispatch::dispatch_intent(intent_text, "intent-1", &state)
         .await
         .expect("dispatch failed");
 

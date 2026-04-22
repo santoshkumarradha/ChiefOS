@@ -10,6 +10,7 @@ members = [
     "crates/chief-core",
     "crates/chief-cli",
     "crates/chief-sdk",
+    "crates/chief-ui",
     "prototypes/hello-world-pack",
 ]
 exclude = [

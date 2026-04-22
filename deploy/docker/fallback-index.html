@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chief OS — Morning Brief</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0b0b0f;
+      --fg: #f4f4f5;
+      --muted: #a1a1aa;
+      --card: #17171c;
+      --accent: #fbbf24;
+      --ceremony: #f472b6;
+      --border: rgba(255, 255, 255, 0.08);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #fafafa;
+        --fg: #18181b;
+        --muted: #52525b;
+        --card: #ffffff;
+        --border: rgba(0, 0, 0, 0.08);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem;
+    }
+    header {
+      width: min(720px, 100%);
+      margin-bottom: 2rem;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+      letter-spacing: -0.01em;
+    }
+    .muted { color: var(--muted); font-size: 0.9rem; }
+    main { width: min(720px, 100%); display: flex; flex-direction: column; gap: 0.75rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      transition: transform 120ms ease;
+    }
+    .card h3 { margin: 0 0 0.25rem; font-size: 0.95rem; font-weight: 600; }
+    .card .src { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .card .body { margin-top: 0.5rem; font-size: 0.85rem; color: var(--muted); line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
+    .card.ceremony { border-left: 3px solid var(--ceremony); }
+    .card.hn { border-left: 3px solid var(--accent); }
+    .empty { color: var(--muted); font-size: 0.9rem; padding: 2rem; text-align: center; }
+    .section-title { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 1.5rem 0 0.25rem; }
+    pre {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.75rem;
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    footer { width: min(720px, 100%); margin-top: 2rem; font-size: 0.75rem; color: var(--muted); }
+    footer code { background: var(--card); padding: 0.15rem 0.35rem; border-radius: 4px; font-size: 0.8em; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Good morning.</h1>
+    <div class="muted" id="date-line">loading…</div>
+  </header>
+
+  <main>
+    <div class="section-title">Needs you</div>
+    <div id="needs-you"><div class="empty">Nothing yet. Agents are starting up…</div></div>
+
+    <div class="section-title">Handled</div>
+    <div id="handled"><div class="empty">None handled yet.</div></div>
+  </main>
+
+  <footer>
+    <p>Raw endpoints: <code>GET /v1/brief</code>, <code>GET /v1/inbox</code>, <code>GET /v1/status</code>.</p>
+    <p>Fallback UI (vite bundle not available in this build). Full Morning Brief UI ships once the frontend PR lands.</p>
+    <div class="section-title">Raw /v1/brief</div>
+    <pre id="raw">loading…</pre>
+  </footer>
+
+  <script>
+    const fmt = (d) => new Date(d).toLocaleString();
+    const safe = (v, fallback = "") => (v == null ? fallback : String(v));
+
+    async function refresh() {
+      try {
+        const brief = await fetch("/v1/brief").then((r) => r.json());
+        document.getElementById("date-line").textContent =
+          (brief.needs_you?.length ?? 0) + " need you • " +
+          (brief.handled?.length ?? 0) + " handled • " +
+          safe(brief.date);
+        renderList("needs-you", brief.needs_you || [], true);
+        renderList("handled", brief.handled || [], false);
+        document.getElementById("raw").textContent = JSON.stringify(brief, null, 2);
+      } catch (e) {
+        document.getElementById("date-line").textContent = "error fetching brief: " + e.message;
+      }
+    }
+
+    function renderList(id, items, isNeedsYou) {
+      const host = document.getElementById(id);
+      if (!items.length) {
+        host.innerHTML = isNeedsYou
+          ? '<div class="empty">Nothing yet. Agents are starting up…</div>'
+          : '<div class="empty">None handled yet.</div>';
+        return;
+      }
+      host.innerHTML = items
+        .map((c) => {
+          const cls = c.action_type === "capability_escalation" ? "ceremony" : "hn";
+          return `
+            <div class="card ${cls}">
+              <div class="src">${safe(c.action_type)} • ${safe(c.surface)}</div>
+              <h3>${safe(c.summary)}</h3>
+              <div class="body">${safe(c.mem_uri)} — created ${fmt(c.created_at)}</div>
+            </div>`;
+        })
+        .join("");
+    }
+
+    refresh();
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>

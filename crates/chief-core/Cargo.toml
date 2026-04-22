@@ -56,6 +56,13 @@ path = "src/main.rs"
 name = "chief_core_server"
 path = "src/bin/chief_core_server.rs"
 
+# Demo orchestrator binary. Boots chief-core HTTP API + schedules the
+# hn-briefer / file-watcher ticks with real capability-escalation on a
+# narrow net.http grant. See `src/bin/demo_run.rs` for the full story.
+[[bin]]
+name = "demo_run"
+path = "src/bin/demo_run.rs"
+
 [dev-dependencies]
 tempfile.workspace = true
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }

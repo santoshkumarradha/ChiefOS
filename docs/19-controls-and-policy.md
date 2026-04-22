@@ -230,7 +230,15 @@ If more than 30 items land here, the surface has drifted. Current candidate list
 - Rectify data
 - Retention settings (how long event-log entries are kept)
 
-**Total**: ~28 items. Under cap.
+**Models (per ADR-0013 — agent runtime) (6)**
+- Fast tier → model (picker; default: local Qwen 2.5 3B Q4)
+- Deep tier → model (picker; default: local Qwen 14B Q4 or Unbound)
+- Provider credentials (sealed storage for API keys — reuses `chief-oauth` sealed storage)
+- Default on-device toggle
+- Per-day cost budget
+- Per-pack override (advanced; empty by default)
+
+**Total**: ~34 items. Under cap. Note: Models is included because tier→model bindings are user-controlled preferences, not authority grants; they fit the Controls contract. If this expands significantly, split into a dedicated surface.
 
 ### Ruled OUT of Controls
 

@@ -37,6 +37,7 @@ Machine-readable map of all Chief OS documentation. Update when adding or renami
 | `os-ceremonies` | [`17-os-ceremonies-and-boundaries.md`](./17-os-ceremonies-and-boundaries.md) | draft | What the OS absorbs (OAuth, pickers, payment, e-sign, devices); threat model; anti-phishing |
 | `ui-standardization` | [`18-ui-standardization.md`](./18-ui-standardization.md) | draft | `chief-ui` primitive catalog, token system, pack enforcement layers |
 | `controls-and-policy` | [`19-controls-and-policy.md`](./19-controls-and-policy.md) | draft | Security & Privacy surface + Controls surface (implementation spec) |
+| `agent-runtime` | [`20-agent-runtime.md`](./20-agent-runtime.md) | draft | Two-primitive SDK (`.ai()` + `.harness()`), tier-based routing, engine adapter, harness runtime spec |
 
 ## Decisions (ADRs)
 
@@ -56,6 +57,7 @@ Machine-readable map of all Chief OS documentation. Update when adding or renami
 | `adr-0010` | [`../adr/0010-sdk-public-api-stability.md`](../adr/0010-sdk-public-api-stability.md) | accepted |
 | `adr-0011` | [`../adr/0011-ui-stack-and-component-library.md`](../adr/0011-ui-stack-and-component-library.md) | accepted |
 | `adr-0012` | [`../adr/0012-no-settings-app.md`](../adr/0012-no-settings-app.md) | accepted |
+| `adr-0013` | [`../adr/0013-agent-runtime-two-tier-llm.md`](../adr/0013-agent-runtime-two-tier-llm.md) | accepted |
 
 ## Reusable diagrams (mermaid)
 

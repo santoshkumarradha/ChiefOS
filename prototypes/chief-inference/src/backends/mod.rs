@@ -10,9 +10,11 @@ pub mod stub;
 pub use stub as local;
 
 pub mod cloud_stub;
+pub mod openrouter;
 
 pub use cloud_stub::CloudAnthropicStub;
 pub use local::LocalLlamaCppStub;
+pub use openrouter::OpenRouterBackend;
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -32,5 +34,10 @@ pub trait ModelBackend: Send + Sync {
     fn id(&self) -> BackendId;
     fn health(&self) -> Result<()>;
     fn capabilities(&self) -> CapabilitySet;
-    async fn infer(&self, prompt: &str, temperature: Option<f32>, top_p: Option<f32>) -> Result<String>;
+    async fn infer(
+        &self,
+        prompt: &str,
+        temperature: Option<f32>,
+        top_p: Option<f32>,
+    ) -> Result<String>;
 }

@@ -6,6 +6,31 @@ An AI-native operating system where agents are first-class citizens and humans a
 
 Built on NixOS. Licensed AGPL-3.0.
 
+## Run the demo (30 seconds to real AI content)
+
+One-line demo with real HN + real OpenRouter + a real capability-escalation Ceremony. Zero mocks.
+
+```bash
+export OPENROUTER_API_KEY=sk-or-...    # get one at https://openrouter.ai/keys
+docker run -p 8080:8080 \
+           -e OPENROUTER_API_KEY=$OPENROUTER_API_KEY \
+           -v $(pwd)/chief-state:/var/chief \
+           -v $(pwd)/workspace:/workspace \
+           chief-os-demo:latest
+```
+
+Open `http://localhost:8080` — within ~30 seconds the Brief populates with live HN headlines scored by `openai/gpt-4o-mini`. Seconds later, the pack attempts `*.substack.com` with a narrow grant, the broker denies, and a Ceremony card appears: the grant-escalation flow arising from real capability enforcement, not a fixture.
+
+Build from source:
+
+```bash
+docker build -f deploy/docker/Dockerfile -t chief-os-demo:latest .
+```
+
+Full details, architecture walkthrough, and troubleshooting: [`deploy/docker/README.md`](./deploy/docker/README.md).
+
+<!-- TODO: add screenshot once UI settles: ./screenshots/demo-brief-30s.png -->
+
 ## Quick Start (Docker)
 
 To try Chief OS locally with `docker compose` (Path B — Docker-as-OS):

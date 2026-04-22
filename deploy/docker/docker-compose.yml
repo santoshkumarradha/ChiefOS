@@ -1,0 +1,38 @@
+# Chief OS — live demo (deploy/docker/docker-compose.yml)
+#
+# From this directory:
+#   OPENROUTER_API_KEY=sk-or-... docker compose up --build
+#
+# From the repo root (uses the top-level alternate file):
+#   OPENROUTER_API_KEY=sk-or-... docker compose -f deploy/docker/docker-compose.yml up --build
+
+services:
+  chief-os-demo:
+    build:
+      # Context is the repo root — the Dockerfile copies the whole workspace.
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    image: chief-os-demo:latest
+    container_name: chief-os-demo
+    ports:
+      - "0.0.0.0:8080:8080"
+    environment:
+      # Required: the demo binary fails fast if this is absent.
+      # Get a key at https://openrouter.ai/keys
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?OPENROUTER_API_KEY required — get one at https://openrouter.ai/keys}
+      # Optional overrides
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openai/gpt-4o-mini}
+      RUST_LOG: ${RUST_LOG:-info,reqwest=warn}
+    volumes:
+      # Persistent state: broker SQLite, memory graph, attestations, sealed secrets.
+      - ./chief-state:/var/chief
+      # Workspace for the file-watcher pack. Drop markdown / txt in here
+      # and it surfaces as a Morning Brief card on the next tick.
+      - ./workspace:/workspace
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/v1/status"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 45s
+    restart: unless-stopped

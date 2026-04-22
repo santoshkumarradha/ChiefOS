@@ -263,7 +263,10 @@ fn enter_terminal() -> Result<Terminal<CrosstermBackend<Stdout>>> {
     Terminal::new(CrosstermBackend::new(io::stdout())).map_err(Into::into)
 }
 
-fn leave_terminal<B: Backend>(terminal: &mut Terminal<B>) -> Result<()> {
+fn leave_terminal<B: Backend>(terminal: &mut Terminal<B>) -> Result<()>
+where
+    <B as Backend>::Error: Send + Sync + 'static,
+{
     disable_raw_mode()?;
     execute!(io::stdout(), LeaveAlternateScreen)?;
     terminal.show_cursor()?;

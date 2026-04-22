@@ -1,0 +1,39 @@
+{
+  "name": "@chief-os/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Chief OS React primitive kit: locked tokens and OS-feeling surface components.",
+  "license": "AGPL-3.0-or-later",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./tokens.css": "./src/tokens.css",
+    "./tauri/vibrancy": {
+      "types": "./dist/src/tauri/vibrancy.d.ts",
+      "default": "./dist/src/tauri/vibrancy.js"
+    }
+  },
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "dist",
+    "src/tokens.css",
+    "assets/fonts",
+    "internal/shadcn/LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/tests/*.test.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "typescript": "^5.6.3"
+  }
+}

@@ -28,12 +28,16 @@ tags: [ui, ux, surfaces, hax]
 | **Clipboard Pane** | 1, 5 | `kbd://` typed clipboard with agent transforms. | Auto / gesture |
 | Live Agent View | 6 (observe) | Cinematic real-time agent activity | Scroll / filter |
 | Provenance Explorer | 3, 4 | Walk back any artifact's chain | Click / keystroke |
+| **Security & Privacy** | 6 (audit) | **Universal read-dominant inventory: who has access to what, what they've done, when.** Includes OS-itself grants. | Menubar shield / Omnibar / Inspector link |
 | Trust Ledger Viewer | 4, 8 | See + adjust delegation | Tap (read) / ritual (write) |
 | Ceremony | 7, 8 | High-stakes approvals with evidence + friction | Hold / biometric / co-sign |
 | Chat Pane | 1, 5 | Ad-hoc "ask / tell Chief" | Voice / typing |
+| **Controls** | 1, 2 | **~30 hand-curated cosmetic preferences.** No security / authority items. | Omnibar |
 | Quarterly Review | 4, 8 | Renegotiation ritual every 90d | Guided walk |
 
 Three new surfaces (**HAX Inbox, Omnibar, Clipboard Pane**) come from the substrate-spine research ([`research/2026-04-21-ai-native-primitive-rethinks.md`](./research/2026-04-21-ai-native-primitive-rethinks.md)). They are first-class, not add-ons.
+
+**Security & Privacy** and **Controls** are added per [`adr-0012`](../adr/0012-no-settings-app.md). Chief OS does not ship a Settings app; control is decomposed across surfaces matched to HAX region, with Security & Privacy as the unified read-dominant audit surface and Controls as the tight cosmetic-preferences surface. Detailed spec: [`18-ui-standardization.md`](./18-ui-standardization.md) (primitives) and [`19-controls-and-policy.md`](./19-controls-and-policy.md) (implementation).
 
 ## Morning Brief — the flagship
 

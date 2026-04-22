@@ -1,0 +1,37 @@
+[package]
+name = "chief-ebpf"
+version = "0.0.1"
+edition = "2021"
+rust-version = "1.75"
+license = "AGPL-3.0-or-later"
+authors = ["Santosh Kumar Radha <santosh@agentfield.ai>"]
+description = "Chief OS eBPF enforcement prototype — LSM + kprobe fs/net deny-outside-allowlist"
+publish = false
+
+[lib]
+name = "chief_ebpf"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+
+# Linux-only eBPF userland loader. Pure Rust (no libbpf C deps).
+# Kept at 0.13.x to match workspace MSRV (1.75). aya's eBPF-program crate
+# (aya-ebpf) is a separate crate that targets `bpfel-unknown-none`; we keep
+# the eBPF program source in-tree (`src/ebpf/chief_enforce.rs`) but do NOT
+# compile it as a workspace member — it is documented as "build with
+# `bpf-linker` on Linux CI" (see README). This keeps the userland crate
+# cross-platform without forcing every developer to install an eBPF
+# toolchain.
+[target.'cfg(target_os = "linux")'.dependencies]
+aya = { version = "0.13", default-features = false }
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[[test]]
+name = "integration"
+path = "tests/integration.rs"

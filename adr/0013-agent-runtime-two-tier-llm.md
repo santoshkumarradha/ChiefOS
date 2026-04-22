@@ -141,9 +141,17 @@ You have no Deep-tier model configured.
 → Cancel install
 ```
 
-At v0, the OS ships with **both tiers pre-bound to local defaults**, so this dialog appears only for users who have explicitly unbound a tier or who lack local compute for the Deep default (then they bind a cloud provider).
+**First-run auto-bind.** On first boot, chief-core probes device capability (CPU, RAM, GPU) and auto-binds sensible defaults:
 
-**Rationale for block vs. soft-degrade**: the pack's value prop may depend on the missing tier. Soft-degrade ships a half-broken pack with an opaque reason. Block-with-fix gives the user a clear action and takes ~30 seconds. Soft-degrade is a post-v0 consideration if clearly warranted.
+| Device profile | Fast tier default | Deep tier default |
+|---|---|---|
+| Apple Silicon ≥ 32 GB, Linux ≥ 32 GB + GPU | Qwen 2.5 3B Q4 (local) | Qwen 14B Q4 (local) |
+| Apple Silicon 16 GB | Qwen 2.5 3B Q4 (local) | **Unbound** — Ceremony on first Deep-tier pack install offers "Bind to cloud provider" flow |
+| Apple Silicon 8 GB, small Linux, or otherwise low-RAM | Qwen 2.5 3B Q4 Q4 (local) | **Unbound** — same Ceremony flow |
+
+Practical consequence: for many consumer MacBooks (M1/M2 with 16 GB), Deep starts as Unbound, and the first Deep-tier pack to install triggers a friendly first-time Ceremony: "HN Briefer wants a Deep-tier model. Your device can run Fast locally but not Deep. Bind Deep to a cloud provider (Anthropic / OpenAI / Google) or decline." This is a single 30-second flow, attested in the event log, that also issues the `net.http { hosts: ["<provider>"] }` grant the kernel needs.
+
+**Rationale for block vs. soft-degrade**: the pack's value prop may depend on the missing tier. Soft-degrade ships a half-broken pack with an opaque reason. Block-with-fix-or-cloud-bind gives the user a clear action. Soft-degrade is a post-v0 consideration if clearly warranted.
 
 ### HAX consequentiality gradient (binding)
 

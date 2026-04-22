@@ -38,6 +38,7 @@ Machine-readable map of all Chief OS documentation. Update when adding or renami
 | `ui-standardization` | [`18-ui-standardization.md`](./18-ui-standardization.md) | draft | `chief-ui` primitive catalog, token system, pack enforcement layers |
 | `controls-and-policy` | [`19-controls-and-policy.md`](./19-controls-and-policy.md) | draft | Security & Privacy surface + Controls surface (implementation spec) |
 | `agent-runtime` | [`20-agent-runtime.md`](./20-agent-runtime.md) | draft | Two-primitive SDK (`.ai()` + `.harness()`), tier-based routing, engine adapter, harness runtime spec |
+| `harness-resume-protocol` | [`21-harness-resume-protocol.md`](./21-harness-resume-protocol.md) | draft | Ceremony-interrupted harness sessions: pause, approve/deny/timeout, multi-pause, engine-state handling |
 
 ## Decisions (ADRs)
 
@@ -58,6 +59,9 @@ Machine-readable map of all Chief OS documentation. Update when adding or renami
 | `adr-0011` | [`../adr/0011-ui-stack-and-component-library.md`](../adr/0011-ui-stack-and-component-library.md) | accepted |
 | `adr-0012` | [`../adr/0012-no-settings-app.md`](../adr/0012-no-settings-app.md) | accepted |
 | `adr-0013` | [`../adr/0013-agent-runtime-two-tier-llm.md`](../adr/0013-agent-runtime-two-tier-llm.md) | accepted |
+| `adr-0014` | [`../adr/0014-opencode-subprocess-boundary.md`](../adr/0014-opencode-subprocess-boundary.md) | accepted |
+| `adr-0015` | [`../adr/0015-chief-os-compositor.md`](../adr/0015-chief-os-compositor.md) | accepted |
+| `adr-0016` | [`../adr/0016-kernel-principal-identity.md`](../adr/0016-kernel-principal-identity.md) | accepted |
 
 ## Reusable diagrams (mermaid)
 

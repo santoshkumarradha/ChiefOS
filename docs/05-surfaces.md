@@ -32,12 +32,13 @@ tags: [ui, ux, surfaces, hax]
 | Trust Ledger Viewer | 4, 8 | See + adjust delegation | Tap (read) / ritual (write) |
 | Ceremony | 7, 8 | High-stakes approvals with evidence + friction | Hold / biometric / co-sign |
 | Chat Pane | 1, 5 | Ad-hoc "ask / tell Chief" | Voice / typing |
-| **Controls** | 1, 2 | **~30 hand-curated cosmetic preferences.** No security / authority items. | Omnibar |
+| **Controls** | 1, 2 | **~28 hand-curated cosmetic preferences.** No security / authority / routing items. | Omnibar |
+| **Models** | 4 | **Tier→model bindings + cloud-provider enrollment.** Cloud bindings are Ceremony-gated. | Menubar brain glyph / Omnibar |
 | Quarterly Review | 4, 8 | Renegotiation ritual every 90d | Guided walk |
 
 Three new surfaces (**HAX Inbox, Omnibar, Clipboard Pane**) come from the substrate-spine research ([`research/2026-04-21-ai-native-primitive-rethinks.md`](./research/2026-04-21-ai-native-primitive-rethinks.md)). They are first-class, not add-ons.
 
-**Security & Privacy** and **Controls** are added per [`adr-0012`](../adr/0012-no-settings-app.md). Chief OS does not ship a Settings app; control is decomposed across surfaces matched to HAX region, with Security & Privacy as the unified read-dominant audit surface and Controls as the tight cosmetic-preferences surface. Detailed spec: [`18-ui-standardization.md`](./18-ui-standardization.md) (primitives) and [`19-controls-and-policy.md`](./19-controls-and-policy.md) (implementation).
+**Security & Privacy**, **Controls**, and **Models** are added per [`adr-0012`](../adr/0012-no-settings-app.md) + [`adr-0013`](../adr/0013-agent-runtime-two-tier-llm.md). Chief OS does not ship a Settings app; control is decomposed across surfaces matched to HAX region — Security & Privacy (read-dominant audit), Controls (cosmetic preferences), Models (tier→model routing). Detailed spec: [`18-ui-standardization.md`](./18-ui-standardization.md) (primitives) and [`19-controls-and-policy.md`](./19-controls-and-policy.md) (implementation). Total surface count: 13.
 
 ## Morning Brief — the flagship
 

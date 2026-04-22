@@ -230,15 +230,9 @@ If more than 30 items land here, the surface has drifted. Current candidate list
 - Rectify data
 - Retention settings (how long event-log entries are kept)
 
-**Models (per ADR-0013 — agent runtime) (6)**
-- Fast tier → model (picker; default: local Qwen 2.5 3B Q4)
-- Deep tier → model (picker; default: local Qwen 14B Q4 or Unbound)
-- Provider credentials (sealed storage for API keys — reuses `chief-oauth` sealed storage)
-- Default on-device toggle
-- Per-day cost budget
-- Per-pack override (advanced; empty by default)
+**Total**: ~28 items. Under 30-item cap.
 
-**Total**: ~34 items. Under cap. Note: Models is included because tier→model bindings are user-controlled preferences, not authority grants; they fit the Controls contract. If this expands significantly, split into a dedicated surface.
+> **Models is NOT in Controls** (reversed from an earlier draft). Model-tier bindings affect where user data flows (cloud vs. local) and what cost budgets consume; they carry privacy + cost consequentiality beyond cosmetic preferences. Mixing them with wallpaper + timezone in one surface is an information-architecture smell. Models is its own top-level surface — see §Models surface below.
 
 ### Ruled OUT of Controls
 
@@ -248,9 +242,9 @@ These never go in Controls; they have their own surfaces:
 |---|---|
 | Pack permissions | Security & Privacy |
 | Delegation levels | Trust Ledger Viewer |
+| Model router / tier→model bindings | **Models surface (new)** |
 | Device keys / biometric enrollment | Ceremony (triggered on demand) |
 | Agent fleet configuration | (future surface, not in v0 scope) |
-| Model router / inference routing | (future surface, Region 4 work) |
 | Notification preferences per-pack | Security & Privacy (byPack → pack → "notifications" section) |
 | Backup settings | Ceremony (backup is long-horizon) |
 
@@ -268,6 +262,57 @@ All of these are Controls-internal compositions over `chief-ui` primitives. If `
 ### No write-ceremony for Controls items
 
 By construction: every Controls item is Region 1–2 (cosmetic, reversible, low-consequence). If a proposed item requires ceremony, it isn't a Controls item.
+
+## Models surface — new (per ADR-0013 + ADR-0014)
+
+Promoted out of Controls because tier→model bindings are **routing / consequentiality decisions**, not cosmetic prefs. Still read-dominant for the median user; writes are low-friction but consequential enough to deserve their own mental model.
+
+### Invocation
+
+- **Omnibar**: `models`, `model`, `cloud provider`, `API key`, `ai budget`, `tier` route here.
+- **Menubar**: small brain glyph in the right-side status strip (next to cost `$0.42`). Tap → summary popover. Click-through → full Models surface.
+- **From Security & Privacy**: each grant showing a `tier` links to its Models binding.
+
+### HAX region
+
+Region 4 (delegation-adjacent — affects routing for every pack). Lower consequentiality than Trust Ledger per-change (no authority increase); higher than Controls (cloud binding flows data externally).
+
+### Contents (~8 items — cap)
+
+1. **Fast tier → model** — picker. Default: local Qwen 2.5 3B Q4 on supported devices, else Unbound.
+2. **Deep tier → model** — picker. Default: local Qwen 14B Q4 on supported devices, else Unbound with a "Bind cloud provider" CTA.
+3. **Bind a cloud provider** — the ceremony-gated flow that: (a) enrolls API keys into chief-oauth sealed storage; (b) issues `net.http { hosts: ["api.anthropic.com" | ...] }` grant to the kernel.
+4. **Provider list** — currently bound cloud providers with revoke affordance.
+5. **Default local-only** — toggle. When on, all tier bindings must resolve to local models; cloud pickers grey out.
+6. **Daily cost budget** — soft cap; individual pack grants have their own hard `max_cost_usd`.
+7. **Per-pack override** — advanced table; empty by default. A pack can be pinned to a specific tier→model binding different from the user-wide default.
+8. **Device capability probe result** — read-only: "Your device can run Qwen 14B locally: No (16 GB RAM insufficient)." Tells the user why Deep is Unbound if it is.
+
+### Writes from Models
+
+| Action | Friction |
+|---|---|
+| Change tier→model binding (local → local) | Inline |
+| Change tier→model binding (local → cloud) | Ceremony (data-path consequentiality) |
+| Revoke a cloud provider | One click (safety-favoring) |
+| Adjust daily cost budget | Inline |
+| Add/remove per-pack override | Inline for local-local; Ceremony for local-cloud |
+
+Revoking a cloud provider auto-nulls any tier binding that pointed to it; subsequent harness calls requiring that tier trigger the install-time-style "bind a model" dialog.
+
+### Relationship to other surfaces
+
+- **Security & Privacy** shows *which tier* each pack grant declares; clicking a tier chip links here.
+- **Controls** doesn't touch model routing (per the split in this ADR revision).
+- **Ceremony** is the write path for any cloud-binding change.
+- **Quarterly Review** surfaces "Are you still using Anthropic's cloud tier? 4,200 calls last quarter at $N cost" as a retention / renegotiation item.
+
+### Not in Models (stays elsewhere)
+
+- Pack-specific LLM permissions → Security & Privacy.
+- Trust tier (Email 4/5 etc.) → Trust Ledger.
+- Inference attestation viewing → Provenance Explorer.
+- Individual cost records per pack per day → Security & Privacy → Recent activity (filtered).
 
 ## Safety-favoring asymmetry — the rule table
 

@@ -153,11 +153,13 @@ flowchart TD
         ATTEST["Per-turn<br/>SignedAttestation<br/>→ Event Log"]
     end
 
-    subgraph L2ENG["Engine adapter (pluggable)"]
-        OC["OpencodeEngine v0"]
+    subgraph L2ENG["Engine adapter (HTTP client to subprocess, per ADR-0014)"]
+        OC["OpencodeEngine<br/>(HTTP client to<br/>opencode subprocess)"]
+        CE["CustomEngine<br/>(in-tree Rust,<br/>v0 fallback)"]
         FUT1["SwarmEngine (future)"]
-        FUT2["CustomEngine (future)"]
     end
+    OCP["opencode subprocess<br/>(TypeScript,<br/>spawned per session,<br/>isolated)"]
+    OC <-. HTTP/JSON .-> OCP
 
     subgraph L2INF["Inference layer"]
         RTR[Model Router]
@@ -204,7 +206,7 @@ Key invariants enforced by the runtime:
 
 | Invariant | Mechanism |
 |---|---|
-| Every tool call goes through the Capability Broker | chief-core intercepts each engine-emitted tool_call before dispatch |
+| Every tool call goes through the Capability Broker | chief-core intercepts each engine-emitted tool_call over the engine-adapter wire (per [ADR-0014](../adr/0014-opencode-subprocess-boundary.md)) before dispatch |
 | Every turn produces a signed attestation | Attestation chain → Event Log → verifiable in Provenance Explorer |
 | Budget (max_turns / max_cost_usd / max_wall_secs) enforced | Per-session state in chief-core; session killed on overflow |
 | External actions (R7–R8) never harness-autonomous | Gate intercepts `share.hand_off` / `payment.request` / `esign.request` → Ceremony |

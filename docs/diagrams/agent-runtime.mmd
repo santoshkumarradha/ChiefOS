@@ -19,11 +19,13 @@ flowchart TD
         ATTEST["Per-turn<br/>SignedAttestation<br/>→ Event Log"]
     end
 
-    subgraph L2ENG["Engine adapter (pluggable)"]
-        OC["OpencodeEngine v0"]
+    subgraph L2ENG["Engine adapter (HTTP client; ADR-0014)"]
+        OC["OpencodeEngine<br/>(HTTP client)"]
+        CE["CustomEngine<br/>(in-tree Rust,<br/>v0 fallback)"]
         FUT1["SwarmEngine (future)"]
-        FUT2["CustomEngine (future)"]
     end
+    OCP["opencode subprocess<br/>(TypeScript,<br/>per-session spawn)"]
+    OC <-. HTTP/JSON .-> OCP
 
     subgraph L2INF["Inference layer"]
         RTR[Model Router]

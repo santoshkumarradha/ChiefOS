@@ -1290,6 +1290,10 @@ dependencies:
   kind: blocks
 context:
 - kind: discovery
+  content: 'chief-ebpf: chose aya 0.13 over libbpf-rs — pure Rust, no C toolchain, cleaner on NixOS. aya is cfg-gated target_os=linux only, macOS gets a no-op stub. eBPF program source in src/ebpf/chief_enforce.rs is gated by #[cfg(target_arch = "bpf")] so it is invisible to userland builds; dedicated bpf-linker CI step builds it separately. Hooks: file_open LSM (fs) + __sys_connect kprobe (net). v1 will upgrade connect to socket_connect LSM. Linux integration tests are #[ignore] + cfg(target_os=linux) since they need CAP_BPF + bpf artefact.'
+  tags: []
+  task_ref: task-63
+- kind: discovery
   content: 'firecracker spike: dev host is macOS/arm64 (no KVM). Cited NSDI 2020 + upstream + Kata benchmarks: ~125ms cold-boot, ~5ms snapshot-restore, ~5MB RSS overhead. Recommendation: proceed to prototype in v1, default to snapshot-restore. vsock is the right transport for broker<->pack. Prototype skipped; follow-up task needed to measure on Linux+KVM before v1 branch lands.'
   tags: []
   task_ref: task-80

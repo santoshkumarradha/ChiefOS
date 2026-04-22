@@ -17,6 +17,7 @@ members = [
     "tools/chief-ts-lint",
     "prototypes/chief-fs",
     "prototypes/hax-inbox",
+    "prototypes/chief-ebpf",
 ]
 exclude = [
     # Keep future exclusions explicit; empty for now.

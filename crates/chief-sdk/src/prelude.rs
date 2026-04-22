@@ -8,6 +8,7 @@ pub use crate::connectors::{
 };
 pub use crate::context::CapabilityContext;
 pub use crate::error::{Result, SdkError};
+pub use crate::fs::{FsConnector, FsError, InMemoryFsConnector};
 pub use crate::grant::Grant;
 pub use crate::ingester::Ingester;
 pub use crate::manifest::PackManifest;

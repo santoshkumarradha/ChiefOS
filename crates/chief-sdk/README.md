@@ -38,6 +38,31 @@ impl Agent for HelloAgent {
 }
 ```
 
+## Accessors
+
+`CapabilityContext` exposes narrow accessors for every side-effectful channel.
+Each one is grant-scoped by the Capability Broker — packs never reach the
+kernel directly.
+
+| Accessor | Since | Use for |
+| --- | --- | --- |
+| `ctx.net()` | 0.1 | HTTP/WS, OAuth2 |
+| `ctx.memory()` | 0.1 | Memory Graph read/write |
+| `ctx.event_bus()` | 0.1 | pub/sub topics |
+| `ctx.llm()` | 0.1 | raw inference (prefer `ctx.ai()`) |
+| `ctx.ai()` | 0.2 | single-shot structured inference |
+| `ctx.harness()` | 0.2 | multi-turn tool-using agents |
+| `ctx.fs()` | 0.3.1 | grant-scoped filesystem (watch / read / list) |
+
+Example — `ctx.fs()`:
+
+```rust
+let bytes = ctx.fs().read("/home/user/notes/today.md".into()).await?;
+let entries = ctx.fs().list("/home/user/notes".into()).await?;
+let handle = ctx.fs().watch(vec!["/home/user/notes".into()]).await?;
+// handle can then be attached to ctx.harness().tools(&[handle])
+```
+
 Versioning policy follows ADR-0010:
 
 - v0 starts at `0.1.0`.

@@ -3,6 +3,7 @@
 use crate::ai::AiBuilder;
 use crate::ai::InMemoryAiBackend;
 use crate::connectors::{EventBusConnector, InferenceConnector, MemoryConnector, NetworkConnector};
+use crate::fs::{FsConnector, InMemoryFsConnector};
 use crate::harness::{HarnessBuilder, HarnessToolScope, InMemoryHarnessBackend};
 use crate::tier::Tier;
 use crate::tool_handle::{ScopeSpec, SessionId, ToolHandle, ToolScope};
@@ -15,9 +16,18 @@ pub struct CapabilityContext {
     pub(crate) mem: Arc<dyn MemoryConnector>,
     pub(crate) llm: Arc<dyn InferenceConnector>,
     pub(crate) events: Arc<dyn EventBusConnector>,
+    pub(crate) fs: Arc<dyn FsConnector>,
 }
 
 impl CapabilityContext {
+    /// Construct a context with the four v0.1 connectors.
+    ///
+    /// The `fs` connector defaults to an empty-allowlist `InMemoryFsConnector`
+    /// (accessor returns it, but every read/watch/list resolves to
+    /// [`FsError::GrantDenied`](crate::fs::FsError::GrantDenied)). Callers that
+    /// need real fs access should use [`CapabilityContext::with_fs`] to install
+    /// a real connector. This keeps `new(..)` backwards-compatible across
+    /// 0.3.0 → 0.3.1.
     pub fn new(
         net: Arc<dyn NetworkConnector>,
         mem: Arc<dyn MemoryConnector>,
@@ -29,7 +39,15 @@ impl CapabilityContext {
             mem,
             llm,
             events,
+            fs: Arc::new(InMemoryFsConnector::new(Vec::new())),
         }
+    }
+
+    /// Install a custom `FsConnector` (used by chief-core to inject the real
+    /// dispatcher, and by tests to inject a populated `InMemoryFsConnector`).
+    pub fn with_fs(mut self, fs: Arc<dyn FsConnector>) -> Self {
+        self.fs = fs;
+        self
     }
 
     pub fn net(&self) -> &Arc<dyn NetworkConnector> {
@@ -42,6 +60,24 @@ impl CapabilityContext {
 
     pub fn event_bus(&self) -> &Arc<dyn EventBusConnector> {
         &self.events
+    }
+
+    // ============ v0.3.1 Filesystem Accessor ============
+
+    /// Access the grant-scoped filesystem connector.
+    ///
+    /// Every read/watch/list call is checked against the pack's
+    /// `CapabilityKind::Fs{Read,Watch}` grants by the Capability Broker
+    /// (or the in-memory allowlist, under tests).
+    ///
+    /// Example:
+    /// ```ignore
+    /// let handle = ctx.fs().watch(vec!["/home/user/notes".into()]).await?;
+    /// let bytes  = ctx.fs().read("/home/user/notes/today.md".into()).await?;
+    /// let entries = ctx.fs().list("/home/user/notes".into()).await?;
+    /// ```
+    pub fn fs(&self) -> &dyn FsConnector {
+        self.fs.as_ref()
     }
 
     // ============ v0.2 Agent Runtime (ADR-0013) ============
@@ -203,6 +239,7 @@ impl Clone for CapabilityContext {
             mem: Arc::clone(&self.mem),
             llm: Arc::clone(&self.llm),
             events: Arc::clone(&self.events),
+            fs: Arc::clone(&self.fs),
         }
     }
 }

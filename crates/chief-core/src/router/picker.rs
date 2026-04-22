@@ -2,8 +2,12 @@
 
 use super::config::{BindingKind, ModelsConfig};
 use super::probe::DeviceCapability;
+use super::provider_config::{
+    ProviderError, ProviderKind, ProviderRegistry, ResolvedProviderRoute,
+};
 use chief_sdk::Tier;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 /// Errors from the model router.
 #[derive(Debug, Clone, thiserror::Error)]
@@ -58,16 +62,81 @@ pub struct ModelChoice {
     pub endpoint: RoutedEndpoint,
 }
 
+/// Errors from resolving a concrete cloud route through the Models surface.
+///
+/// Distinct from `RouterError` — `RouterError` covers tier→config resolution
+/// (missing bindings, insufficient RAM). `RouteError` covers what happens
+/// when we then try to bind that tier to a real cloud provider dispatch.
+#[derive(Debug, Clone, thiserror::Error)]
+pub enum RouteError {
+    #[error(
+        "no cloud provider bound — bind one via Controls → Models before using Cloud-tier calls"
+    )]
+    NoCloudProvider,
+
+    #[error("provider {provider} is not bound in the provider registry")]
+    ProviderNotBound { provider: ProviderKind },
+
+    #[error("API key missing in sealed storage for {provider}")]
+    ProviderKeyMissing { provider: ProviderKind },
+
+    #[error("provider {provider} dispatch is not yet implemented")]
+    NotYetImplemented { provider: ProviderKind },
+
+    #[error("upstream router error: {0}")]
+    Router(#[from] RouterError),
+
+    #[error("unknown provider id `{0}` in Models config")]
+    UnknownProvider(String),
+}
+
+impl From<ProviderError> for RouteError {
+    fn from(value: ProviderError) -> Self {
+        match value {
+            ProviderError::NoCloudProvider => RouteError::NoCloudProvider,
+            ProviderError::ProviderNotBound { provider } => {
+                RouteError::ProviderNotBound { provider }
+            }
+            ProviderError::ProviderKeyMissing { provider, .. } => {
+                RouteError::ProviderKeyMissing { provider }
+            }
+            ProviderError::NotYetImplemented { provider } => {
+                RouteError::NotYetImplemented { provider }
+            }
+            ProviderError::Io(e) | ProviderError::Parse(e) => {
+                RouteError::Router(RouterError::InvalidConfig(e))
+            }
+        }
+    }
+}
+
 /// Model router.
 pub struct ModelRouter {
     config: ModelsConfig,
     probe: DeviceCapability,
+    /// Optional user-configured cloud provider registry. When present, the
+    /// router will resolve `ModelChoice::Cloud` routes through this — i.e.
+    /// it replaces the in-`ModelsConfig` `providers` map with the live
+    /// Controls → Models binding set.
+    providers: Option<Arc<ProviderRegistry>>,
 }
 
 impl ModelRouter {
     /// Create a new model router.
     pub fn new(config: ModelsConfig, probe: DeviceCapability) -> Self {
-        ModelRouter { config, probe }
+        ModelRouter {
+            config,
+            probe,
+            providers: None,
+        }
+    }
+
+    /// Attach a provider registry (from the Models surface). Without this,
+    /// `resolve_cloud_route` will fall back to the legacy `ModelsConfig.providers`
+    /// map when possible, or return `NoCloudProvider` when nothing is bound.
+    pub fn with_providers(mut self, providers: Arc<ProviderRegistry>) -> Self {
+        self.providers = Some(providers);
+        self
     }
 
     /// Pick a concrete model for the requested tier.
@@ -146,6 +215,73 @@ impl ModelRouter {
                 url,
             },
         })
+    }
+
+    /// Resolve a concrete cloud route for the given tier, consulting the
+    /// user-configured provider registry (from Controls → Models).
+    ///
+    /// Unlike `pick()`, this does NOT require the tier's provider to be
+    /// present in `ModelsConfig.providers`. The registry (from the Models
+    /// surface) is the source of truth for cloud providers — the legacy
+    /// `ModelsConfig.providers` map is a holdover from the initial install
+    /// flow and is being phased out.
+    ///
+    /// Resolution order:
+    /// 1. Tier must be bound to `BindingKind::Cloud`. Local bindings → error.
+    /// 2. If the tier binding names a provider id, match it against the
+    ///    registry. Bound → use that. Known kind, unbound → explicit error.
+    ///    Unknown kind → `UnknownProvider`.
+    /// 3. If the tier binding does not name a provider, fall back to the
+    ///    registry's default.
+    /// 4. If the registry is empty (or absent), return `NoCloudProvider`.
+    ///
+    /// This layer does NOT fetch the API key — callers pair the returned
+    /// `ResolvedProviderRoute` with a `SealedKeyStore` to do that.
+    pub fn resolve_cloud_route(&self, tier: Tier) -> Result<ResolvedProviderRoute, RouteError> {
+        // Local-only guard + tier-unbound guard re-used from pick(), but we
+        // deliberately DON'T call pick() here because its ModelsConfig.providers
+        // validation conflicts with the Models surface being the source of truth.
+        let tier_str = tier.as_str().to_string();
+        let binding = match tier {
+            Tier::Fast => self.config.tiers.fast.as_ref(),
+            Tier::Deep => self.config.tiers.deep.as_ref(),
+        };
+        let binding = binding.ok_or_else(|| {
+            RouteError::Router(RouterError::TierUnbound {
+                tier: tier_str.clone(),
+            })
+        })?;
+
+        if self.config.defaults.local_only && binding.kind == BindingKind::Cloud {
+            return Err(RouteError::Router(RouterError::LocalOnlyViolation));
+        }
+
+        if binding.kind == BindingKind::Local {
+            // Caller asked for a cloud route but the tier is locally bound.
+            return Err(RouteError::NoCloudProvider);
+        }
+
+        let registry = self.providers.as_ref().ok_or(RouteError::NoCloudProvider)?;
+
+        // Step 2: if the tier binding names a provider id, try to match it.
+        if let Some(ref provider_id) = binding.provider {
+            if let Some(kind) = ProviderKind::parse(provider_id) {
+                if registry.get(kind).is_some() {
+                    let mut route = registry.resolve(kind)?;
+                    // Tier config's model_id wins if explicitly set.
+                    if !binding.model_id.is_empty() {
+                        route.model = binding.model_id.clone();
+                    }
+                    return Ok(route);
+                }
+                return Err(RouteError::ProviderNotBound { provider: kind });
+            }
+            return Err(RouteError::UnknownProvider(provider_id.clone()));
+        }
+
+        // Step 3: fall back to registry default.
+        let route = registry.resolve_default_cloud()?;
+        Ok(route)
     }
 }
 

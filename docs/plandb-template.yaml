@@ -1290,6 +1290,10 @@ dependencies:
   kind: blocks
 context:
 - kind: discovery
+  content: 'firecracker spike: dev host is macOS/arm64 (no KVM). Cited NSDI 2020 + upstream + Kata benchmarks: ~125ms cold-boot, ~5ms snapshot-restore, ~5MB RSS overhead. Recommendation: proceed to prototype in v1, default to snapshot-restore. vsock is the right transport for broker<->pack. Prototype skipped; follow-up task needed to measure on Linux+KVM before v1 branch lands.'
+  tags: []
+  task_ref: task-80
+- kind: discovery
   content: Clipboard Pane has no ADR yet despite being flagged substrate-spine in primitive-rethink research; added a note in docs/05-surfaces.md that a follow-up ADR is warranted. Also caught stale FAISS references in docs/03-chief-kernel.md (Memory Graph row, storage-layout tree, open-questions item 2) — all rewritten to sqlite-vec/iroh-blobs per ADR-0008.
   tags: []
   task_ref: task-75

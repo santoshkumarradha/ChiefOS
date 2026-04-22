@@ -1,4 +1,6 @@
-//! Axum route handlers for HTTP API.
+//! Legacy v0 HTTP routes (intent / brief / approve / verify / rewind /
+//! status / oauth). Kept at their original paths for backward compatibility.
+//! New surface work lives under `routes/v1_*.rs`.
 
 use crate::brief::assemble_brief;
 use crate::broker::CapabilityDenied;
@@ -95,7 +97,7 @@ pub struct OAuthProxyRequest {
     pub body: Option<Vec<u8>>,
 }
 
-pub fn router(state: Arc<AppState>) -> Router {
+pub(crate) fn legacy_routes() -> Router<Arc<AppState>> {
     Router::new()
         .route("/oauth/start", axum::routing::post(oauth_start_handler))
         .route(
@@ -109,7 +111,6 @@ pub fn router(state: Arc<AppState>) -> Router {
         .route("/verify", axum::routing::post(verify_handler))
         .route("/rewind", axum::routing::post(rewind_handler))
         .route("/status", axum::routing::get(status_handler))
-        .with_state(state)
 }
 
 pub async fn intent_handler(
@@ -474,7 +475,7 @@ pub async fn oauth_proxy_handler(
     }
 }
 
-fn principal_for_request(headers: &HeaderMap, state: &AppState) -> PrincipalId {
+pub(crate) fn principal_for_request(headers: &HeaderMap, state: &AppState) -> PrincipalId {
     if state.dev_mode {
         return PrincipalId::from("dev");
     }
@@ -488,7 +489,7 @@ fn principal_for_request(headers: &HeaderMap, state: &AppState) -> PrincipalId {
         .unwrap_or_else(|| PrincipalId::from("anonymous"))
 }
 
-fn capability_denied_response(denied: CapabilityDenied) -> axum::response::Response {
+pub(crate) fn capability_denied_response(denied: CapabilityDenied) -> axum::response::Response {
     (
         StatusCode::FORBIDDEN,
         Json(serde_json::json!({

@@ -1336,6 +1336,18 @@ dependencies:
   kind: blocks
 context:
 - kind: discovery
+  content: 'demo-backend discovery: GrantHandle in chief-core::broker does not derive Deserialize, which forced CeremonyItem to drop Deserialize too. If a future task needs to read CeremonyItems from JSON (e.g. restore), add #[derive(Deserialize)] to GrantHandle first.'
+  tags: []
+  task_ref: task-13
+- kind: decision
+  content: 'demo-backend design: trust ledger uses ''first path segment of source_agent'' as the category (e.g. ''hn-briefer'' -> ''hn''). Crude but predictable. Refine when the real capability taxonomy binds categories to capabilities.'
+  tags: []
+  task_ref: task-13
+- kind: discovery
+  content: 'demo-backend discovery: kept hax-inbox prototype unchanged — the /v1 API uses an in-memory InboxStore directly in chief-core because (a) the prototype is sqlite-backed and we didn''t want contention with the broker db, (b) the API only needs chronological list+broadcast, no persistence.'
+  tags: []
+  task_ref: task-13
+- kind: discovery
   content: 'chief-ebpf: chose aya 0.13 over libbpf-rs — pure Rust, no C toolchain, cleaner on NixOS. aya is cfg-gated target_os=linux only, macOS gets a no-op stub. eBPF program source in src/ebpf/chief_enforce.rs is gated by #[cfg(target_arch = "bpf")] so it is invisible to userland builds; dedicated bpf-linker CI step builds it separately. Hooks: file_open LSM (fs) + __sys_connect kprobe (net). v1 will upgrade connect to socket_connect LSM. Linux integration tests are #[ignore] + cfg(target_os=linux) since they need CAP_BPF + bpf artefact.'
   tags: []
   task_ref: task-66

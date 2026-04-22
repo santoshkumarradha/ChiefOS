@@ -11,9 +11,13 @@ description = "Chief OS kernel integration: starts L2 services and exposes HTTP 
 [dependencies]
 anyhow.workspace = true
 tokio = { workspace = true, features = ["net", "process", "signal", "sync", "time"] }
+tokio-stream = { version = "0.1", features = ["sync"] }
+futures.workspace = true
 tracing.workspace = true
 tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"] }
 axum.workspace = true
+tower = { workspace = true }
+tower-http = { version = "0.5", features = ["fs", "trace", "cors"] }
 serde.workspace = true
 serde_json.workspace = true
 serde_yaml.workspace = true
@@ -48,5 +52,12 @@ chief-inference           = { path = "../../prototypes/chief-inference" }
 name = "chief-core"
 path = "src/main.rs"
 
+[[bin]]
+name = "chief_core_server"
+path = "src/bin/chief_core_server.rs"
+
 [dev-dependencies]
 tempfile.workspace = true
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "net", "time", "sync"] }
+futures-util = "0.3"

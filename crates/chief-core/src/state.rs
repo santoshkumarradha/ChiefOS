@@ -2,7 +2,10 @@
 
 use crate::broker::CapabilityBroker;
 use crate::capability::{Grant, PrincipalId};
+use crate::ceremony::CeremonyStore;
+use crate::inbox::InboxStore;
 use crate::kernel_principal::boot_kernel_principal;
+use crate::trust_ledger::TrustLedger;
 use anyhow::{anyhow, Context, Result};
 use chief_event_log_proto::EventLog;
 use chief_harness_proto::NullHarness;
@@ -103,6 +106,9 @@ pub struct AppState {
     pub device_pubkey: [u8; 32],
     pub inference_backend: Arc<dyn ModelBackend>,
     pub start_time: DateTime<Utc>,
+    pub inbox: InboxStore,
+    pub ceremonies: CeremonyStore,
+    pub trust_ledger: TrustLedger,
     id_counter: Arc<AtomicU64>,
 }
 
@@ -187,6 +193,9 @@ impl AppState {
             device_pubkey,
             inference_backend,
             start_time: Utc::now(),
+            inbox: InboxStore::new(),
+            ceremonies: CeremonyStore::new(),
+            trust_ledger: TrustLedger::new(),
             id_counter: Arc::new(AtomicU64::new(1)),
         })
     }
@@ -203,13 +212,25 @@ impl AppState {
         (Utc::now() - self.start_time).num_seconds().max(0)
     }
 
+    /// Legacy trust-ledger snapshot kept for backward compatibility with the
+    /// existing `/brief` endpoint. The v1 API reads from `self.trust_ledger`
+    /// and returns real aggregated data.
     pub fn trust_ledger_snapshot(&self) -> HashMap<String, u8> {
-        HashMap::from([
-            ("email".to_string(), 3),
-            ("calendar".to_string(), 3),
-            ("memory".to_string(), 3),
-            ("ops".to_string(), 2),
-        ])
+        // Empty map — legacy endpoint must not fabricate data. The v0 brief
+        // surfaces whatever the real ledger contains (via async snapshot).
+        HashMap::new()
+    }
+
+    /// Short hex fingerprint of the device pubkey. Used by the demo Brief's
+    /// `signed_by` field.
+    pub fn device_fingerprint(&self) -> String {
+        let hex: String = self
+            .device_pubkey
+            .iter()
+            .take(8)
+            .map(|b| format!("{b:02x}"))
+            .collect();
+        hex
     }
 
     pub async fn shutdown(&self) -> Result<()> {

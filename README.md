@@ -18,9 +18,9 @@ Chief OS is not a multi-agent framework. Not a Python runtime. Not a policy wrap
 
 | Project | What it actually is |
 |---|---|
-| **AgentField, CrewAI, LangGraph, AutoGen** | Libraries that orchestrate crews of agents inside your app. |
-| **AIOS** | A Python runtime that casts the LLM as a "kernel." |
-| **Agent Safehouse** | A macOS sandbox wrapper for AI tools. |
+| [**AgentField**](https://github.com/Agent-Field/agentfield), [**CrewAI**](https://github.com/crewAIInc/crewAI), [**LangGraph**](https://github.com/langchain-ai/langgraph), [**AutoGen**](https://github.com/microsoft/autogen) | Libraries that orchestrate crews of agents inside your app. |
+| [**AIOS**](https://github.com/agiresearch/AIOS) | A Python runtime that casts the LLM as a "kernel." |
+| [**Agent Safehouse**](https://github.com/eugene1g/agent-safehouse) | A macOS sandbox wrapper for AI tools. |
 | **Chief OS** | The operating system the agent lives in. It boots. Your agent is a kernel-issued principal with typed capabilities. Every LLM call is broker-gated and signs an attestation. You see its work through one surface, not ten chat windows. |
 
 Closest prior art by shape: **ChromeOS**, **SteamOS**. A Linux-based OS with novel userland, shipped as a distinct product.

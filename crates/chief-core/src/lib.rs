@@ -4,6 +4,7 @@ pub mod brief;
 pub mod broker;
 pub mod capability;
 pub mod dispatch;
+pub mod harness;
 pub mod router;
 pub mod routes;
 pub mod state;

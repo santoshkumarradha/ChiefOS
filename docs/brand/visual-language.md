@@ -283,6 +283,6 @@ Before any Morning Brief / surface PR lands on main:
 
 ## Related
 
-- [`apple-design`](../12-apple-design-principles.md) — the product-design guardrails this doc implements visually.
-- [`surfaces`](../05-surfaces.md) — what each surface is and does.
+- [`apple-design`](../02-apple-design-principles.md) — the product-design guardrails this doc implements visually.
+- [`surfaces`](../30-surfaces.md) — what each surface is and does.
 - [`north-star`](../00-north-star.md) — why "it feels like an OS" matters for B2C virality.

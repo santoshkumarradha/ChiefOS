@@ -40,7 +40,7 @@ proposed → under_review → accepted → (later) superseded | deprecated
 
 - Describing how something already works → design doc.
 - Sketching an idea → `docs/ideation/`.
-- Tracking a decision to make later → `docs/14-risks-open-questions.md` → decisions-needed table.
+- Tracking a decision to make later → `docs/51-risks-open-questions.md` → decisions-needed table.
 
 ## Relationship to docs
 

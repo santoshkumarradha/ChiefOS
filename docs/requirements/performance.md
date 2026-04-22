@@ -95,5 +95,5 @@ Focus v0 perf work on: Morning Brief render, Capability Broker hot path, and Omn
 ## Related
 
 - [`non-functional.md`](./non-functional.md) — NFR cross-reference
-- [`../13-v0-scope-90-day.md`](../13-v0-scope-90-day.md) — v0 commitments that drive these targets
-- [`../14-risks-open-questions.md`](../14-risks-open-questions.md) — risks that touch perf
+- [`../50-v0-scope-90-day.md`](../50-v0-scope-90-day.md) — v0 commitments that drive these targets
+- [`../51-risks-open-questions.md`](../51-risks-open-questions.md) — risks that touch perf

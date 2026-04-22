@@ -13,9 +13,9 @@ Chief OS: an AI-native operating system where agents are first-class users and h
 3. [`CHARTER.md`](./CHARTER.md) — 10 axioms; every decision must derive from them
 4. [`docs/INDEX.md`](./docs/INDEX.md) — machine-readable map of all docs
 5. [`docs/00-north-star.md`](./docs/00-north-star.md) — mission, Person Zero, wedge
-6. [`docs/02-architecture.md`](./docs/02-architecture.md) — L0–L4 layers
-7. [`docs/13-v0-scope-90-day.md`](./docs/13-v0-scope-90-day.md) — what ships first
-8. [`docs/14-risks-open-questions.md`](./docs/14-risks-open-questions.md) — what's undecided
+6. [`docs/10-architecture.md`](./docs/10-architecture.md) — L0–L4 layers
+7. [`docs/50-v0-scope-90-day.md`](./docs/50-v0-scope-90-day.md) — what ships first
+8. [`docs/51-risks-open-questions.md`](./docs/51-risks-open-questions.md) — what's undecided
 
 ## One-time setup (fresh clone)
 
@@ -64,7 +64,7 @@ Sections (in order, omit if empty):
 | A reusable diagram referenced from multiple docs | `docs/diagrams/<slug>.mmd` + embed via link |
 | A research reference or competitor analysis | `docs/research/<slug>.md` |
 | An implementation plan | `plans/YYYY-MM-DD-<slug>-plan.md` |
-| A throwaway code spike | `prototypes/<slug>/` with its own `README.md` |
+| A throwaway code spike | `spikes/<slug>/` with its own `README.md` |
 | Brand, naming, visual identity | `brand/<slug>.md` |
 
 ## Never do this
@@ -98,7 +98,7 @@ Sections (in order, omit if empty):
 1. Read CHARTER.md → internalize axioms
 2. Read docs/INDEX.md → locate relevant areas
 3. Read the 3–5 docs most relevant to your task
-4. Check docs/14-risks-open-questions.md for known unknowns
+4. Check docs/51-risks-open-questions.md for known unknowns
 5. Draft your change; validate against all 10 axioms
 6. If you amend an axiom or core architecture → propose an ADR
 7. Update frontmatter + INDEX.md

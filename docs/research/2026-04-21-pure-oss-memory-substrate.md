@@ -117,14 +117,14 @@ Chief FS mounts the graph read-only as a FUSE/virtual tree where paths are `mem:
 ## Follow-up actions
 
 - [x] Open ADR [`../../adr/0008-pure-oss-memory-substrate.md`](../../adr/0008-pure-oss-memory-substrate.md).
-- [x] Update [`../08-memory-substrate.md`](../08-memory-substrate.md) with confirmed stack.
+- [x] Update [`../13-memory-substrate.md`](../13-memory-substrate.md) with confirmed stack.
 - [ ] Prototype `chief-mem` crate (plandb `t-future-protos`).
 - [ ] Benchmark sqlite-vec vs LanceDB-lance on Chief-class workload.
 
 ## Related
 
-- [`../08-memory-substrate.md`](../08-memory-substrate.md) — substrate design
-- [`../03-chief-kernel.md`](../03-chief-kernel.md) — Memory Graph service
+- [`../13-memory-substrate.md`](../13-memory-substrate.md) — substrate design
+- [`../11-chief-kernel.md`](../11-chief-kernel.md) — Memory Graph service
 - [`2026-04-21-agent-native-fs.md`](./2026-04-21-agent-native-fs.md) — filesystem sister doc
 - [`2026-04-21-oss-landscape-scan.md`](./2026-04-21-oss-landscape-scan.md) — broader OSS scan
 - [`../directives/README.md`](../directives/README.md) — originating directive

@@ -11,7 +11,7 @@ tags: [sdk, ceremonies, threat-model, agent-autonomy]
 
 # OS Ceremonies & Boundaries
 
-Companion to [`16-pack-sdk.md`](./16-pack-sdk.md). Enumerates what the OS absorbs from application authors: operations that carry identity, money, privacy, or trust must be **OS-rendered ceremonies**, not pack-rendered surfaces. Derived from the Mac/iOS pattern (Apple Pay sheet, `ASWebAuthenticationSession`, Share Sheet, File Picker) extended for agent autonomy.
+Companion to [`40-pack-sdk.md`](./40-pack-sdk.md). Enumerates what the OS absorbs from application authors: operations that carry identity, money, privacy, or trust must be **OS-rendered ceremonies**, not pack-rendered surfaces. Derived from the Mac/iOS pattern (Apple Pay sheet, `ASWebAuthenticationSession`, Share Sheet, File Picker) extended for agent autonomy.
 
 ## TL;DR
 
@@ -132,7 +132,7 @@ Building Gmail / Calendar / HN-briefer / file-watcher forces us to exercise this
 
 ## Related
 
-- [`pack-sdk`](./16-pack-sdk.md) — what packs can do, SDK surface, CAN/CANNOT table.
-- [`security-model`](./06-security-model.md) — cryptographic backing.
+- [`pack-sdk`](./40-pack-sdk.md) — what packs can do, SDK surface, CAN/CANNOT table.
+- [`security-model`](./14-security-model.md) — cryptographic backing.
 - [`adr/0002-capability-based-security.md`](../adr/0002-capability-based-security.md) — the foundation.
 - [`adr/0010-sdk-public-api-stability.md`](../adr/0010-sdk-public-api-stability.md) — SDK as the boundary.

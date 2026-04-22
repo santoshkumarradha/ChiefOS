@@ -24,7 +24,7 @@ A Rust crate (`chief-harness-proto`) that:
 ## Building and Testing
 
 ```bash
-# Inside prototypes/harness/
+# Inside spikes/harness/
 cargo test
 
 # Format check

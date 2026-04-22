@@ -96,9 +96,9 @@ Two impls at v0:
 
 The invariants (Capability Broker check per tool, budget enforcement, per-turn attestation, external-action Ceremony gate, budgets, meta-prompt depth) are unchanged. Only the implementation vocabulary shifts from "trait object" to "subprocess with wire protocol."
 
-### Amendment to docs/20-agent-runtime.md
+### Amendment to docs/15-agent-runtime.md
 
-`docs/20-agent-runtime.md` §"Engine adapter interface" is amended to match: explicit subprocess diagram, HTTP boundary, per-session spawn/supervise/terminate lifecycle. Diagram at `docs/diagrams/agent-runtime.mmd` is also updated — opencode appears as a sibling process with a wire protocol, not as a nested sub-component.
+`docs/15-agent-runtime.md` §"Engine adapter interface" is amended to match: explicit subprocess diagram, HTTP boundary, per-session spawn/supervise/terminate lifecycle. Diagram at `docs/diagrams/agent-runtime.mmd` is also updated — opencode appears as a sibling process with a wire protocol, not as a nested sub-component.
 
 ## Consequences
 
@@ -123,7 +123,7 @@ The invariants (Capability Broker check per tool, budget enforcement, per-turn a
 ## Related
 
 - [`adr-0013`](./0013-agent-runtime-two-tier-llm.md) — amended by this ADR.
-- [`docs/20-agent-runtime.md`](../docs/20-agent-runtime.md) — implementation spec to be updated.
+- [`docs/15-agent-runtime.md`](../docs/15-agent-runtime.md) — implementation spec to be updated.
 - [`docs/diagrams/agent-runtime.mmd`](../docs/diagrams/agent-runtime.mmd) — to be updated.
 - [`adr-0002`](./0002-capability-based-security.md) — Broker.check contract used on every tool-call interception.
 - [opencode upstream](https://github.com/sst/opencode) — the v0 engine.

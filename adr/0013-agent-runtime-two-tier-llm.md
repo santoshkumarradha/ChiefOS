@@ -120,7 +120,7 @@ Packs **never see** opencode, the model API, or the raw loop. Everything flows t
 The router picks a concrete model for each call based on:
 
 1. The grant's declared `tier` (required).
-2. The user's **Models configuration** (in Controls → Models section, per [`docs/19-controls-and-policy.md`](../docs/19-controls-and-policy.md)) — tier → model binding.
+2. The user's **Models configuration** (in Controls → Models section, per [`docs/32-controls-and-policy.md`](../docs/32-controls-and-policy.md)) — tier → model binding.
 3. Optional grant constraints (`min_context`, etc. — v1+).
 4. Consequentiality of the calling task (derived from HAX region); high-consequence tasks prefer local-only unless user has explicitly opted in to cloud.
 5. Available local compute (falls back to cloud if local model is OOM — but only if cloud binding exists and consequentiality permits).
@@ -177,7 +177,7 @@ Rules:
 - **Depth cap**: 3 levels maximum. Enforced by chief-core.
 - **Tool narrowing only**: child inherits a strict subset of parent's tools; never widens.
 - **Budget shared**: child's turns count against parent's `max_turns`; child's cost against parent's `max_cost_usd`.
-- **Capability**: `meta.prompt` — already in the 27-kind CapabilityKind closed enum ([`docs/16-pack-sdk.md`](../docs/16-pack-sdk.md)). Default-deny; packs declare explicitly.
+- **Capability**: `meta.prompt` — already in the 27-kind CapabilityKind closed enum ([`docs/40-pack-sdk.md`](../docs/40-pack-sdk.md)). Default-deny; packs declare explicitly.
 
 ### Attestation chain
 
@@ -229,7 +229,7 @@ impl HarnessBuilder {
 
 ### CapabilityKind additions
 
-Added to the closed enum in [`docs/16-pack-sdk.md`](../docs/16-pack-sdk.md):
+Added to the closed enum in [`docs/40-pack-sdk.md`](../docs/40-pack-sdk.md):
 
 - `llm.ai` — replaces the old `llm.generate` at chief-sdk v0.2 (deprecation shim for one minor version, then removed).
 - `llm.harness` — the multi-turn session capability.
@@ -264,7 +264,7 @@ Total CapabilityKind count: **28** (was 27). Placed in the **Inference** pillar 
 
 ## Open questions (deferred to implementation)
 
-1. Exact `HarnessTranscript` serialization (JSON + nested attestations) — spec in `docs/20-agent-runtime.md`.
+1. Exact `HarnessTranscript` serialization (JSON + nested attestations) — spec in `docs/15-agent-runtime.md`.
 2. Cost accounting per pack vs. per user — start per-user (display aggregate in status strip), split per-pack at v1.
 3. Tool-handle lifetime — bound to enclosing harness call; invalidated after `.run()` returns. Pack cannot cache or forward handles.
 4. What happens when a cloud provider is unreachable mid-harness — error propagated to pack, partial transcript preserved, cost accounted for turns completed.
@@ -272,10 +272,10 @@ Total CapabilityKind count: **28** (was 27). Placed in the **Inference** pillar 
 
 ## Related
 
-- [`docs/16-pack-sdk.md`](../docs/16-pack-sdk.md) — CapabilityKind enum (to be extended with `llm.ai` and `llm.harness`).
-- [`docs/18-ui-standardization.md`](../docs/18-ui-standardization.md) — primitive catalog (Inference pillar absorbs the new kinds).
-- [`docs/19-controls-and-policy.md`](../docs/19-controls-and-policy.md) — Controls → Models sub-surface (user's tier→model binding lives here).
-- [`docs/20-agent-runtime.md`](../docs/20-agent-runtime.md) — implementation spec for this ADR.
+- [`docs/40-pack-sdk.md`](../docs/40-pack-sdk.md) — CapabilityKind enum (to be extended with `llm.ai` and `llm.harness`).
+- [`docs/31-ui-standardization.md`](../docs/31-ui-standardization.md) — primitive catalog (Inference pillar absorbs the new kinds).
+- [`docs/32-controls-and-policy.md`](../docs/32-controls-and-policy.md) — Controls → Models sub-surface (user's tier→model binding lives here).
+- [`docs/15-agent-runtime.md`](../docs/15-agent-runtime.md) — implementation spec for this ADR.
 - [`adr/0002-capability-based-security.md`](./0002-capability-based-security.md) — capability mechanism.
 - [`adr/0004-machine-as-fax-posture.md`](./0004-machine-as-fax-posture.md) — motivates the external-actions Ceremony rule.
 - [`adr/0009-signed-inference.md`](./0009-signed-inference.md) — attestation format and tier claims.

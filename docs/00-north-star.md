@@ -109,6 +109,6 @@ Captures delegation volume, trust depth, and retention in one number.
 
 ## Related
 
-- [`v0-scope`](./13-v0-scope-90-day.md) — concrete MVP
-- [`viral-loop`](./10-viral-loop.md) — Morning Reveal + Stack flywheel
+- [`v0-scope`](./50-v0-scope-90-day.md) — concrete MVP
+- [`viral-loop`](./60-viral-loop.md) — Morning Reveal + Stack flywheel
 - [`hax-principles`](./01-hax-principles.md) — how HAX shapes the loop

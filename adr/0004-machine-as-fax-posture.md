@@ -50,8 +50,8 @@ Three defensible postures:
 - Some automation dreams (auto-pay recurring bills without approval) require graduated ceremony patterns, not silent dispatch.
 
 ### Downstream effects
-- [`docs/06-security-model.md`](../docs/06-security-model.md) — ceremony cryptography is the backbone of this posture.
-- [`docs/15-regulatory-posture.md`](../docs/15-regulatory-posture.md) — detailed legal framing.
+- [`docs/14-security-model.md`](../docs/14-security-model.md) — ceremony cryptography is the backbone of this posture.
+- [`docs/62-regulatory-posture.md`](../docs/62-regulatory-posture.md) — detailed legal framing.
 - Every Region-7/8 action requires a single-use signed token, binding action to human intent.
 
 ## Implementation notes

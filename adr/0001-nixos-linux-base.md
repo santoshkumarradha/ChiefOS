@@ -68,7 +68,7 @@ Chief OS needs a base OS that supports:
 - Base flake lives at the repo root (future `flake.nix`).
 - Three deploy targets (ISO, VM, USB) derived from same flake.
 - Lanzaboote provides UEFI Secure Boot + measured boot.
-- bootc-on-NixOS tracked as v0 stretch vs. v1 deferred — see [`docs/07-base-and-hardware.md`](../docs/07-base-and-hardware.md).
+- bootc-on-NixOS tracked as v0 stretch vs. v1 deferred — see [`docs/18-base-and-hardware.md`](../docs/18-base-and-hardware.md).
 
 ## Revisit triggers
 

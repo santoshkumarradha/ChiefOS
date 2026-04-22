@@ -163,7 +163,7 @@ From [`research/2026-04-21-oss-landscape-scan.md`](./research/2026-04-21-oss-lan
 
 Parallelizable across codex-on-worktree for independent workstreams (see [`AGENTS.md`](../AGENTS.md) and plandb entries).
 
-## Risks (top 5, full list in [`risks-open`](./14-risks-open-questions.md))
+## Risks (top 5, full list in [`risks-open`](./51-risks-open-questions.md))
 
 1. **Boot time breaches 10s** → gate in CI; trim systemd units; move more to lazy init.
 2. **Local-model quality embarrassing next to Claude** → confine local model to triage + summarization; never generation in demo.
@@ -182,7 +182,7 @@ Parallelizable across codex-on-worktree for independent workstreams (see [`AGENT
 ## Related
 
 - [`north-star`](./00-north-star.md) — staged vision
-- [`chief-kernel`](./03-chief-kernel.md) — what's implemented at v0
-- [`security-model`](./06-security-model.md) — Sigstore integration detail
-- [`viral-loop`](./10-viral-loop.md) — Morning Reveal + try-your-own preview
+- [`chief-kernel`](./11-chief-kernel.md) — what's implemented at v0
+- [`security-model`](./14-security-model.md) — Sigstore integration detail
+- [`viral-loop`](./60-viral-loop.md) — Morning Reveal + try-your-own preview
 - [`research/2026-04-21-oss-landscape-scan.md`](./research/2026-04-21-oss-landscape-scan.md) — OSS integrations source

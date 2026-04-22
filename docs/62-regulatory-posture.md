@@ -155,7 +155,7 @@ All money flows require a ceremony with a signed token. Partners verify the user
 
 ## Related
 
-- [`security-model`](./06-security-model.md) — cryptographic backing
-- [`oss-business`](./11-open-source-business.md) — commercial obligations
-- [`v0-scope`](./13-v0-scope-90-day.md) — v0 compliance scope
+- [`security-model`](./14-security-model.md) — cryptographic backing
+- [`oss-business`](./61-open-source-business.md) — commercial obligations
+- [`v0-scope`](./50-v0-scope-90-day.md) — v0 compliance scope
 - [`adr/0004-machine-as-fax-posture.md`](../adr/0004-machine-as-fax-posture.md) — canonical decision

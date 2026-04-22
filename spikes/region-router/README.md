@@ -34,7 +34,7 @@ It outputs:
 ## Project Layout
 
 ```
-prototypes/region-router/
+spikes/region-router/
 ├── Cargo.toml                        # Rust 2021 crate config
 ├── README.md                         # This file
 ├── src/

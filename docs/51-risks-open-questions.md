@@ -54,7 +54,7 @@ tags: [risks, open-questions, decisions-needed]
 
 | # | Risk | Mitigation |
 |---|---|---|
-| R1 | Jurisdiction holds Chief OS liable when agent sends a message | "Machine as fax" posture — human cryptographically signs; OS is a drafting tool (see [`regulatory`](./15-regulatory-posture.md)) |
+| R1 | Jurisdiction holds Chief OS liable when agent sends a message | "Machine as fax" posture — human cryptographically signs; OS is a drafting tool (see [`regulatory`](./62-regulatory-posture.md)) |
 | R2 | EU DMA / AI Act imposes unexpected obligations on "AI system" | Consult counsel; publish transparency reports; design for auditability (we're already there) |
 | R3 | Apple / Google sandbox restrictions limit browser pack capabilities on companion devices | Desktop is the anchor; companion devices are read-only mirrors (v1) |
 | R4 | SEC / FINRA classify agent-assisted trading as advisory | Block trading/advice packs from official tier; community packs carry disclaimers |
@@ -133,7 +133,7 @@ tags: [risks, open-questions, decisions-needed]
 
 ## Related
 
-- [`v0-scope`](./13-v0-scope-90-day.md) — what we're trying to deliver
-- [`security-model`](./06-security-model.md) — threat model context
-- [`regulatory`](./15-regulatory-posture.md) — legal posture
+- [`v0-scope`](./50-v0-scope-90-day.md) — what we're trying to deliver
+- [`security-model`](./14-security-model.md) — threat model context
+- [`regulatory`](./62-regulatory-posture.md) — legal posture
 - [`research/2026-04-21-oss-landscape-scan.md`](./research/2026-04-21-oss-landscape-scan.md) — OSS options evaluated

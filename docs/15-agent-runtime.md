@@ -204,7 +204,7 @@ The router is **authoritative**. A pack can hint via `.model(id)` (v1+) but chie
 
 ## Controls → Models sub-surface
 
-(Extension of [`docs/19-controls-and-policy.md`](./19-controls-and-policy.md).)
+(Extension of [`docs/32-controls-and-policy.md`](./32-controls-and-policy.md).)
 
 Items in Controls → Models (~6 total):
 
@@ -425,7 +425,7 @@ HN briefer pack (PR #35) currently uses the stub. Migration to `ctx.ai()` / `ctx
 - [`adr/0002-capability-based-security.md`](../adr/0002-capability-based-security.md) — Broker.check contract.
 - [`adr/0011-ui-stack-and-component-library.md`](../adr/0011-ui-stack-and-component-library.md) — chief-ui primitives that compose Controls → Models + Provenance Explorer harness views.
 - [`adr/0012-no-settings-app.md`](../adr/0012-no-settings-app.md) — Security & Privacy (harness tier visibility) + Controls (Models sub-surface).
-- [`docs/16-pack-sdk.md`](./16-pack-sdk.md) — CapabilityKind enum to be extended.
-- [`docs/18-ui-standardization.md`](./18-ui-standardization.md) — primitive catalog, Inference pillar absorbs `llm.ai` + `llm.harness`.
-- [`docs/19-controls-and-policy.md`](./19-controls-and-policy.md) — Controls → Models sub-surface.
+- [`docs/40-pack-sdk.md`](./40-pack-sdk.md) — CapabilityKind enum to be extended.
+- [`docs/31-ui-standardization.md`](./31-ui-standardization.md) — primitive catalog, Inference pillar absorbs `llm.ai` + `llm.harness`.
+- [`docs/32-controls-and-policy.md`](./32-controls-and-policy.md) — Controls → Models sub-surface.
 - `code/CLAUDE.md` — AgentField two-primitive doctrine this ADR inherits.

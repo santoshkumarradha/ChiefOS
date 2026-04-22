@@ -102,7 +102,7 @@ Every surface is composed from these. New primitives require ADR amendment.
 Three layers of enforcement, earliest wins:
 
 1. **SDK compile-time**: `@chief-os/sdk` exports only chief-ui primitives for UI work; Radix and Tauri are internal to the kit and not re-exported. TypeScript `declare module` aliases that try to access internals fail to typecheck.
-2. **Pack build**: the pack-build toolchain (Nix-flake-driven, see [`docs/16-pack-sdk.md`](../docs/16-pack-sdk.md)) scans imports and bans any top-level import not listed in the SDK's public surface. Hard-fails the build.
+2. **Pack build**: the pack-build toolchain (Nix-flake-driven, see [`docs/40-pack-sdk.md`](../docs/40-pack-sdk.md)) scans imports and bans any top-level import not listed in the SDK's public surface. Hard-fails the build.
 3. **Runtime / installation**: signed pack manifests declare which primitives they render. The Capability Broker cross-checks at install time. Non-matching packs are rejected.
 
 ## First-party packs set the bar
@@ -139,5 +139,5 @@ The dogfood sequence — HN briefer, file-watcher brief, Gmail triage, Calendar 
 
 - [`docs/brand/visual-language.md`](../docs/brand/visual-language.md) — the design specification this ADR implements.
 - [`screenshots/`](../screenshots/) — reference mockups showing the locked language.
-- [`docs/16-pack-sdk.md`](../docs/16-pack-sdk.md) — pack-level contract.
-- [`docs/18-ui-standardization.md`](../docs/18-ui-standardization.md) — implementation details and primitive API reference.
+- [`docs/40-pack-sdk.md`](../docs/40-pack-sdk.md) — pack-level contract.
+- [`docs/31-ui-standardization.md`](../docs/31-ui-standardization.md) — implementation details and primitive API reference.

@@ -55,8 +55,8 @@ Build a **Capability Broker at L2** as the single enforcement point for every se
 
 ### Downstream effects
 - [`adr-0001`](./0001-nixos-linux-base.md) — Linux ambient authority is why this ADR exists.
-- [`docs/06-security-model.md`](../docs/06-security-model.md) — implements this decision.
-- [`docs/03-chief-kernel.md`](../docs/03-chief-kernel.md) — Capability Broker is L2 service #2.
+- [`docs/14-security-model.md`](../docs/14-security-model.md) — implements this decision.
+- [`docs/11-chief-kernel.md`](../docs/11-chief-kernel.md) — Capability Broker is L2 service #2.
 
 ## Implementation notes
 

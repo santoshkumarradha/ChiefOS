@@ -57,20 +57,20 @@ Append-only log of verbal directives from the steward (founder) captured during 
 **Tag:** `architecture`
 **Directive:** For AI-harness work inside Chief OS, use opencode at v0 but ensure modularity so other harnesses can swap in. Parallelize future implementation via codex on git worktrees.
 **Resolution:**
-- [x] Harness interface defined as a stable swap point in `docs/03-chief-kernel.md`.
+- [x] Harness interface defined as a stable swap point in `docs/11-chief-kernel.md`.
 - [x] opencode named as v0 default; swappability requirement captured in `requirements/non-functional.md` (NF-801).
 - [ ] Create ADR formalizing the harness interface (tracked as plandb context note).
-**Docs touched:** `03-chief-kernel.md`, `requirements/non-functional.md`, `13-v0-scope-90-day.md`
+**Docs touched:** `11-chief-kernel.md`, `requirements/non-functional.md`, `50-v0-scope-90-day.md`
 
 ### 2026-04-21 — Use appropriate language per task; no OS-startup-time requirement at v0
 
 **Tag:** `architecture`
 **Directive:** Don't constrain to a single language. Pick best tool per task (Rust, Go, TypeScript, Python, Nix). Boot-time optimization is explicitly not a v0 requirement; optimize later.
 **Resolution:**
-- [x] Polyglot language policy added to `docs/02-architecture.md`.
+- [x] Polyglot language policy added to `docs/10-architecture.md`.
 - [x] Captured as NF-001 through NF-007 in `requirements/non-functional.md`.
 - [x] Boot-time non-requirement explicit in `requirements/performance.md`.
-**Docs touched:** `02-architecture.md`, `requirements/non-functional.md`, `requirements/performance.md`
+**Docs touched:** `10-architecture.md`, `requirements/non-functional.md`, `requirements/performance.md`
 
 ### 2026-04-21 — Model routing must be swappable at multiple granularities
 
@@ -80,7 +80,7 @@ Append-only log of verbal directives from the steward (founder) captured during 
 - [x] `Model Router` added as first-class L2 kernel service.
 - [x] `ModelBackend` trait defined with 5 routing granularities (system/category/pack/agent/call).
 - [x] Captured as F-201–F-206 and baked into diagrams.
-**Docs touched:** `02-architecture.md`, `09-local-vs-cloud.md`, `03-chief-kernel.md`, `requirements/functional.md`, `diagrams/kernel-services.mmd`, `diagrams/layers.mmd`
+**Docs touched:** `10-architecture.md`, `41-local-vs-cloud.md`, `11-chief-kernel.md`, `requirements/functional.md`, `diagrams/kernel-services.mmd`, `diagrams/layers.mmd`
 
 ### 2026-04-21 — Filesystem (and more broadly all OS primitives) must be rethought for agent-primary usage
 
@@ -93,7 +93,7 @@ Append-only log of verbal directives from the steward (founder) captured during 
 - [x] ADRs 0005, 0006, 0007 opened.
 - [x] Surfaces doc updated with 3 new surfaces (HAX Inbox, Omnibar, Clipboard Pane).
 - [x] v0 scope updated with substrate-spine non-negotiables.
-**Docs touched:** `02-architecture.md`, `05-surfaces.md`, `13-v0-scope-90-day.md`, `research/2026-04-21-ai-native-primitive-rethinks.md`, `research/2026-04-21-agent-native-fs.md`, `adr/0005`, `adr/0006`, `adr/0007`
+**Docs touched:** `10-architecture.md`, `30-surfaces.md`, `50-v0-scope-90-day.md`, `research/2026-04-21-ai-native-primitive-rethinks.md`, `research/2026-04-21-agent-native-fs.md`, `adr/0005`, `adr/0006`, `adr/0007`
 
 ### 2026-04-21 — Docs must be optimized for AI-agent consumption (mermaid, frontmatter, tight)
 
@@ -115,7 +115,7 @@ Append-only log of verbal directives from the steward (founder) captured during 
 - [x] Hero video "Morning Reveal" scripted with 9 beats; every beat proves an OS-only feature.
 - [x] "Try Your Own Morning Brief" web funnel scoped as viral loop 2.
 - [x] Forkable Stacks scoped as viral loop 3 with 5 influencer-stack seeds at launch.
-**Docs touched:** `00-north-star.md`, `10-viral-loop.md`, `11-open-source-business.md`
+**Docs touched:** `00-north-star.md`, `60-viral-loop.md`, `61-open-source-business.md`
 
 ### 2026-04-21 — Features must honor HAX theory; Apple-grade UX bar
 
@@ -124,20 +124,20 @@ Append-only log of verbal directives from the steward (founder) captured during 
 **Resolution:**
 - [x] Axiom 10 in Charter: "HAX maps 1:1 to architectural primitives."
 - [x] `docs/01-hax-principles.md` maps 3 HAX dimensions → kernel primitives (Trust Ledger, Region Router, Memory-horizon tags).
-- [x] `docs/12-apple-design-principles.md` defines 10 product-design principles with anti-patterns.
-- [x] Every surface tagged with HAX region(s) in `docs/05-surfaces.md`.
-**Docs touched:** `CHARTER.md`, `01-hax-principles.md`, `12-apple-design-principles.md`, `05-surfaces.md`
+- [x] `docs/02-apple-design-principles.md` defines 10 product-design principles with anti-patterns.
+- [x] Every surface tagged with HAX region(s) in `docs/30-surfaces.md`.
+**Docs touched:** `CHARTER.md`, `01-hax-principles.md`, `02-apple-design-principles.md`, `30-surfaces.md`
 
 ### 2026-04-21 — Memory substrate at kernel layer must be pure OSS (no single-company capture)
 
 **Tag:** `architecture`
 **Directive:** For memory at the OS kernel layer, use the best **pure-OSS** (multi-maintainer, not startup-led) components rather than a startup's OSS that has gravitational pull toward their hosted platform. Explicitly: Letta is not appropriate at the kernel layer; fine only as an optional pack-level backend.
 **Resolution:**
-- [x] `docs/03-chief-kernel.md`, `docs/08-memory-substrate.md`, `docs/13-v0-scope-90-day.md` updated to name pure-OSS default (SQLite + sqlite-vec + fastembed-rs + blake3 CAS).
+- [x] `docs/11-chief-kernel.md`, `docs/13-memory-substrate.md`, `docs/50-v0-scope-90-day.md` updated to name pure-OSS default (SQLite + sqlite-vec + fastembed-rs + blake3 CAS).
 - [x] `docs/research/2026-04-21-oss-landscape-scan.md` updated; Letta withdrawn from kernel-layer recommendation.
 - [ ] Follow-up research agent dispatched to audit pure-OSS alternatives across all memory-stack components (vector index, graph store, blob CAS, full-text, embedding inference).
 - [ ] After research returns: propose ADR codifying the "no single-company capture at kernel layer" principle.
-**Docs touched:** `08-memory-substrate.md`, `03-chief-kernel.md`, `13-v0-scope-90-day.md`, `research/2026-04-21-oss-landscape-scan.md`
+**Docs touched:** `13-memory-substrate.md`, `11-chief-kernel.md`, `50-v0-scope-90-day.md`, `research/2026-04-21-oss-landscape-scan.md`
 
 ### 2026-04-21 — Provable AI is kernel-native (promoted from "demo flex")
 
@@ -147,9 +147,9 @@ Append-only log of verbal directives from the steward (founder) captured during 
 - [x] ADR-0009 opened: Signed Inference as L2 primitive (`chief-inference` service).
 - [x] Per-inference attestation ~400 B; Ed25519 signing; BLAKE3 hashes; ~1–2 ms overhead per call; ≤ 5 ms NFR.
 - [x] Three-tier claim model (Generated / Co-signed / Custody) prevents implicit over-claiming.
-- [x] Docs updated: `02-architecture.md`, `03-chief-kernel.md`, `09-local-vs-cloud.md`, `13-v0-scope-90-day.md`, requirements F-207..F-214, NF-507..NF-508.
+- [x] Docs updated: `10-architecture.md`, `11-chief-kernel.md`, `41-local-vs-cloud.md`, `50-v0-scope-90-day.md`, requirements F-207..F-214, NF-507..NF-508.
 - [ ] Implementation prototype (pending — new plandb task).
-- [ ] Canonical prompt form adversarial review (open question in `14-risks`).
+- [ ] Canonical prompt form adversarial review (open question in `51-risks-open-questions`).
 - [ ] Device-key publication path decision (DID vs Sigstore Fulcio vs self-hosted Rekor).
 
 ### 2026-04-21 — GPU / hardware scheduling deferred to v1+
@@ -157,8 +157,8 @@ Append-only log of verbal directives from the steward (founder) captured during 
 **Tag:** `scope`
 **Directive:** Kernel-level LLM/GPU scheduling and local GPU inference deferred. Steward lacks GPU for testing; many target users also lack one. v0 targets CPU models + cloud models only. Model Router handles routing in userspace; hardware scheduling can become an add-on later.
 **Resolution:**
-- [x] `docs/13-v0-scope-90-day.md` out-of-scope table updated.
-- [x] `docs/09-local-vs-cloud.md` local stack pinned to CPU (Qwen 2.5 7B Q4 / Llama 3.2 8B Q4 default).
+- [x] `docs/50-v0-scope-90-day.md` out-of-scope table updated.
+- [x] `docs/41-local-vs-cloud.md` local stack pinned to CPU (Qwen 2.5 7B Q4 / Llama 3.2 8B Q4 default).
 - [x] `docs/requirements/non-functional.md` NF-505 revised (CPU targets).
 - [x] Apple Silicon Metal left ambiguous — flagged as decision D10 to lock within 7 days. Lean: Metal is acceptable under v0 constraint since it's a built-in backend, not a discrete GPU.
 

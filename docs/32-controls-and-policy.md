@@ -345,7 +345,7 @@ Repeated here for implementation clarity (also in ADR-0012):
 
 ### Phase 1 (v0 scope — locks in parallel with HN briefer)
 
-- `docs/05-surfaces.md` updated with `Security & Privacy` and `Controls` entries.
+- `docs/30-surfaces.md` updated with `Security & Privacy` and `Controls` entries.
 - `chief-ui` gains `<Toggle>`, `<Select>`, `<Slider>` if not already present.
 - `crates/chief-core` exposes a read-only `GET /grants` endpoint returning the grant registry (projection-ready).
 - Morning Brief shows "Security & Privacy" as a link in the Inspector pane under an "Audit" header.
@@ -378,6 +378,6 @@ Repeated here for implementation clarity (also in ADR-0012):
 - [`adr-0010`](../adr/0010-sdk-public-api-stability.md) — public SDK stability.
 - [`adr-0002`](../adr/0002-capability-based-security.md) — grant registry semantics.
 - [`adr-0005`](../adr/0005-signed-typed-event-log.md) — signed receipts powering the activity timeline.
-- [`docs/05-surfaces.md`](./05-surfaces.md) — surface inventory.
-- [`docs/16-pack-sdk.md`](./16-pack-sdk.md) — the 27 CapabilityKinds grouped here into 8 pillars.
-- [`docs/18-ui-standardization.md`](./18-ui-standardization.md) — primitive catalog.
+- [`docs/30-surfaces.md`](./30-surfaces.md) — surface inventory.
+- [`docs/40-pack-sdk.md`](./40-pack-sdk.md) — the 27 CapabilityKinds grouped here into 8 pillars.
+- [`docs/31-ui-standardization.md`](./31-ui-standardization.md) — primitive catalog.

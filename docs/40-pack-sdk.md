@@ -35,7 +35,7 @@ A Nix flake declaring one or more of:
 | Policies | Declarative rules (YAML) | `never-ship-before-9am` |
 | Stack | Curated bundle of the above | `founder-stack`, `doctor-stack` |
 
-See [`docs/04-module-system.md`](./04-module-system.md) for the pack-file layout and registry model.
+See [`docs/12-module-system.md`](./12-module-system.md) for the pack-file layout and registry model.
 
 ## Developer contract (CAN / CANNOT)
 
@@ -258,6 +258,6 @@ Gaps surfaced by building these become SDK primitives via ADR.
 ## Related
 
 - [`adr/0010-sdk-public-api-stability.md`](../adr/0010-sdk-public-api-stability.md) — canonical decision.
-- [`04-module-system.md`](./04-module-system.md) — pack registry + stacks.
-- [`06-security-model.md`](./06-security-model.md) — capability broker + cryptography.
+- [`12-module-system.md`](./12-module-system.md) — pack registry + stacks.
+- [`14-security-model.md`](./14-security-model.md) — capability broker + cryptography.
 - [`17-os-ceremonies-and-boundaries.md`](./17-os-ceremonies-and-boundaries.md) — what the OS absorbs; complementary doc.

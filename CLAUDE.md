@@ -13,9 +13,9 @@
 3. **[`CHARTER.md`](./CHARTER.md)** — 10 axioms; never violate without ADR
 4. **[`docs/INDEX.md`](./docs/INDEX.md)** — machine-readable doc map
 5. **[`docs/00-north-star.md`](./docs/00-north-star.md)** — wedge, Person Zero, staged vision
-6. **[`docs/02-architecture.md`](./docs/02-architecture.md)** — L0–L4
-7. **[`docs/13-v0-scope-90-day.md`](./docs/13-v0-scope-90-day.md)** — what ships first
-8. **[`docs/14-risks-open-questions.md`](./docs/14-risks-open-questions.md)** — open decisions
+6. **[`docs/10-architecture.md`](./docs/10-architecture.md)** — L0–L4
+7. **[`docs/50-v0-scope-90-day.md`](./docs/50-v0-scope-90-day.md)** — what ships first
+8. **[`docs/51-risks-open-questions.md`](./docs/51-risks-open-questions.md)** — open decisions
 
 ## PlanDB — source of truth for all work
 
@@ -260,7 +260,7 @@ External contributors fork the repo, push to their fork, open PR against `main`.
 
 - `.github/workflows/doc-lint.yml` — frontmatter + internal-link check on PRs touching docs.
 - Future:
-  - Rust workspace build + test (when `prototypes/*/Cargo.toml` lands).
+  - Rust workspace build + test (when `spikes/*/Cargo.toml` or `crates/*/Cargo.toml` lands).
   - TypeScript typecheck + lint (for surfaces).
   - Sigstore / cosign verification on signed pack PRs.
   - PlanDB state consistency check (no orphan deps, no runaway claims).
@@ -330,7 +330,7 @@ Kinds are freeform: `discovery` | `decision` | `pattern` | `blocker` | `referenc
 | You want to... | Go to... |
 |---|---|
 | See the axioms | [`CHARTER.md`](./CHARTER.md) |
-| Understand layer architecture | [`docs/02-architecture.md`](./docs/02-architecture.md) |
+| Understand layer architecture | [`docs/10-architecture.md`](./docs/10-architecture.md) |
 | Find an accepted decision | [`adr/`](./adr/) |
 | Add a new design doc | `docs/NN-*.md` + update `docs/INDEX.md` |
 | Propose a decision | `adr/NNNN-slug.md` using `adr/template.md` |
@@ -338,13 +338,13 @@ Kinds are freeform: `discovery` | `decision` | `pattern` | `blocker` | `referenc
 | Record a user directive | `docs/directives/README.md` (append) |
 | Track what-if research | `docs/research/YYYY-MM-DD-slug.md` |
 | Write an implementation plan | `plans/YYYY-MM-DD-slug-plan.md` |
-| Spike a risky idea | `prototypes/<slug>/` with own README + CLEANUP date |
+| Spike a risky idea | `spikes/<slug>/` with own README + CLEANUP date |
 | Capture a brand decision | `brand/*.md` |
 | Track tasks | `.plandb.db` (use `plandb` CLI; see above) |
 
 ## Escalating
 
-- **Need a decision you can't make:** add a row to the decisions-needed table in [`docs/14-risks-open-questions.md`](./docs/14-risks-open-questions.md), assign an owner and deadline.
+- **Need a decision you can't make:** add a row to the decisions-needed table in [`docs/51-risks-open-questions.md`](./docs/51-risks-open-questions.md), assign an owner and deadline.
 - **Found an axiom that's wrong:** propose an ADR.
 - **Architecture shifted:** open an ADR that cites what changed.
 - **Directive from steward that cuts across docs:** append to [`docs/directives/README.md`](./docs/directives/README.md).

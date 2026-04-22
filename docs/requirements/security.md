@@ -108,6 +108,6 @@ Append-only. Each requirement has a stable ID `S-NNN`.
 
 ## Related
 
-- [`../06-security-model.md`](../06-security-model.md) — full security architecture
+- [`../14-security-model.md`](../14-security-model.md) — full security architecture
 - [`non-functional.md`](./non-functional.md) — NFR cross-reference
 - [`../adr/0002-capability-based-security.md`](../adr/0002-capability-based-security.md) — canonical decision

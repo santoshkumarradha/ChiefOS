@@ -117,6 +117,6 @@ Append-only. Each requirement has a stable ID `F-NNN`. Reference from docs, ADRs
 
 ## Related
 
-- [`../02-architecture.md`](../02-architecture.md) — layer placement
-- [`../13-v0-scope-90-day.md`](../13-v0-scope-90-day.md) — v0 commitment
-- [`../14-risks-open-questions.md`](../14-risks-open-questions.md) — open questions on scope
+- [`../10-architecture.md`](../10-architecture.md) — layer placement
+- [`../50-v0-scope-90-day.md`](../50-v0-scope-90-day.md) — v0 commitment
+- [`../51-risks-open-questions.md`](../51-risks-open-questions.md) — open questions on scope

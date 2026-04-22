@@ -33,7 +33,7 @@ Options considered:
 
 ### Concrete model
 
-1. **Device identity key.** Generated at first boot in TPM / Secure Enclave (per [`docs/07-base-and-hardware.md`](../docs/07-base-and-hardware.md)). Never leaves secure hardware. Public half is the device's public identity.
+1. **Device identity key.** Generated at first boot in TPM / Secure Enclave (per [`docs/18-base-and-hardware.md`](../docs/18-base-and-hardware.md)). Never leaves secure hardware. Public half is the device's public identity.
 2. **Root-of-trust principal.** `urn:chief:device:<pubkey-hash>`. Has one meta-grant: `meta.root_of_trust`, which permits issuing grants to the `urn:chief:kernel` principal.
 3. **Kernel principal.** `urn:chief:kernel`. Receives its grants at every boot from the root-of-trust principal via a signed boot-attestation. Grants include:
    - `fs.read { paths: ["/etc/chief/**", "$CHIEF_HOME/**"] }` — own config.
@@ -89,7 +89,7 @@ A CHARTER PR will follow this ADR.
 
 ## CapabilityKind additions
 
-Added to the closed enum in [`docs/16-pack-sdk.md`](../docs/16-pack-sdk.md):
+Added to the closed enum in [`docs/40-pack-sdk.md`](../docs/40-pack-sdk.md):
 
 - `meta.root_of_trust` — the one capability only the device identity key can hold. Permits issuing grants to `urn:chief:kernel`. No pack may request this.
 
@@ -102,6 +102,6 @@ Total `CapabilityKind` count: **29** (was 28 after ADR-0013, now +1).
 - [`adr-0009`](./0009-signed-inference.md) — device identity key also signs inference attestations.
 - [`adr-0012`](./0012-no-settings-app.md) — Security & Privacy surface shows the results of this model.
 - [`CHARTER.md`](../CHARTER.md) — Axiom 2 amendment to follow.
-- [`docs/06-security-model.md`](../docs/06-security-model.md) — will be updated to reference this ADR.
-- [`docs/07-base-and-hardware.md`](../docs/07-base-and-hardware.md) — TPM / Secure Enclave path already committed.
-- [`docs/19-controls-and-policy.md`](../docs/19-controls-and-policy.md) — Security & Privacy implementation.
+- [`docs/14-security-model.md`](../docs/14-security-model.md) — will be updated to reference this ADR.
+- [`docs/18-base-and-hardware.md`](../docs/18-base-and-hardware.md) — TPM / Secure Enclave path already committed.
+- [`docs/32-controls-and-policy.md`](../docs/32-controls-and-policy.md) — Security & Privacy implementation.

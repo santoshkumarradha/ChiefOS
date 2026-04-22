@@ -146,7 +146,7 @@ Disable by default for: finance, health, personal, family, legal.private.
 
 ## Network-cable-pull demo
 
-The hero-video trust flex (see [`viral-loop`](./10-viral-loop.md)):
+The hero-video trust flex (see [`viral-loop`](./60-viral-loop.md)):
 
 1. User yanks ethernet mid-demo.
 2. Chief continues answering sensitive questions instantly.
@@ -204,7 +204,7 @@ Tuning levers:
 
 ## Related
 
-- [`chief-kernel`](./03-chief-kernel.md) — runtime hosting
-- [`memory-substrate`](./08-memory-substrate.md) — what replicates
-- [`security-model`](./06-security-model.md) — cloud-twin trust model
-- [`viral-loop`](./10-viral-loop.md) — network-cable-pull beat
+- [`chief-kernel`](./11-chief-kernel.md) — runtime hosting
+- [`memory-substrate`](./13-memory-substrate.md) — what replicates
+- [`security-model`](./14-security-model.md) — cloud-twin trust model
+- [`viral-loop`](./60-viral-loop.md) — network-cable-pull beat

@@ -21,7 +21,9 @@ WORKDIR /build
 # Copy workspace root and all crates
 COPY Cargo.toml Cargo.lock ./
 COPY crates/ ./crates/
-COPY prototypes/ ./prototypes/
+COPY packs/ ./packs/
+COPY spikes/ ./spikes/
+COPY tools/ ./tools/
 
 # Build chief-core binary
 # Attempt with real-llama feature if available; fall back gracefully if not

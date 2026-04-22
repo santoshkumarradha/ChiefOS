@@ -130,6 +130,6 @@ Every 90 days, Chief OS triggers Quarterly Review:
 
 ## Related
 
-- [`chief-kernel`](./03-chief-kernel.md) — Trust Ledger & Region Router impl surfaces
-- [`surfaces`](./05-surfaces.md) — how friction tiers render
-- [`security-model`](./06-security-model.md) — cryptographic coupling
+- [`chief-kernel`](./11-chief-kernel.md) — Trust Ledger & Region Router impl surfaces
+- [`surfaces`](./30-surfaces.md) — how friction tiers render
+- [`security-model`](./14-security-model.md) — cryptographic coupling

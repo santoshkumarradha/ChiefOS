@@ -53,9 +53,9 @@ Implement a **single Signed Typed Event Log** as the substrate of Chief OS. Ever
 - Storage grows continuously; retention + compaction policy needed.
 
 ### Downstream effects
-- Supersedes the simple "Provenance Log" service scope in [`docs/03-chief-kernel.md`](../docs/03-chief-kernel.md) — Provenance Log is the custodian of the substrate.
+- Supersedes the simple "Provenance Log" service scope in [`docs/11-chief-kernel.md`](../docs/11-chief-kernel.md) — Provenance Log is the custodian of the substrate.
 - Enables [`adr-0007`](./0007-hax-inbox-notifications.md) (HAX Inbox as a view over pending-decision events).
-- Informs [`docs/08-memory-substrate.md`](../docs/08-memory-substrate.md) (Memory Graph is a denormalized view).
+- Informs [`docs/13-memory-substrate.md`](../docs/13-memory-substrate.md) (Memory Graph is a denormalized view).
 
 ## Implementation notes
 

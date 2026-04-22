@@ -39,7 +39,7 @@ tags: [nixos, linux, hardware, deployment]
 | 7 Boring infra | Linux works on everything; HW support is real |
 | 10 HAX-as-enforcement | Flakes = declarative policy; user's house rules ARE a flake |
 
-**Cap-security gap closed at L2** via our Capability Broker + eBPF enforcement on network + fs for high-risk categories. See [`security-model`](./06-security-model.md).
+**Cap-security gap closed at L2** via our Capability Broker + eBPF enforcement on network + fs for high-risk categories. See [`security-model`](./14-security-model.md).
 
 ## macOS considered and rejected
 
@@ -151,8 +151,8 @@ No login screen. No greeter. No desktop environment. The Morning Brief *is* the 
 
 ## Related
 
-- [`architecture`](./02-architecture.md) — L0/L1 placement
-- [`security-model`](./06-security-model.md) — TPM, attestation, boot measurement
-- [`local-vs-cloud`](./09-local-vs-cloud.md) — local runtime requirements
+- [`architecture`](./10-architecture.md) — L0/L1 placement
+- [`security-model`](./14-security-model.md) — TPM, attestation, boot measurement
+- [`local-vs-cloud`](./41-local-vs-cloud.md) — local runtime requirements
 - [`adr/0001-nixos-linux-base.md`](../adr/0001-nixos-linux-base.md) — canonical decision
 - [`adr/0003-wayland-not-x11.md`](../adr/0003-wayland-not-x11.md) — compositor choice

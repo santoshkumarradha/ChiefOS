@@ -3,7 +3,7 @@ id: docs-index
 title: "Docs Index"
 status: stable
 owners: [santosh]
-last_updated: 2026-04-21
+last_updated: 2026-04-22
 tags: [meta, navigation]
 ---
 
@@ -11,34 +11,68 @@ tags: [meta, navigation]
 
 Machine-readable map of all Chief OS documentation. Update when adding or renaming a doc.
 
-## Core design
+Grouped by topic (numbered ranges):
+
+- `00-09` — overview, design philosophy
+- `10-19` — architecture and system design
+- `30-39` — surfaces and UI
+- `40-49` — developer platform
+- `50-59` — deployment and scope
+- `60-69` — go-to-market
+
+## Core design (00-09)
 
 | ID | File | Status | Purpose |
 |---|---|---|---|
 | `charter` | [`../CHARTER.md`](../CHARTER.md) | stable | 10 axioms; constitution |
 | `agents-md` | [`../AGENTS.md`](../AGENTS.md) | stable | Entry point for AI agents |
-| `north-star` | [`00-north-star.md`](./00-north-star.md) | draft | Mission, P0, wedge, staged vision |
+| `north-star` | [`00-north-star.md`](./00-north-star.md) | draft | Mission, Person Zero, wedge, staged vision |
 | `hax-principles` | [`01-hax-principles.md`](./01-hax-principles.md) | draft | HAX theory → OS primitives |
-| `architecture` | [`02-architecture.md`](./02-architecture.md) | draft | L0–L4 layers, substrate spine, language policy |
-| `chief-kernel` | [`03-chief-kernel.md`](./03-chief-kernel.md) | draft | L2 services (7) with swappable harness |
-| `module-system` | [`04-module-system.md`](./04-module-system.md) | draft | Capability Packs, Stacks, registry |
-| `surfaces` | [`05-surfaces.md`](./05-surfaces.md) | draft | 10 surfaces incl. HAX Inbox + Omnibar + Clipboard Pane |
-| `security-model` | [`06-security-model.md`](./06-security-model.md) | draft | Cap-based, hardware-rooted |
-| `base-and-hardware` | [`07-base-and-hardware.md`](./07-base-and-hardware.md) | draft | NixOS choice + targets |
-| `memory-substrate` | [`08-memory-substrate.md`](./08-memory-substrate.md) | draft | Graph schema, URIs, horizon |
-| `local-vs-cloud` | [`09-local-vs-cloud.md`](./09-local-vs-cloud.md) | draft | Hybrid runtime + Model Router swappability |
-| `viral-loop` | [`10-viral-loop.md`](./10-viral-loop.md) | draft | Morning Reveal + try-your-own + Stacks |
-| `oss-business` | [`11-open-source-business.md`](./11-open-source-business.md) | draft | Licensing, monetization |
-| `apple-design` | [`12-apple-design-principles.md`](./12-apple-design-principles.md) | draft | Product guardrails |
-| `v0-scope` | [`13-v0-scope-90-day.md`](./13-v0-scope-90-day.md) | draft | 90-day MVP incl. substrate spine |
-| `risks-open` | [`14-risks-open-questions.md`](./14-risks-open-questions.md) | draft | Honest punch list |
-| `regulatory` | [`15-regulatory-posture.md`](./15-regulatory-posture.md) | draft | Legal posture, compliance |
-| `pack-sdk` | [`16-pack-sdk.md`](./16-pack-sdk.md) | draft | Developer contract — public SDK, CapabilityKind closed enum, CAN/CANNOT, dogfood sequence |
-| `os-ceremonies` | [`17-os-ceremonies-and-boundaries.md`](./17-os-ceremonies-and-boundaries.md) | draft | What the OS absorbs (OAuth, pickers, payment, e-sign, devices); threat model; anti-phishing |
-| `ui-standardization` | [`18-ui-standardization.md`](./18-ui-standardization.md) | draft | `chief-ui` primitive catalog, token system, pack enforcement layers |
-| `controls-and-policy` | [`19-controls-and-policy.md`](./19-controls-and-policy.md) | draft | Security & Privacy surface + Controls surface (implementation spec) |
-| `agent-runtime` | [`20-agent-runtime.md`](./20-agent-runtime.md) | draft | Two-primitive SDK (`.ai()` + `.harness()`), tier-based routing, engine adapter, harness runtime spec |
-| `harness-resume-protocol` | [`21-harness-resume-protocol.md`](./21-harness-resume-protocol.md) | draft | Ceremony-interrupted harness sessions: pause, approve/deny/timeout, multi-pause, engine-state handling |
+| `apple-design` | [`02-apple-design-principles.md`](./02-apple-design-principles.md) | draft | Product design guardrails |
+
+## Architecture and system (10-19)
+
+| ID | File | Status | Purpose |
+|---|---|---|---|
+| `architecture` | [`10-architecture.md`](./10-architecture.md) | draft | L0–L4 layers, substrate spine, language policy |
+| `chief-kernel` | [`11-chief-kernel.md`](./11-chief-kernel.md) | draft | L2 services (with swappable harness) |
+| `module-system` | [`12-module-system.md`](./12-module-system.md) | draft | Capability Packs, Stacks, registry |
+| `memory-substrate` | [`13-memory-substrate.md`](./13-memory-substrate.md) | draft | Graph schema, URIs, horizon |
+| `security-model` | [`14-security-model.md`](./14-security-model.md) | draft | Capability-based, hardware-rooted |
+| `agent-runtime` | [`15-agent-runtime.md`](./15-agent-runtime.md) | draft | Two-primitive SDK (`.ai()` + `.harness()`), tier routing, engine adapter |
+| `harness-resume-protocol` | [`16-harness-resume-protocol.md`](./16-harness-resume-protocol.md) | draft | Ceremony-interrupted harness sessions |
+| `os-ceremonies` | [`17-os-ceremonies-and-boundaries.md`](./17-os-ceremonies-and-boundaries.md) | draft | What the OS absorbs (OAuth, pickers, payment, e-sign, devices); threat model |
+| `base-and-hardware` | [`18-base-and-hardware.md`](./18-base-and-hardware.md) | draft | NixOS base + hardware targets |
+
+## Surfaces and UI (30-39)
+
+| ID | File | Status | Purpose |
+|---|---|---|---|
+| `surfaces` | [`30-surfaces.md`](./30-surfaces.md) | draft | 12 surfaces incl. HAX Inbox, Omnibar, Clipboard Pane |
+| `ui-standardization` | [`31-ui-standardization.md`](./31-ui-standardization.md) | draft | `chief-ui` primitive catalog, token system |
+| `controls-and-policy` | [`32-controls-and-policy.md`](./32-controls-and-policy.md) | draft | Security & Privacy + Controls surfaces |
+
+## Developer platform (40-49)
+
+| ID | File | Status | Purpose |
+|---|---|---|---|
+| `pack-sdk` | [`40-pack-sdk.md`](./40-pack-sdk.md) | draft | Developer contract — public SDK, CapabilityKind closed enum |
+| `local-vs-cloud` | [`41-local-vs-cloud.md`](./41-local-vs-cloud.md) | draft | Hybrid runtime + Model Router swappability |
+
+## Deployment and scope (50-59)
+
+| ID | File | Status | Purpose |
+|---|---|---|---|
+| `v0-scope` | [`50-v0-scope-90-day.md`](./50-v0-scope-90-day.md) | draft | 90-day MVP scope |
+| `risks-open` | [`51-risks-open-questions.md`](./51-risks-open-questions.md) | draft | Honest punch list |
+
+## Go-to-market (60-69)
+
+| ID | File | Status | Purpose |
+|---|---|---|---|
+| `viral-loop` | [`60-viral-loop.md`](./60-viral-loop.md) | draft | Morning Reveal + try-your-own + Stacks |
+| `oss-business` | [`61-open-source-business.md`](./61-open-source-business.md) | draft | Licensing, monetization |
+| `regulatory` | [`62-regulatory-posture.md`](./62-regulatory-posture.md) | draft | Legal posture, compliance |
 
 ## Decisions (ADRs)
 
@@ -63,18 +97,18 @@ Machine-readable map of all Chief OS documentation. Update when adding or renami
 | `adr-0015` | [`../adr/0015-chief-os-compositor.md`](../adr/0015-chief-os-compositor.md) | accepted |
 | `adr-0016` | [`../adr/0016-kernel-principal-identity.md`](../adr/0016-kernel-principal-identity.md) | accepted |
 
-## Reusable diagrams (mermaid)
+## Diagrams (mermaid)
 
-| ID | File | Embedded in |
-|---|---|---|
-| `diag-layers` | [`diagrams/layers.mmd`](./diagrams/layers.mmd) | `architecture` |
-| `diag-kernel-services` | [`diagrams/kernel-services.mmd`](./diagrams/kernel-services.mmd) | `chief-kernel`, `architecture` |
-| `diag-approval-flow` | [`diagrams/approval-flow.mmd`](./diagrams/approval-flow.mmd) | `security-model`, `hax-principles` |
-| `diag-hax-regions` | [`diagrams/hax-regions.mmd`](./diagrams/hax-regions.mmd) | `hax-principles` |
-| `diag-pack-lifecycle` | [`diagrams/pack-lifecycle.mmd`](./diagrams/pack-lifecycle.mmd) | `module-system`, `security-model` |
-| `diag-night-morning` | [`diagrams/night-morning-loop.mmd`](./diagrams/night-morning-loop.mmd) | `north-star`, `viral-loop` |
-| `diag-memory-schema` | [`diagrams/memory-schema.mmd`](./diagrams/memory-schema.mmd) | `memory-substrate` |
-| `diag-agent-runtime` | [`diagrams/agent-runtime.mmd`](./diagrams/agent-runtime.mmd) | `architecture`, `agent-runtime` |
+| File | Embedded in |
+|---|---|
+| [`diagrams/layers.mmd`](./diagrams/layers.mmd) | `architecture` |
+| [`diagrams/kernel-services.mmd`](./diagrams/kernel-services.mmd) | `chief-kernel`, `architecture` |
+| [`diagrams/approval-flow.mmd`](./diagrams/approval-flow.mmd) | `security-model`, `hax-principles` |
+| [`diagrams/hax-regions.mmd`](./diagrams/hax-regions.mmd) | `hax-principles` |
+| [`diagrams/pack-lifecycle.mmd`](./diagrams/pack-lifecycle.mmd) | `module-system`, `security-model` |
+| [`diagrams/night-morning-loop.mmd`](./diagrams/night-morning-loop.mmd) | `north-star`, `viral-loop` |
+| [`diagrams/memory-schema.mmd`](./diagrams/memory-schema.mmd) | `memory-substrate` |
+| [`diagrams/agent-runtime.mmd`](./diagrams/agent-runtime.mmd) | `architecture`, `agent-runtime` |
 
 ## Requirements
 
@@ -101,36 +135,41 @@ External references, competitor analyses, prior art.
 - [`research/2026-04-21-ai-native-primitive-rethinks.md`](./research/2026-04-21-ai-native-primitive-rethinks.md)
 - [`research/2026-04-21-agent-native-fs.md`](./research/2026-04-21-agent-native-fs.md)
 - [`research/2026-04-21-pure-oss-memory-substrate.md`](./research/2026-04-21-pure-oss-memory-substrate.md)
+- [`research/2026-04-22-firecracker-spike.md`](./research/2026-04-22-firecracker-spike.md)
 
-## Brand & visual
+## Brand and visual
 
 | ID | File | Status | Purpose |
 |---|---|---|---|
-| `brand-visual-language` | [`brand/visual-language.md`](./brand/visual-language.md) | draft (binding) | Desktop-feel rules: Tauri rendering, typography, color, motion, native integration checklist, anti-patterns. Review-blocker for any UI PR. |
-| `brand-typeface` | [`../brand/typeface.md`](../brand/typeface.md) | draft | Inter + Inter Tight + JetBrains Mono picks, bundling rules, v2 upgrade candidates |
-| `brand-sound` | [`../brand/sound.md`](../brand/sound.md) | draft | Three-sound palette: ship chime, approval cluck, ceremony tone |
-| `brand-motion` | [`../brand/motion.md`](../brand/motion.md) | draft | Seven spring-physics presets; banned motion list |
+| `brand-typeface` | [`../brand/typeface.md`](../brand/typeface.md) | draft | Inter + Inter Tight + JetBrains Mono |
+| `brand-sound` | [`../brand/sound.md`](../brand/sound.md) | draft | Three-sound palette |
+| `brand-motion` | [`../brand/motion.md`](../brand/motion.md) | draft | Spring-physics presets |
 
-## Legal (draft, counsel review pending)
+## Legal
 
 | ID | File | Status |
 |---|---|---|
 | `legal-tos` | [`../legal/terms-of-service.md`](../legal/terms-of-service.md) | draft |
 | `legal-privacy` | [`../legal/privacy-policy.md`](../legal/privacy-policy.md) | draft |
 
-## Directories
+## Where code lives
 
-- [`../plans/`](../plans/) — implementation plans (see `plans/README.md`)
-- [`../prototypes/`](../prototypes/) — throwaway code spikes
-- [`../brand/`](../brand/) — brand identity
-- [`../legal/`](../legal/) — draft legal documents (external counsel review required)
+- [`../crates/`](../crates/) — production Rust (kernel services, SDK, CLI)
+- [`../packs/`](../packs/) — first-party capability packs
+- [`../apps/`](../apps/) — user-facing apps (chief-brief-ui)
+- [`../spikes/`](../spikes/) — research prototypes
+- [`../tools/`](../tools/) — dev / CI tools
+- [`../packages/`](../packages/) — TS npm packages
+- [`../deploy/docker/`](../deploy/docker/) — Docker demo image
+- [`../nix/`](../nix/), [`../flake.nix`](../flake.nix) — NixOS modules + flake
 
-## Other
+## State
 
-- `../.plandb.db` — PlanDB task graph (intentionally tracked in git)
+- `../.plandb/state.sql` — PlanDB task graph (authoritative, tracked in git)
+- `../.plandb/template.yaml` — human-readable graph sidecar
 
-## Conventions for this index
+## Conventions
 
-- Row-order within a section is stable; append new entries at the bottom of the relevant table.
+- Row-order within a section is stable; append at the bottom.
 - `status` must match the doc's frontmatter `status`.
-- If a doc is renamed, keep an entry with `status: deprecated` and a link forward.
+- If a doc is renamed, keep an entry with `status: deprecated` and a forward link.

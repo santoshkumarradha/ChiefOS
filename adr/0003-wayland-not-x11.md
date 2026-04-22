@@ -49,12 +49,12 @@ Chief OS hosts many agent-adjacent processes (packs, surfaces, sandboxed browser
 - Wayland input / clipboard stories are less flexible than X11's (feature, not bug).
 
 ### Downstream effects
-- [`docs/06-security-model.md`](../docs/06-security-model.md) — surface isolation claim grounded here.
-- [`docs/05-surfaces.md`](../docs/05-surfaces.md) — surfaces are Wayland clients.
+- [`docs/14-security-model.md`](../docs/14-security-model.md) — surface isolation claim grounded here.
+- [`docs/30-surfaces.md`](../docs/30-surfaces.md) — surfaces are Wayland clients.
 
 ## Implementation notes
 
-- Compositor choice for v0: `niri` (scrollable tiling) or `hyprland` under evaluation (see [`docs/14-risks-open-questions.md`](../docs/14-risks-open-questions.md) design questions). Default may be our own thin compositor built on `wlroots`.
+- Compositor choice for v0: `niri` (scrollable tiling) or `hyprland` under evaluation (see [`docs/51-risks-open-questions.md`](../docs/51-risks-open-questions.md) design questions). Default may be our own thin compositor built on `wlroots`.
 - XWayland enabled selectively per-pack manifest, never globally.
 - Input events to ceremony UI never exposed to other clients, enforced by compositor.
 

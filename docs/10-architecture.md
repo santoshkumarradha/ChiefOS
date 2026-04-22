@@ -105,7 +105,7 @@ Diagram also at [`diagrams/layers.mmd`](./diagrams/layers.mmd).
 | Audit / observe | Live Agent View, Provenance Explorer, **Security & Privacy** | 3, 4, 6 | Read-dominant |
 | Policy / control | Trust Ledger Viewer, Ceremony, **Controls** | 1, 2, 4, 7, 8 | Writes gated by consequentiality |
 
-Security & Privacy and Controls are new per [ADR-0012](../adr/0012-no-settings-app.md). See [`05-surfaces.md`](./05-surfaces.md) and [`19-controls-and-policy.md`](./19-controls-and-policy.md).
+Security & Privacy and Controls are new per [ADR-0012](../adr/0012-no-settings-app.md). See [`30-surfaces.md`](./30-surfaces.md) and [`32-controls-and-policy.md`](./32-controls-and-policy.md).
 
 ## Per-layer intent
 
@@ -200,7 +200,7 @@ flowchart TD
     FUT2 -. v1+ swap .-> OC
 ```
 
-Diagram also at [`diagrams/agent-runtime.mmd`](./diagrams/agent-runtime.mmd). Full spec: [`20-agent-runtime.md`](./20-agent-runtime.md).
+Diagram also at [`diagrams/agent-runtime.mmd`](./diagrams/agent-runtime.mmd). Full spec: [`15-agent-runtime.md`](./15-agent-runtime.md).
 
 Key invariants enforced by the runtime:
 
@@ -229,7 +229,7 @@ Pick the right tool per layer. No mandatory single language.
 | Agents / ingesters | **Rust** inside packs (no in-pack Python at v0) | Keep the pack sandbox minimal; Python packs arrive post-v0 |
 | L1 glue (Nix modules, systemd units) | **Nix** + **Bash** | Where boring works |
 
-We do NOT optimize OS boot time at v0 — explicit non-goal (see [`14-risks-open-questions.md`](./14-risks-open-questions.md)).
+We do NOT optimize OS boot time at v0 — explicit non-goal (see [`51-risks-open-questions.md`](./51-risks-open-questions.md)).
 
 ## Ownership summary
 
@@ -349,15 +349,15 @@ Agents do not call syscalls directly for capability-relevant operations. They go
 
 ## Related
 
-- [`chief-kernel`](./03-chief-kernel.md) — L2 detail
-- [`security-model`](./06-security-model.md) — cap-broker enforcement
-- [`base-and-hardware`](./07-base-and-hardware.md) — L0/L1 choices
-- [`module-system`](./04-module-system.md) — L3 pack format
-- [`pack-sdk`](./16-pack-sdk.md) — L3 `chief-sdk` public surface + CapabilityKind enum
-- [`ui-standardization`](./18-ui-standardization.md) — L3 `chief-ui` primitive catalog
-- [`surfaces`](./05-surfaces.md) — L4 detail
-- [`controls-and-policy`](./19-controls-and-policy.md) — L4 Security & Privacy + Controls decomposition
-- [`agent-runtime`](./20-agent-runtime.md) — L2 Agent Runtime spec (two-tier LLM)
-- [`local-vs-cloud`](./09-local-vs-cloud.md) — Model Router swappability
+- [`chief-kernel`](./11-chief-kernel.md) — L2 detail
+- [`security-model`](./14-security-model.md) — cap-broker enforcement
+- [`base-and-hardware`](./18-base-and-hardware.md) — L0/L1 choices
+- [`module-system`](./12-module-system.md) — L3 pack format
+- [`pack-sdk`](./40-pack-sdk.md) — L3 `chief-sdk` public surface + CapabilityKind enum
+- [`ui-standardization`](./31-ui-standardization.md) — L3 `chief-ui` primitive catalog
+- [`surfaces`](./30-surfaces.md) — L4 detail
+- [`controls-and-policy`](./32-controls-and-policy.md) — L4 Security & Privacy + Controls decomposition
+- [`agent-runtime`](./15-agent-runtime.md) — L2 Agent Runtime spec (two-tier LLM)
+- [`local-vs-cloud`](./41-local-vs-cloud.md) — Model Router swappability
 - [`requirements/non-functional.md`](./requirements/non-functional.md) — language + performance constraints
 - ADRs: [`0010`](../adr/0010-sdk-public-api-stability.md), [`0011`](../adr/0011-ui-stack-and-component-library.md), [`0012`](../adr/0012-no-settings-app.md), [`0013`](../adr/0013-agent-runtime-two-tier-llm.md)

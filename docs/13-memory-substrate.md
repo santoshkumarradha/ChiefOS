@@ -206,7 +206,7 @@ Kernel normalizes, adds provenance, commits.
 
 ## Related
 
-- [`chief-kernel`](./03-chief-kernel.md) — Memory Graph service contract
-- [`security-model`](./06-security-model.md) — encryption + cap-gated reads
-- [`local-vs-cloud`](./09-local-vs-cloud.md) — what replicates and what doesn't
+- [`chief-kernel`](./11-chief-kernel.md) — Memory Graph service contract
+- [`security-model`](./14-security-model.md) — encryption + cap-gated reads
+- [`local-vs-cloud`](./41-local-vs-cloud.md) — what replicates and what doesn't
 - [`hax-principles`](./01-hax-principles.md) — horizon-driven retrieval

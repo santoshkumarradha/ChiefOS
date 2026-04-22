@@ -115,4 +115,4 @@ tags: [research, oss, integrations]
 
 - [`2026-04-21-ai-native-primitive-rethinks.md`](./2026-04-21-ai-native-primitive-rethinks.md) — sister research (broader primitives)
 - [`2026-04-21-agent-native-fs.md`](./2026-04-21-agent-native-fs.md) — filesystem deep-dive
-- [`../13-v0-scope-90-day.md`](../13-v0-scope-90-day.md) — Bucket-A integrations baked in
+- [`../50-v0-scope-90-day.md`](../50-v0-scope-90-day.md) — Bucket-A integrations baked in

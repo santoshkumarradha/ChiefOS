@@ -102,7 +102,7 @@ Snapshot-restore is **significantly faster** than cold-boot for Chief's use case
 - On cosign-signed pack upgrades, invalidate all snapshots for the old version.
 - Periodic snapshot refresh (e.g., weekly) to pick up microcode / kernel security updates.
 
-**The one unknown:** snapshot restore requires all the VM's memory pages to be mappable again. For a Chief pack with generous memory grants (e.g. 512 MB for a researcher pack) the snapshot file is 512 MB on disk. Multiply by ~50 installed packs = ~25 GB of snapshot blobs. Manageable, but needs a disk-budget entry in `docs/06-security-model.md`.
+**The one unknown:** snapshot restore requires all the VM's memory pages to be mappable again. For a Chief pack with generous memory grants (e.g. 512 MB for a researcher pack) the snapshot file is 512 MB on disk. Multiply by ~50 installed packs = ~25 GB of snapshot blobs. Manageable, but needs a disk-budget entry in `docs/14-security-model.md`.
 
 ## Rootfs shape
 
@@ -298,5 +298,5 @@ Option 3 was selected per this task's "skip if not tractable" instruction. A fol
 - Cloud Hypervisor (arm64-friendly alternative, future spike): [cloud-hypervisor.org](https://www.cloudhypervisor.org/)
 - ADR-0014 (opencode-subprocess-boundary) — mentions Firecracker as v1+ path
 - ADR-0002 (capability-based-security) — the "process isolation as a layer" posture
-- `docs/06-security-model.md` — Sandboxing v0 → v1+ table
+- `docs/14-security-model.md` — Sandboxing v0 → v1+ table
 - `crates/chief-core/src/sandbox/` — current v0 nspawn implementation

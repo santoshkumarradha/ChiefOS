@@ -7,10 +7,10 @@ Packs must consume the public Chief OS surface, not internal UI or shell APIs.
 ## Usage
 
 ```bash
-chief-ts-lint --pack-root prototypes/my-pack
-chief-ts-lint --pack-root prototypes/my-pack --json
-chief-ts-lint --pack-root prototypes/my-pack --fail-on-violation
-chief-ts-lint --pack-root prototypes/my-pack --allowlist chief-ts-lint.toml
+chief-ts-lint --pack-root packs/my-pack
+chief-ts-lint --pack-root packs/my-pack --json
+chief-ts-lint --pack-root packs/my-pack --fail-on-violation
+chief-ts-lint --pack-root packs/my-pack --allowlist chief-ts-lint.toml
 ```
 
 Exit code `0` means no violations.

@@ -13,7 +13,7 @@ tags: [research, filesystem, cas]
 ## TL;DR
 
 - The broader primitive-rethink scan ([`2026-04-21-ai-native-primitive-rethinks.md`](./2026-04-21-ai-native-primitive-rethinks.md)) already picked **content-addressed filesystem with a human-folder FUSE shim** as top-5 substrate primitive #2. This doc drills in.
-- Primary layout: **CAS over blake3** + **property-graph index** (nodes + edges from [`08-memory-substrate.md`](../08-memory-substrate.md)).
+- Primary layout: **CAS over blake3** + **property-graph index** (nodes + edges from [`13-memory-substrate.md`](../13-memory-substrate.md)).
 - Legacy `~/Downloads/`, `~/Desktop/`, etc. live on as a **read/write FUSE layer** mapping CIDs to path aliases (Plan9 `bind`-style).
 - Embedding model choice: **fastembed-rs** (Rust, ort/ONNX, bge-small/bge-m3) for hot-path; **sentence-transformers** in Python for agent-side ad-hoc.
 
@@ -103,10 +103,10 @@ Breakdown (targets):
 - [ ] ADR: CAS-over-blake3 with FUSE shim as the primary filesystem layout.
 - [ ] ADR: embedding model pinning strategy.
 - [ ] Prototype: `chief-fs` capture daemon + FUSE shim (Rust).
-- [ ] Update [`08-memory-substrate.md`](../08-memory-substrate.md) to reflect CAS-primary framing.
+- [ ] Update [`13-memory-substrate.md`](../13-memory-substrate.md) to reflect CAS-primary framing.
 
 ## Related
 
 - [`2026-04-21-ai-native-primitive-rethinks.md`](./2026-04-21-ai-native-primitive-rethinks.md) — parent research (FS is top-5 pick)
-- [`../08-memory-substrate.md`](../08-memory-substrate.md) — Memory Graph schema that this FS feeds
-- [`../03-chief-kernel.md`](../03-chief-kernel.md) — capture daemon fits here
+- [`../13-memory-substrate.md`](../13-memory-substrate.md) — Memory Graph schema that this FS feeds
+- [`../11-chief-kernel.md`](../11-chief-kernel.md) — capture daemon fits here

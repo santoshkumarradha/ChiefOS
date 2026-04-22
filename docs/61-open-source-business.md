@@ -150,6 +150,6 @@ v3+: optional — if community growth warrants — spin out a Chief Foundation w
 ## Related
 
 - [`north-star`](./00-north-star.md) — staged vision
-- [`module-system`](./04-module-system.md) — pack registry + Stacks
-- [`v0-scope`](./13-v0-scope-90-day.md) — what ships first
-- [`regulatory`](./15-regulatory-posture.md) — compliance implications
+- [`module-system`](./12-module-system.md) — pack registry + Stacks
+- [`v0-scope`](./50-v0-scope-90-day.md) — what ships first
+- [`regulatory`](./62-regulatory-posture.md) — compliance implications

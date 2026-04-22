@@ -176,7 +176,7 @@ The Provenance Explorer (L4 surface) lets any human — user or auditor — reco
 
 ## Related
 
-- [`chief-kernel`](./03-chief-kernel.md) — Capability Broker internals
-- [`module-system`](./04-module-system.md) — pack signing + grants display
-- [`regulatory`](./15-regulatory-posture.md) — how this posture satisfies "machine as fax"
+- [`chief-kernel`](./11-chief-kernel.md) — Capability Broker internals
+- [`module-system`](./12-module-system.md) — pack signing + grants display
+- [`regulatory`](./62-regulatory-posture.md) — how this posture satisfies "machine as fax"
 - [`adr/0002-capability-based-security.md`](../adr/0002-capability-based-security.md) — the canonical decision

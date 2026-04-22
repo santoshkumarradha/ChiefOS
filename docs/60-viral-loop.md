@@ -78,7 +78,7 @@ Landing: `chief-os.com/try`.
 
 ## Loop 3: Forkable Stacks
 
-See [`module-system`](./04-module-system.md) for Stacks as the extension primitive.
+See [`module-system`](./12-module-system.md) for Stacks as the extension primitive.
 
 **Mechanic:**
 
@@ -152,6 +152,6 @@ Launch with opt-in; if a week of data looks like a feel-good metric, bump visibi
 ## Related
 
 - [`north-star`](./00-north-star.md) — north-star metric + Person Zero
-- [`v0-scope`](./13-v0-scope-90-day.md) — what's shippable for the demo
-- [`surfaces`](./05-surfaces.md) — Morning Brief + Live Agent View detail
-- [`module-system`](./04-module-system.md) — Stacks as the viral unit
+- [`v0-scope`](./50-v0-scope-90-day.md) — what's shippable for the demo
+- [`surfaces`](./30-surfaces.md) — Morning Brief + Live Agent View detail
+- [`module-system`](./12-module-system.md) — Stacks as the viral unit

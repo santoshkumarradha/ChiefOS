@@ -64,9 +64,9 @@ Startup-led memory libraries (Letta, Mem0, Zep, Chroma-client, SurrealDB, Memgra
 - Pack authors who want "memory blocks" must adopt Letta/Mem0 themselves as pack deps.
 
 ### Downstream effects
-- [`docs/08-memory-substrate.md`](../docs/08-memory-substrate.md) — storage-backends table updated.
-- [`docs/13-v0-scope-90-day.md`](../docs/13-v0-scope-90-day.md) — Memory Graph line updated.
-- [`docs/03-chief-kernel.md`](../docs/03-chief-kernel.md) — Memory Graph service description updated.
+- [`docs/13-memory-substrate.md`](../docs/13-memory-substrate.md) — storage-backends table updated.
+- [`docs/50-v0-scope-90-day.md`](../docs/50-v0-scope-90-day.md) — Memory Graph line updated.
+- [`docs/11-chief-kernel.md`](../docs/11-chief-kernel.md) — Memory Graph service description updated.
 - Opens: benchmark sqlite-vec vs lance-embedded at a future checkpoint.
 
 ## Implementation notes

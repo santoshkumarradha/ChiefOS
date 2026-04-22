@@ -93,7 +93,7 @@ Same discipline applies to any eventual Hyprland → Wlroots-native-Chief migrat
 
 - [`adr-0003`](./0003-wayland-not-x11.md) — remains accepted; this ADR further specifies "which Wayland compositor."
 - [`adr-0011`](./0011-ui-stack-and-component-library.md) — §"Native material (liquid glass)" row amended to match the table above.
-- [`docs/07-base-and-hardware.md`](../docs/07-base-and-hardware.md) — compositor choice row to be updated.
+- [`docs/18-base-and-hardware.md`](../docs/18-base-and-hardware.md) — compositor choice row to be updated.
 - [`docs/brand/visual-language.md`](../docs/brand/visual-language.md) §6 — blur values become the source of truth for `chief-compositor.nix`.
 
 ## Risks
@@ -106,5 +106,5 @@ Same discipline applies to any eventual Hyprland → Wlroots-native-Chief migrat
 
 - [`adr-0003`](./0003-wayland-not-x11.md) — Wayland choice.
 - [`adr-0011`](./0011-ui-stack-and-component-library.md) — UI stack this ADR disambiguates.
-- [`docs/07-base-and-hardware.md`](../docs/07-base-and-hardware.md) — L1 choices.
+- [`docs/18-base-and-hardware.md`](../docs/18-base-and-hardware.md) — L1 choices.
 - [`docs/brand/visual-language.md`](../docs/brand/visual-language.md) — source of truth for blur + motion values.

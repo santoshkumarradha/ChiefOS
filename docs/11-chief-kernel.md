@@ -108,7 +108,7 @@ grant:
 
 ### 3. Memory Graph (`chief-memory`)
 
-See [`memory-substrate`](./08-memory-substrate.md) for schema and URI design. Pure-OSS stack per [ADR-0008](../adr/0008-pure-oss-memory-substrate.md); content-addressed blobs share the CAS plane defined in [ADR-0006](../adr/0006-cas-filesystem.md).
+See [`memory-substrate`](./13-memory-substrate.md) for schema and URI design. Pure-OSS stack per [ADR-0008](../adr/0008-pure-oss-memory-substrate.md); content-addressed blobs share the CAS plane defined in [ADR-0006](../adr/0006-cas-filesystem.md).
 
 | Aspect | Value |
 |---|---|
@@ -196,7 +196,7 @@ Canonical decision in [ADR-0009](../adr/0009-signed-inference.md). This service 
 
 **Attestation struct** (~400 B; see ADR-0009 for full schema). Ed25519 signature using device key (TPM/SE-sealed). Overhead target: ≤ 5 ms per call — see [`requirements/non-functional.md`](./requirements/non-functional.md) NF-507.
 
-**Routing policy stack** (resolved in order): call-level override → agent manifest → pack manifest → trust-ledger category → system default. See [`09-local-vs-cloud.md`](./09-local-vs-cloud.md).
+**Routing policy stack** (resolved in order): call-level override → agent manifest → pack manifest → trust-ledger category → system default. See [`41-local-vs-cloud.md`](./41-local-vs-cloud.md).
 
 **Tier labeling:**
 - *Generated* — local model, device-key-signed.
@@ -259,8 +259,8 @@ All under the user's encrypted volume (LUKS v0; Apple-style-per-file v1).
 
 ## Related
 
-- [`architecture`](./02-architecture.md) — where these sit in the stack
-- [`security-model`](./06-security-model.md) — cryptographic details
-- [`memory-substrate`](./08-memory-substrate.md) — Memory Graph schema
+- [`architecture`](./10-architecture.md) — where these sit in the stack
+- [`security-model`](./14-security-model.md) — cryptographic details
+- [`memory-substrate`](./13-memory-substrate.md) — Memory Graph schema
 - [`hax-principles`](./01-hax-principles.md) — Trust Ledger + Region Router semantics
 - [`adr/0002-capability-based-security.md`](../adr/0002-capability-based-security.md) — the cap-model decision

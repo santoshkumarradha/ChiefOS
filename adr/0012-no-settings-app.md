@@ -60,7 +60,7 @@ Evaluated three names:
 One surface, six projections over the same **signed, typed grant registry**:
 
 1. **By Pack** (default projection) — what every installed pack can do, what it's done recently, revoke inline.
-2. **By Capability** — grouped into the 8 pillars below; drill down into the 27-kind closed enum from [`docs/16-pack-sdk.md`](../docs/16-pack-sdk.md).
+2. **By Capability** — grouped into the 8 pillars below; drill down into the 27-kind closed enum from [`docs/40-pack-sdk.md`](../docs/40-pack-sdk.md).
 3. **By Agent** — per-agent activity rollup.
 4. **By Data** — data-class lineage ("who has touched my email this week?").
 5. **By HAX region** — what's running in Region 7–8 right now.
@@ -80,7 +80,7 @@ If a proposed new setting writes anything with user-, data-, or system-consequen
 
 ## The 8-pillar capability grouping
 
-The 27-kind `CapabilityKind` closed enum ([`docs/16-pack-sdk.md`](../docs/16-pack-sdk.md)) is too granular as a top-level grouping. We collapse to 8 pillars, each drilling down into its member kinds:
+The 27-kind `CapabilityKind` closed enum ([`docs/40-pack-sdk.md`](../docs/40-pack-sdk.md)) is too granular as a top-level grouping. We collapse to 8 pillars, each drilling down into its member kinds:
 
 | Pillar | Member CapabilityKinds | User-legible question |
 |---|---|---|
@@ -103,7 +103,7 @@ A core rule applied across all control surfaces:
 |---|---|
 | **Grant a new capability** | Ceremony |
 | **Increase a grant's scope** | Ceremony |
-| **Raise trust tier for a category** | Ceremony (per `docs/05-surfaces.md` §Quarterly Review) |
+| **Raise trust tier for a category** | Ceremony (per `docs/30-surfaces.md` §Quarterly Review) |
 | **Enroll a new device / key** | Ceremony + biometric |
 | **Revoke a grant** | One click. No ceremony. |
 | **Tighten a grant's scope** | Inline. No ceremony. |
@@ -155,9 +155,9 @@ One chord (TBD — likely `⌃⌘⎋` or menubar "Panic" extra) kills all pack g
 
 ## Related
 
-- [`docs/05-surfaces.md`](../docs/05-surfaces.md) — to be updated with new surfaces.
-- [`docs/19-controls-and-policy.md`](../docs/19-controls-and-policy.md) — implementation spec for Security & Privacy + Controls.
-- [`docs/16-pack-sdk.md`](../docs/16-pack-sdk.md) §CapabilityKind — canonical 27-kind closed enum.
+- [`docs/30-surfaces.md`](../docs/30-surfaces.md) — to be updated with new surfaces.
+- [`docs/32-controls-and-policy.md`](../docs/32-controls-and-policy.md) — implementation spec for Security & Privacy + Controls.
+- [`docs/40-pack-sdk.md`](../docs/40-pack-sdk.md) §CapabilityKind — canonical 27-kind closed enum.
 - [`adr/0002-capability-based-security.md`](./0002-capability-based-security.md) — capability mechanism these surfaces project over.
 - [`adr/0004-machine-as-fax-posture.md`](./0004-machine-as-fax-posture.md) — user-as-legal-actor, motivates safety-favoring asymmetry.
 - [`adr/0010-sdk-public-api-stability.md`](./0010-sdk-public-api-stability.md) — the SDK that exposes grants for Security & Privacy to project over.

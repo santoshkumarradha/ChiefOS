@@ -192,8 +192,8 @@ Ships as `chief-sdk` — a Nix flake + library bindings:
 
 ## Related
 
-- [`architecture`](./02-architecture.md) — L3 placement
-- [`security-model`](./06-security-model.md) — signing, sandboxing, supply chain
-- [`chief-kernel`](./03-chief-kernel.md) — Capability Broker consumes pack grants
-- [`oss-business`](./11-open-source-business.md) — licensing & registry economics
-- [`viral-loop`](./10-viral-loop.md) — Stacks as the forkable viral unit
+- [`architecture`](./10-architecture.md) — L3 placement
+- [`security-model`](./14-security-model.md) — signing, sandboxing, supply chain
+- [`chief-kernel`](./11-chief-kernel.md) — Capability Broker consumes pack grants
+- [`oss-business`](./61-open-source-business.md) — licensing & registry economics
+- [`viral-loop`](./60-viral-loop.md) — Stacks as the forkable viral unit

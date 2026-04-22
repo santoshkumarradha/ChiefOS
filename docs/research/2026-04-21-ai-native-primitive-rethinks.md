@@ -66,9 +66,9 @@ Schema defined once in Cap'n Proto or Protobuf. Every other primitive — Memory
 **Prototype:** Ship a `chief-journald` sidecar in v0 that captures MCP + A2A traffic; expose as a read-only FUSE at `/chief/events/`. Single log makes "replay my morning" and "prove this agent did X" demoable.
 
 **Integration points (our existing docs):**
-- [`03-chief-kernel.md`](../03-chief-kernel.md) — Provenance Log grows into this substrate.
-- [`06-security-model.md`](../06-security-model.md) — Sigstore signing on every event.
-- [`02-architecture.md`](../02-architecture.md) — add as L2 primitive beneath other services.
+- [`11-chief-kernel.md`](../11-chief-kernel.md) — Provenance Log grows into this substrate.
+- [`14-security-model.md`](../14-security-model.md) — Sigstore signing on every event.
+- [`10-architecture.md`](../10-architecture.md) — add as L2 primitive beneath other services.
 
 ### 2. Content-addressed filesystem with human-folder shim
 
@@ -79,8 +79,8 @@ Schema defined once in Cap'n Proto or Protobuf. Every other primitive — Memory
 **Demo:** "Delete a file. It's still there by CID, and referenced in 3 agent conversations."
 
 **Integration points:**
-- [`08-memory-substrate.md`](../08-memory-substrate.md) — this IS the substrate's FS side.
-- [`02-architecture.md`](../02-architecture.md) — add as L1/L2 hybrid primitive.
+- [`13-memory-substrate.md`](../13-memory-substrate.md) — this IS the substrate's FS side.
+- [`10-architecture.md`](../10-architecture.md) — add as L1/L2 hybrid primitive.
 
 ### 3. Typed, provenanced clipboard (`kbd://`)
 
@@ -91,8 +91,8 @@ Schema defined once in Cap'n Proto or Protobuf. Every other primitive — Memory
 **Demo:** Copy a paper PDF → paste as calendar events. Or: copy a customer email → paste as a triaged response draft.
 
 **Integration points:**
-- [`05-surfaces.md`](../05-surfaces.md) — new surface: Clipboard Pane.
-- [`03-chief-kernel.md`](../03-chief-kernel.md) — clipboard as an L2 service.
+- [`30-surfaces.md`](../30-surfaces.md) — new surface: Clipboard Pane.
+- [`11-chief-kernel.md`](../11-chief-kernel.md) — clipboard as an L2 service.
 
 ### 4. HAX approval queue as the notification primitive
 
@@ -103,7 +103,7 @@ Schema defined once in Cap'n Proto or Protobuf. Every other primitive — Memory
 **Demo:** Five agents doing work, one pane shows exactly what needs you.
 
 **Integration points:**
-- [`05-surfaces.md`](../05-surfaces.md) — major update: this IS the notification surface.
+- [`30-surfaces.md`](../30-surfaces.md) — major update: this IS the notification surface.
 - [`01-hax-principles.md`](../01-hax-principles.md) — the ledger's inbox.
 
 ### 5. Semantic memory-graph search as the omnibar
@@ -115,8 +115,8 @@ Schema defined once in Cap'n Proto or Protobuf. Every other primitive — Memory
 **Demo:** "Find the PDF my sister sent about the cabin last summer" → right answer in one step.
 
 **Integration points:**
-- [`05-surfaces.md`](../05-surfaces.md) — new surface: Omnibar.
-- [`08-memory-substrate.md`](../08-memory-substrate.md) — retrieval API grows this.
+- [`30-surfaces.md`](../30-surfaces.md) — new surface: Omnibar.
+- [`13-memory-substrate.md`](../13-memory-substrate.md) — retrieval API grows this.
 
 ## Why these 5 together
 
@@ -164,16 +164,16 @@ Everything else in the OS — sessions, scheduler, DNS, drivers, mail, browsers 
 
 ## Action items (to be scheduled after architecture incorporation)
 
-- [ ] Add "Signed Typed Event Log" as L2 substrate primitive (beneath all other services). Update [`02-architecture.md`](../02-architecture.md).
-- [ ] Grow Provenance Log into the substrate event store. Update [`03-chief-kernel.md`](../03-chief-kernel.md).
-- [ ] Add "Chief FS" (CAS + shim) to [`08-memory-substrate.md`](../08-memory-substrate.md) and architecture.
-- [ ] Add Clipboard Pane + Omnibar + HAX Inbox to [`05-surfaces.md`](../05-surfaces.md).
+- [ ] Add "Signed Typed Event Log" as L2 substrate primitive (beneath all other services). Update [`10-architecture.md`](../10-architecture.md).
+- [ ] Grow Provenance Log into the substrate event store. Update [`11-chief-kernel.md`](../11-chief-kernel.md).
+- [ ] Add "Chief FS" (CAS + shim) to [`13-memory-substrate.md`](../13-memory-substrate.md) and architecture.
+- [ ] Add Clipboard Pane + Omnibar + HAX Inbox to [`30-surfaces.md`](../30-surfaces.md).
 - [ ] Open ADRs for #1, #2, #4 (the foundational three).
-- [ ] Update [`13-v0-scope-90-day.md`](../13-v0-scope-90-day.md) to list the 5 substrate primitives as v0/v1 non-negotiables.
+- [ ] Update [`50-v0-scope-90-day.md`](../50-v0-scope-90-day.md) to list the 5 substrate primitives as v0/v1 non-negotiables.
 
 ## Related
 
-- [`../02-architecture.md`](../02-architecture.md) — primary integration target
-- [`../08-memory-substrate.md`](../08-memory-substrate.md) — FS + event log converge here
-- [`../05-surfaces.md`](../05-surfaces.md) — #3 #4 #5 add new surfaces
+- [`../10-architecture.md`](../10-architecture.md) — primary integration target
+- [`../13-memory-substrate.md`](../13-memory-substrate.md) — FS + event log converge here
+- [`../30-surfaces.md`](../30-surfaces.md) — #3 #4 #5 add new surfaces
 - [`2026-04-21-oss-landscape-scan.md`](./2026-04-21-oss-landscape-scan.md) — companion research

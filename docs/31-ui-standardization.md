@@ -271,7 +271,7 @@ Framer-motion spring tunings are locked in `docs/brand/visual-language.md` §7. 
 
 ### 2. Pack build-time (hardest enforcement layer)
 
-The pack-build toolchain (Nix-flake-driven, see [`docs/16-pack-sdk.md`](./16-pack-sdk.md)) performs a **static import scan** on every pack before producing a signed artifact:
+The pack-build toolchain (Nix-flake-driven, see [`docs/40-pack-sdk.md`](./40-pack-sdk.md)) performs a **static import scan** on every pack before producing a signed artifact:
 
 - Every top-level import MUST be from the allowed list (`@chief-os/sdk`, `@chief-os/ui`, pack-local files, and a small number of well-known utility libraries).
 - Any `import { … } from "react-dom"`, `"tauri"`, direct `"@radix-ui/*"`, or arbitrary web font URL → hard build failure with a precise diagnostic.
@@ -330,7 +330,7 @@ Before v0 ships:
 
 - [`adr-0011`](../adr/0011-ui-stack-and-component-library.md) — the decision this document implements.
 - [`brand/visual-language.md`](./brand/visual-language.md) — design spec; token values derive from here.
-- [`16-pack-sdk.md`](./16-pack-sdk.md) — pack-level developer contract.
-- [`05-surfaces.md`](./05-surfaces.md) — what each surface is + does.
-- [`12-apple-design-principles.md`](./12-apple-design-principles.md) — product guardrails that motivate this standardization.
+- [`40-pack-sdk.md`](./40-pack-sdk.md) — pack-level developer contract.
+- [`30-surfaces.md`](./30-surfaces.md) — what each surface is + does.
+- [`02-apple-design-principles.md`](./02-apple-design-principles.md) — product guardrails that motivate this standardization.
 - [`screenshots/`](../screenshots/) — reference mockups showing the locked language.

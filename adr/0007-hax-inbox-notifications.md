@@ -51,7 +51,7 @@ Traditional desktop notifications (toast popups, tray icons) are interrupt-drive
 - Some truly urgent (security-critical) events may need a hybrid — see revisit triggers.
 
 ### Downstream effects
-- [`docs/05-surfaces.md`](../docs/05-surfaces.md) — HAX Inbox as a first-class surface.
+- [`docs/30-surfaces.md`](../docs/30-surfaces.md) — HAX Inbox as a first-class surface.
 - [`adr-0005`](./0005-signed-typed-event-log.md) — inbox is a view over events.
 
 ## Implementation notes

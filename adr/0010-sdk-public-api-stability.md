@@ -33,7 +33,7 @@ Steward directive 2026-04-21: "we need to build the SDK first, use public APIs, 
 1. Ship **`crates/chief-sdk`** (Rust) and **`packages/chief-sdk-ts`** (TypeScript) as the only supported way to author a Chief OS pack. Kernel crates (`chief-core`, `chief-inference`, `chief-event-log-proto`, `chief-mem`, `chief-region-router-proto`) are **NOT** part of the public surface; packs must not import them directly.
 2. **`chief-sdk` is semver-versioned (major.minor.patch).** Breaking changes require a major version bump + a deprecation window of at least one minor release cycle.
 3. The **`CapabilityKind`** enum is closed. Adding a new kind requires an ADR. Removing or renaming requires a deprecation window.
-4. The **public API surface is documented in `docs/16-pack-sdk.md`**. Anything not documented there is private and may change without notice.
+4. The **public API surface is documented in `docs/40-pack-sdk.md`**. Anything not documented there is private and may change without notice.
 5. **Dogfood policy (non-negotiable).** Every first-party Chief OS application (Gmail pack, Calendar pack, file-watcher, HN briefer, etc.) uses *only* the public SDK surface. No private hooks, no "first-party entitlements," no kernel imports. If a first-party pack would need private access, that's a signal the SDK is missing a primitive and must be added through the ADR process — not a license to bypass.
 6. **Versioning focus for v0** is internal dogfooding correctness (do *we* build clean apps on our own SDK?). External third-party onboarding is a v1+ concern, but the semver contract is shipped now so it's credible when we open community packs.
 
@@ -47,7 +47,7 @@ Steward directive 2026-04-21: "we need to build the SDK first, use public APIs, 
 ## Consequences
 
 ### Positive
-- Any future third-party pack author can read `docs/16-pack-sdk.md` and build a pack using exactly what we use.
+- Any future third-party pack author can read `docs/40-pack-sdk.md` and build a pack using exactly what we use.
 - Kernel internals are free to churn sprint-over-sprint without worrying about breaking packs.
 - Capability Broker enforcement at `chief-core` is the only code path to user data; auditability is mechanical, not cultural.
 - Packs are portable: same source compiles against any `chief-sdk ^X.Y`.
@@ -59,7 +59,7 @@ Steward directive 2026-04-21: "we need to build the SDK first, use public APIs, 
 - First dogfood pack will reveal missing primitives; we must commit to extending the SDK (via ADR) rather than patching around.
 
 ### Downstream effects
-- `docs/16-pack-sdk.md` — the developer contract (public API catalog, CAN/CANNOT table, versioning rules, scaffolding).
+- `docs/40-pack-sdk.md` — the developer contract (public API catalog, CAN/CANNOT table, versioning rules, scaffolding).
 - `docs/17-os-ceremonies-and-boundaries.md` — the complementary doc on what is OS-absorbed vs. pack-exposed (OAuth login ceremony, pickers, payment, etc.).
 - Capability Broker in `chief-core` moves from allow-all stub to real enforcement.
 - CI lint prevents `prototypes/**` or packs importing `chief-core`, `chief-event-log-proto`, etc. directly.

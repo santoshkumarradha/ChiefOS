@@ -38,7 +38,7 @@ tags: [ui, ux, surfaces, hax]
 
 Three new surfaces (**HAX Inbox, Omnibar, Clipboard Pane**) come from the substrate-spine research ([`research/2026-04-21-ai-native-primitive-rethinks.md`](./research/2026-04-21-ai-native-primitive-rethinks.md)). They are first-class, not add-ons.
 
-**Security & Privacy**, **Controls**, and **Models** are added per [`adr-0012`](../adr/0012-no-settings-app.md) + [`adr-0013`](../adr/0013-agent-runtime-two-tier-llm.md). Chief OS does not ship a Settings app; control is decomposed across surfaces matched to HAX region — Security & Privacy (read-dominant audit), Controls (cosmetic preferences), Models (tier→model routing). Detailed spec: [`18-ui-standardization.md`](./18-ui-standardization.md) (primitives) and [`19-controls-and-policy.md`](./19-controls-and-policy.md) (implementation). Total surface count: 13.
+**Security & Privacy**, **Controls**, and **Models** are added per [`adr-0012`](../adr/0012-no-settings-app.md) + [`adr-0013`](../adr/0013-agent-runtime-two-tier-llm.md). Chief OS does not ship a Settings app; control is decomposed across surfaces matched to HAX region — Security & Privacy (read-dominant audit), Controls (cosmetic preferences), Models (tier→model routing). Detailed spec: [`31-ui-standardization.md`](./31-ui-standardization.md) (primitives) and [`32-controls-and-policy.md`](./32-controls-and-policy.md) (implementation). Total surface count: 13.
 
 ## Morning Brief — the flagship
 
@@ -86,7 +86,7 @@ Used for the hero demo (night handoff). Shows agents as nodes, tool calls as edg
 - Nodes: agents (colored by Stack), tools (shape by kind).
 - Edges: tool calls (color by region — low stakes green, high stakes amber).
 - Overlay: current capability grants in flight.
-- eBPF-powered (see [`chief-kernel`](./03-chief-kernel.md) event bus + observability).
+- eBPF-powered (see [`chief-kernel`](./11-chief-kernel.md) event bus + observability).
 
 Not a debugger. It is **theater of agency** — the aesthetic version of `top -H`. Must hold up at 60fps even with 100 agents.
 
@@ -206,6 +206,6 @@ This is a ritual, not a settings screen. Duration: 10–20 minutes. Modeled on s
 ## Related
 
 - [`hax-principles`](./01-hax-principles.md) — which region maps to which surface
-- [`chief-kernel`](./03-chief-kernel.md) — what the surfaces read
-- [`apple-design`](./12-apple-design-principles.md) — deeper design guardrails
-- [`viral-loop`](./10-viral-loop.md) — Morning Brief as the shareable artifact
+- [`chief-kernel`](./11-chief-kernel.md) — what the surfaces read
+- [`apple-design`](./02-apple-design-principles.md) — deeper design guardrails
+- [`viral-loop`](./60-viral-loop.md) — Morning Brief as the shareable artifact

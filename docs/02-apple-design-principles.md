@@ -125,6 +125,6 @@ Before shipping any surface, ask:
 
 ## Related
 
-- [`surfaces`](./05-surfaces.md) — implementation of these principles
-- [`viral-loop`](./10-viral-loop.md) — demo as product, principle 9
+- [`surfaces`](./30-surfaces.md) — implementation of these principles
+- [`viral-loop`](./60-viral-loop.md) — demo as product, principle 9
 - [`hax-principles`](./01-hax-principles.md) — verification efficiency

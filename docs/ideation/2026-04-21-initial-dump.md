@@ -64,9 +64,9 @@ Stray ideas surfaced during the first brainstorm session. Not yet commitments. S
 
 ## User directives captured (for directive-audit pass)
 
-- **Boot-time is not a v0 requirement** — captured in [`../requirements/non-functional.md`](../requirements/non-functional.md) and [`../14-risks-open-questions.md`](../14-risks-open-questions.md).
-- **Polyglot language policy** — captured in [`../02-architecture.md`](../02-architecture.md) and NFR.
-- **Model routing must be swappable at multiple granularities** — captured in [`../09-local-vs-cloud.md`](../09-local-vs-cloud.md).
+- **Boot-time is not a v0 requirement** — captured in [`../requirements/non-functional.md`](../requirements/non-functional.md) and [`../51-risks-open-questions.md`](../51-risks-open-questions.md).
+- **Polyglot language policy** — captured in [`../10-architecture.md`](../10-architecture.md) and NFR.
+- **Model routing must be swappable at multiple granularities** — captured in [`../41-local-vs-cloud.md`](../41-local-vs-cloud.md).
 - **Rethink all OS primitives for agent-native usage, not just filesystem** — research completed; substrate spine identified; incorporated into architecture + v0 scope + 3 new ADRs.
 
 ## Related
@@ -74,4 +74,4 @@ Stray ideas surfaced during the first brainstorm session. Not yet commitments. S
 - [`../research/2026-04-21-oss-landscape-scan.md`](../research/2026-04-21-oss-landscape-scan.md)
 - [`../research/2026-04-21-ai-native-primitive-rethinks.md`](../research/2026-04-21-ai-native-primitive-rethinks.md)
 - [`../research/2026-04-21-agent-native-fs.md`](../research/2026-04-21-agent-native-fs.md)
-- [`../14-risks-open-questions.md`](../14-risks-open-questions.md)
+- [`../51-risks-open-questions.md`](../51-risks-open-questions.md)

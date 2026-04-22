@@ -11,7 +11,7 @@ tags: [agents, runtime, ceremony, resume, protocol]
 
 # Harness Resume Protocol
 
-> Supplement to [`docs/20-agent-runtime.md`](./20-agent-runtime.md) and [`adr-0013`](../adr/0013-agent-runtime-two-tier-llm.md). Specifies the behavior when a harness session is interrupted by a Ceremony — single pause, multi-pause within one session, approve, deny, timeout, and dependent-state rollback.
+> Supplement to [`docs/15-agent-runtime.md`](./15-agent-runtime.md) and [`adr-0013`](../adr/0013-agent-runtime-two-tier-llm.md). Specifies the behavior when a harness session is interrupted by a Ceremony — single pause, multi-pause within one session, approve, deny, timeout, and dependent-state rollback.
 
 ## Background
 
@@ -166,5 +166,5 @@ Security & Privacy's Recent Activity timeline shows Ceremony events inline with 
 - [`adr-0014`](../adr/0014-opencode-subprocess-boundary.md) — defines the engine-subprocess boundary this protocol sits atop.
 - [`adr-0004`](../adr/0004-machine-as-fax-posture.md) — the machine-as-fax posture this enforces at runtime.
 - [`adr-0005`](../adr/0005-signed-typed-event-log.md) — attestation machinery.
-- [`docs/05-surfaces.md`](./05-surfaces.md) — Ceremony surface definition.
-- [`docs/20-agent-runtime.md`](./20-agent-runtime.md) — the main agent runtime spec this supplements.
+- [`docs/30-surfaces.md`](./30-surfaces.md) — Ceremony surface definition.
+- [`docs/15-agent-runtime.md`](./15-agent-runtime.md) — the main agent runtime spec this supplements.

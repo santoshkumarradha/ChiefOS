@@ -36,7 +36,7 @@ choice.
 ## Layout
 
 ```
-prototypes/chief-ebpf/
+spikes/chief-ebpf/
 ├── Cargo.toml
 ├── README.md
 ├── src/
@@ -75,7 +75,7 @@ cargo clippy -p chief-ebpf --all-targets -- -D warnings
 
 ```bash
 cargo install bpf-linker
-cargo rustc --manifest-path prototypes/chief-ebpf/Cargo.toml \
+cargo rustc --manifest-path spikes/chief-ebpf/Cargo.toml \
     --target bpfel-unknown-none --release \
     -- -C link-arg=--emit=obj
 # produces target/bpfel-unknown-none/release/chief_enforce.o

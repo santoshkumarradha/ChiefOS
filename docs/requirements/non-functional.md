@@ -129,5 +129,5 @@ Append-only. Each requirement has a stable ID `NF-NNN`.
 - [`functional.md`](./functional.md) — functional complement
 - [`security.md`](./security.md) — security depth
 - [`performance.md`](./performance.md) — performance depth
-- [`../02-architecture.md`](../02-architecture.md) — layer placement
-- [`../12-apple-design-principles.md`](../12-apple-design-principles.md) — usability guardrails
+- [`../10-architecture.md`](../10-architecture.md) — layer placement
+- [`../02-apple-design-principles.md`](../02-apple-design-principles.md) — usability guardrails

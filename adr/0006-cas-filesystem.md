@@ -61,8 +61,8 @@ At the same time, humans still want `~/Downloads/` to show the PDF they just dow
 - Some apps with aggressive fsync / rename patterns may surface edge cases.
 
 ### Downstream effects
-- [`docs/08-memory-substrate.md`](../docs/08-memory-substrate.md) — file nodes are CAS-backed.
-- [`docs/07-base-and-hardware.md`](../docs/07-base-and-hardware.md) — storage layout updated.
+- [`docs/13-memory-substrate.md`](../docs/13-memory-substrate.md) — file nodes are CAS-backed.
+- [`docs/18-base-and-hardware.md`](../docs/18-base-and-hardware.md) — storage layout updated.
 - [`adr-0005`](./0005-signed-typed-event-log.md) — every capture emits an event.
 
 ## Implementation notes

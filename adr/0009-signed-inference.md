@@ -89,10 +89,10 @@ UX clearly labels which tier a given attestation holds. No implicit claims.
 - Streaming outputs sign at stream close — mid-stream tampering only detectable post-close.
 
 ### Downstream effects
-- `docs/03-chief-kernel.md` — Model Router renamed `chief-inference`; attestation responsibility added.
-- `docs/02-architecture.md` — TL;DR adds Signed Inference; layer diagram already has Model Router.
-- `docs/09-local-vs-cloud.md` — revised with three-tier claim model.
-- `docs/13-v0-scope-90-day.md` — Signed Inference added as v0 non-negotiable.
+- `docs/11-chief-kernel.md` — Model Router renamed `chief-inference`; attestation responsibility added.
+- `docs/10-architecture.md` — TL;DR adds Signed Inference; layer diagram already has Model Router.
+- `docs/41-local-vs-cloud.md` — revised with three-tier claim model.
+- `docs/50-v0-scope-90-day.md` — Signed Inference added as v0 non-negotiable.
 - `docs/requirements/functional.md` — F-207 Signed Inference on every model call.
 - `docs/requirements/non-functional.md` — NF-507 inference overhead ≤ 5 ms.
 

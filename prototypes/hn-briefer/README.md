@@ -50,6 +50,23 @@ cargo build -p hn-briefer
 cargo test -p hn-briefer
 ```
 
+## Running live tests
+
+Live tests (`tests/live.rs`) are `#[ignore]`-gated because they hit real HN + Substack + OpenRouter. Run them with:
+
+```bash
+export OPENROUTER_API_KEY=sk-or-...
+cargo test -p hn-briefer -- --ignored --nocapture
+```
+
+What they cover:
+
+- `hn_live_top_stories_scored` — fetches real HN top stories via the Algolia API and scores one with `openai/gpt-4o-mini`.
+- `substack_live_rss_parsed` — fetches `astralcodexten.substack.com/feed` (a stable `*.substack.com` host) and scores an article.
+- `briefer_live_end_to_end` — runs `HnBrieferAgent::on_tick` against a real `ReqwestNetworkConnector` and asserts the full memory / card / event-bus shape.
+
+Estimated cost per full run: well under \$0.01 using `openai/gpt-4o-mini` via OpenRouter.
+
 ## Implementation Notes
 
 - **V0 scope**: Hardcoded Substack URLs; user-configurable feeds are a later task.

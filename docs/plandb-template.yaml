@@ -1274,6 +1274,14 @@ dependencies:
   to_ref: task-80
   kind: blocks
 context:
+- kind: decision
+  content: 'ADR-0015 impl: Hyprland v0.49.0 pinned; spring→bezier translation used because Hyprland lacks native spring easing. Approximations documented in chief-compositor.nix.'
+  tags: []
+  task_ref: task-48
+- kind: discovery
+  content: 'SDK TypeScript parity 0.3.0: Implemented Tier (fast|deep), CapabilityKind (37 variants + llm.ai/harness/meta.prompt/meta.root_of_trust), AiBuilder fluent API, HarnessBuilder with transcript, ToolHandle opaque type (branded), error discriminated unions (AiError/HarnessError), CapabilityContext methods (ai/harness/netTool/memoryTool/fsTool/aiTool/harnessTool), full public exports from index.ts. Build clean (tsc strict mode), tests pass (vitest 5 tests). Version 0.3.0. Ready for commit.'
+  tags: []
+  task_ref: null
 - kind: discovery
   content: 'SDK gaps discovered: fs.watch/fs.read grants defined in CapabilityKind but no direct ctx.fs() accessor yet. Stub via ctx.ai() call works as workaround. Grant shape accurate for both manifest.toml TOML format and Rust Grant::new() builder.'
   tags: []

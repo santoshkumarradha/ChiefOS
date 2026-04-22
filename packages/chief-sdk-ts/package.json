@@ -1,9 +1,9 @@
 {
   "name": "@chief-os/sdk",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "TypeScript bindings for Chief OS pane authors.",
+  "description": "TypeScript bindings for Chief OS pane authors and pack developers.",
   "license": "AGPL-3.0-or-later",
   "exports": {
     ".": {

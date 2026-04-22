@@ -1,0 +1,48 @@
+name: NixOS CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  linux:
+    name: Provisional NixOS-equivalent Linux tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install native Linux headers
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libbpf-dev \
+            libfuse-dev \
+            libfuse3-dev \
+            libsystemd-dev \
+            libwayland-dev \
+            libxkbcommon-dev \
+            pkg-config \
+            wayland-protocols
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Build workspace and test chief-sdk
+        run: |
+          set -euo pipefail
+          mkdir -p ci-artifacts
+          nix develop --command bash -lc '
+            set -euo pipefail
+            cargo build --workspace 2>&1 | tee ci-artifacts/cargo-build.log
+            cargo test -p chief-sdk -- --nocapture 2>&1 | tee ci-artifacts/cargo-test-chief-sdk.log
+          '
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nixos-ci-failure-${{ github.run_id }}
+          path: ci-artifacts/
+          if-no-files-found: ignore

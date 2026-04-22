@@ -147,6 +147,48 @@ Revert all actions approved within a time window.
 {"reverted_count": 2}
 ```
 
+### POST /oauth/start
+
+Start an OAuth authorization flow. Caller must hold `net.oauth2 { provider, scopes }` capability.
+
+**Request:**
+```json
+{"provider": "google", "scopes": ["gmail.readonly"], "redirect_uri": "http://localhost:8080/callback"}
+```
+
+**Response:**
+```json
+{"flow_id": "flow_...", "auth_url": "https://accounts.google.com/...", "state": "..."}
+```
+
+### POST /oauth/complete
+
+Complete an OAuth flow. Returns opaque `SessionHandle` (bearer token stays server-side).
+
+**Request:**
+```json
+{"flow_id": "flow_...", "code": "auth_code", "state": "state_value"}
+```
+
+**Response:**
+```json
+{"id": "sess_...", "provider": {"kind": "google"}, "scopes": ["gmail.readonly"]}
+```
+
+### POST /oauth/proxy
+
+Make authenticated requests through OAuth bearer token (server-side injection). Requires `net.oauth2 { provider }` capability.
+
+**Request:**
+```json
+{"session_id": "sess_...", "url": "https://www.googleapis.com/gmail/v1/users/me", "method": "GET", "headers": {}, "body": null}
+```
+
+**Response:**
+```json
+{"status": 200, "headers": {...}, "body": "..."}
+```
+
 ### GET /status
 
 Service health and metrics.

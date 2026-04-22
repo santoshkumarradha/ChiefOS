@@ -16,6 +16,7 @@ members = [
     "prototypes/file-watcher-briefer",
     "tools/chief-ts-lint",
     "prototypes/chief-fs",
+    "prototypes/hax-inbox",
 ]
 exclude = [
     # Keep future exclusions explicit; empty for now.

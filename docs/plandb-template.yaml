@@ -1290,6 +1290,26 @@ dependencies:
   kind: blocks
 context:
 - kind: discovery
+  content: ChiefCoreAiBackend's legacy pick() path requires ModelsConfig.providers map populated for Cloud bindings. resolve_cloud_route() bypasses this so ProviderRegistry from Models surface is single source of truth.
+  tags: []
+  task_ref: null
+- kind: discovery
+  content: 'discovery: ChiefCoreAiBackend''s legacy pick() path requires ModelsConfig.providers map to be populated for Cloud bindings. resolve_cloud_route() bypasses this so the ProviderRegistry from the Models surface becomes the single source of truth for cloud providers. Legacy path still works for backward compat.'
+  tags: []
+  task_ref: null
+- kind: discovery
+  content: 'discovery: ctx.ai() hardcodes InMemoryAiBackend in chief-sdk src/context.rs; live tests call OpenRouter directly via reqwest to cover the real-model path. every.to/feed is 404; switched to astralcodexten.substack.com/feed.'
+  tags: []
+  task_ref: task-50
+- kind: discovery
+  content: 'discovery: ctx.ai() in chief-sdk hardcodes InMemoryAiBackend (src/context.rs line 61). Real-model scoring via ctx.ai() from packs isn''t wired up yet; live tests for hn-briefer call OpenRouter directly via reqwest to prove the model/prompt path, and run the full on_tick with a real reqwest NetworkConnector for the fetch side. Follow-up needed: SDK backend-injection point to let packs opt into ChiefCoreAiBackend.'
+  tags: []
+  task_ref: task-50
+- kind: discovery
+  content: 'discovery: packages/chief-sdk-ts/src/context.ts has a pre-existing type error on main — it constructs CapabilityKind as object literals but the type is a string union. The TS ''build'' acceptance gate on t-h-sdk-fs-ctx is blocked until this is fixed. I will fix context.ts in-scope (task allows editing this file) by reducing object literals to string kinds. Deeper discriminated-union rework belongs in a follow-up task to bring TS CapabilityKind to parity with Rust. This does not change the public API of ctx.fsTool/ctx.netTool/etc (those only get used with string paths).'
+  tags: []
+  task_ref: null
+- kind: discovery
   content: 'discovery: systemd-nspawn --bind-ro/--bind syntax uses SRC[:DEST[:OPTS]]; we use SRC:SRC so in-sandbox paths mirror host paths 1:1 - makes policy authoring trivial and keeps --chdir working'
   tags: []
   task_ref: task-26

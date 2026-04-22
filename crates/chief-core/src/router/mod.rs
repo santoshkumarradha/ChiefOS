@@ -11,8 +11,14 @@ pub mod config;
 pub mod install_check;
 pub mod picker;
 pub mod probe;
+pub mod provider_config;
 
 pub use config::{BindingKind, Defaults, ModelsConfig, ProviderBinding, TierBinding, TierBindings};
 pub use install_check::{check_pack_installable, InstallBlockReason, PackGrant};
-pub use picker::{ModelChoice, ModelRouter, RoutedEndpoint, RouterError};
+pub use picker::{ModelChoice, ModelRouter, RouteError, RoutedEndpoint, RouterError};
 pub use probe::{Arch, DeviceCapability};
+pub use provider_config::{
+    EnvOverrideSealedKeyStore, InMemorySealedKeyStore, OauthKeyHandle,
+    ProviderBinding as CloudProviderBinding, ProviderError, ProviderKind, ProviderRegistry,
+    ResolvedProviderRoute, SealedKeyStore, SharedProviderRegistry, SharedSealedKeyStore,
+};

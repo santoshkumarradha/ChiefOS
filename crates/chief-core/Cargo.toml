@@ -41,12 +41,14 @@ num_cpus.workspace = true
 chief-sdk = { path = "../../crates/chief-sdk" }
 chief-oauth = { path = "../../crates/chief-oauth" }
 
-# Internal
-chief-harness-proto       = { path = "../../prototypes/harness" }
-chief-region-router-proto = { path = "../../prototypes/region-router" }
-chief-event-log-proto     = { path = "../../prototypes/event-log" }
-chief-mem                 = { path = "../../prototypes/chief-mem" }
-chief-inference           = { path = "../../prototypes/chief-inference" }
+# Internal crates
+chief-mem                 = { path = "../../crates/chief-mem" }
+chief-inference           = { path = "../../crates/chief-inference" }
+
+# Legacy prototypes (still consumed; slated for removal when chief-core fully supersedes them)
+chief-harness-proto       = { path = "../../spikes/harness", package = "chief-harness-proto" }
+chief-region-router-proto = { path = "../../spikes/region-router", package = "chief-region-router-proto" }
+chief-event-log-proto     = { path = "../../spikes/event-log", package = "chief-event-log-proto" }
 
 [[bin]]
 name = "chief-core"

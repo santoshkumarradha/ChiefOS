@@ -46,7 +46,7 @@ docker run -p 8080:8080 \
 
 Browse:
 
-- `http://localhost:8080/` — Morning Brief UI (React bundle from `prototypes/morning-brief/`)
+- `http://localhost:8080/` — Morning Brief UI (React bundle from `apps/chief-brief-ui/`)
 - `http://localhost:8080/v1/brief` — raw Brief JSON
 - `http://localhost:8080/v1/inbox` — flat list of queued + handled cards
 - `http://localhost:8080/v1/status` — health / uptime

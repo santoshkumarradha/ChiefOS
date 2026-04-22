@@ -43,7 +43,7 @@ FROM node:20-slim AS ui-builder
 WORKDIR /build
 
 # Copy Morning Brief prototype
-COPY prototypes/morning-brief ./
+COPY apps/chief-brief-ui ./
 
 # Install deps and build
 RUN npm ci && npm run build

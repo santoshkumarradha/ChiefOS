@@ -1,26 +1,33 @@
 [workspace]
 resolver = "2"
 members = [
-    "prototypes/harness",
-    "prototypes/region-router",
-    "prototypes/event-log",
-    "prototypes/chief-mem",
-    "prototypes/chief-inference",
-    "crates/chief-oauth",
+    # crates/ — production Rust: kernel services, SDK, CLI
     "crates/chief-core",
-    "crates/chief-cli",
     "crates/chief-sdk",
     "crates/chief-ui",
-    "prototypes/hello-world-pack",
-    "prototypes/hn-briefer",
-    "prototypes/file-watcher-briefer",
+    "crates/chief-cli",
+    "crates/chief-oauth",
+    "crates/chief-mem",
+    "crates/chief-inference",
+    "crates/chief-fs",
+    "crates/hax-inbox",
+
+    # packs/ — first-party capability packs
+    "packs/hn-briefer",
+    "packs/file-watcher-briefer",
+    "packs/hello-world-pack",
+
+    # tools/ — dev / CI tools
     "tools/chief-ts-lint",
-    "prototypes/chief-fs",
-    "prototypes/hax-inbox",
-    "prototypes/chief-ebpf",
+
+    # spikes/ — research prototypes, not production
+    "spikes/chief-ebpf",
+    "spikes/harness",
+    "spikes/event-log",
+    "spikes/region-router",
 ]
 exclude = [
-    # Keep future exclusions explicit; empty for now.
+    # apps/chief-brief-ui is a Node/React project; excluded from Rust workspace.
 ]
 
 [workspace.package]

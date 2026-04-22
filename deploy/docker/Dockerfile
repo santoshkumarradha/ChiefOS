@@ -2,7 +2,7 @@
 # -------------------------------------------------------------------
 # Three stages:
 #   1. rust-builder : builds the `demo_run` binary (release)
-#   2. node-builder : builds prototypes/morning-brief into /dist
+#   2. node-builder : builds apps/chief-brief-ui into /dist
 #   3. runtime      : slim ubuntu image with just the binary + bundle
 #
 # One-line invocation from the repo root:
@@ -37,7 +37,8 @@ WORKDIR /src
 # chief-core, so a fine-grained COPY buys very little cache mileage.
 COPY Cargo.toml Cargo.lock* ./
 COPY crates/ ./crates/
-COPY prototypes/ ./prototypes/
+COPY packs/ ./packs/
+COPY spikes/ ./spikes/
 COPY tools/ ./tools/
 
 # Build just the demo binary.
@@ -49,7 +50,7 @@ RUN test -x /src/target/release/demo_run
 # ────────────────────────────────────────────────────────────────────
 # Stage 2: Frontend build (Morning Brief React bundle)
 # ────────────────────────────────────────────────────────────────────
-# Builds prototypes/morning-brief into /src/dist. If the bundle build
+# Builds apps/chief-brief-ui into /src/dist. If the bundle build
 # fails (e.g. the frontend PR hasn't landed and the tsconfig still
 # references vitest/globals with no vitest installed), we fall back to
 # a minimal placeholder /src/dist/index.html that renders /v1/brief
@@ -61,7 +62,7 @@ FROM node:20-slim AS node-builder
 WORKDIR /src
 
 # Copy the morning-brief prototype plus the fallback template.
-COPY prototypes/morning-brief/ ./
+COPY apps/chief-brief-ui/ ./
 COPY deploy/docker/fallback-index.html /tmp/fallback-index.html
 
 RUN set -e; \

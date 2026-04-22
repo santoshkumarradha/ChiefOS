@@ -11,7 +11,10 @@ tags: [prototype, morning-brief, surface]
 
 ## Hypothesis
 
-The Morning Reveal can make delegated agent work legible in one cold render: two human decisions, fourteen handled receipts, and a trust ledger that visibly moves from prior state to current state.
+The Morning Reveal can make delegated agent work legible in one cold render:
+Brief surface + HAX Inbox drawer + Omnibar + Ceremony overlay, all wired to a
+live chief-core `/v1/*` HTTP API. No mock data in production — empty API
+responses render as empty states.
 
 ## Run
 
@@ -19,20 +22,30 @@ The Morning Reveal can make delegated agent work legible in one cold render: two
 npm install
 npm run typecheck
 npm run build
+npm run test
 npm run dev
 ```
 
-The app reads only from `mock/brief-state.json`. It performs no HTTP requests.
+All surfaces call `/v1/*` relative paths. The dev server proxies `/v1/*` to
+`http://localhost:8080` by default; override with
+`VITE_CHIEF_CORE_URL=http://127.0.0.1:4711 npm run dev` to target a legacy
+chief-core kernel.
+
+## Surfaces
+
+- `src/MorningBrief.tsx` — primary surface bound to `/v1/brief`.
+- `src/surfaces/InboxDrawer.tsx` — HAX Inbox, `⌘I`, streams `/v1/inbox/stream`.
+- `src/surfaces/Omnibar.tsx` — floating palette, `⌘Space`, `/v1/omnibar/search`.
+- `src/surfaces/Ceremony.tsx` — full-screen co-sign with hold-to-confirm ring.
+- `src/surfaces/Menubar.tsx` — thin top strip + live spend-today from `/v1/models/cost`.
 
 ## Success
 
-- Spacebar or the reveal button starts the ceremony.
-- Cards enter with staggered spring motion.
-- Trust ledger bars spring from previous values to current values.
-- Handled cards open a receipt panel with provenance.
-- Needs-you review buttons open an Evidence Card modal stub.
-- Tab, Arrow keys, Enter, and Esc operate the surface.
-- Cold render remains below 3 seconds on a normal local Vite build.
+- `npm run build` ships clean production bundle.
+- `npm run test` passes (vitest + @testing-library/react).
+- `⌘I` toggles HAX Inbox, `⌘Space` toggles Omnibar, `Esc` dismisses.
+- Ceremony requires a 3-second hold on the copper ring to approve.
+- Every surface renders an empty state when the backend is unreachable.
 
 ## Cleanup
 

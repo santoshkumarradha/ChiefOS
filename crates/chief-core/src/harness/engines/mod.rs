@@ -7,7 +7,7 @@ pub mod traits;
 
 pub use custom::CustomEngine;
 pub use opencode::OpencodeEngine;
-pub use opencode_supervisor::OpencodeSupervisor;
+pub use opencode_supervisor::{OpencodeSupervisor, SupervisorConfig};
 pub use traits::{
     EngineError, EngineRegistry, EngineSessionHandle, EngineSessionRequest, EngineStep,
     EngineToolSpec, HarnessEngine, ToolResult,

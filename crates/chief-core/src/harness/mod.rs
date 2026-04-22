@@ -14,7 +14,7 @@ pub use budgets::{BudgetLimits, BudgetState};
 pub use ceremony_gate::{CeremonyOutcome, CeremonySurface, MockCeremonySurface};
 pub use engines::{
     CustomEngine, EngineError, EngineRegistry, EngineSessionHandle, EngineSessionRequest,
-    EngineStep, HarnessEngine, OpencodeEngine, OpencodeSupervisor, ToolResult,
+    EngineStep, HarnessEngine, OpencodeEngine, OpencodeSupervisor, SupervisorConfig, ToolResult,
 };
 pub use runtime::{
     EchoToolDispatcher, HarnessError, HarnessOutcome, HarnessRequest, HarnessRuntime,

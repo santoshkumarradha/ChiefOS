@@ -8,6 +8,7 @@ pub mod harness;
 pub mod kernel_principal;
 pub mod router;
 pub mod routes;
+pub mod sandbox;
 pub mod state;
 
 pub use routes::router;

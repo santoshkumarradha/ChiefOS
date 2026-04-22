@@ -81,6 +81,9 @@
               pkg-config
               rustc
               systemd
+              # systemd-nspawn binary used by chief-core's sandbox module
+              # (see crates/chief-core/src/sandbox/nspawn.rs and ADR-0002).
+              systemd-container
               wayland
               wayland-protocols
               libxkbcommon

@@ -1289,6 +1289,18 @@ dependencies:
   to_ref: task-81
   kind: blocks
 context:
+- kind: discovery
+  content: 'discovery: systemd-nspawn --bind-ro/--bind syntax uses SRC[:DEST[:OPTS]]; we use SRC:SRC so in-sandbox paths mirror host paths 1:1 - makes policy authoring trivial and keeps --chdir working'
+  tags: []
+  task_ref: task-26
+- kind: discovery
+  content: 'discovery: nspawn inherits host netns when neither --private-network nor --network-veth is given; NetworkPolicy::HostShared therefore emits NO flag (documented via comment in build_nspawn_args)'
+  tags: []
+  task_ref: task-26
+- kind: decision
+  content: 'decision: NetworkPolicy::Private variant is defined now but downgrades to HostShared behavior with tracing::warn! at v0 since userland proxy does not exist yet - keeps call sites stable across v0->v1 transition'
+  tags: []
+  task_ref: task-26
 - kind: decision
   content: 'ADR-0015 impl: Hyprland v0.49.0 pinned; spring→bezier translation used because Hyprland lacks native spring easing. Approximations documented in chief-compositor.nix.'
   tags: []

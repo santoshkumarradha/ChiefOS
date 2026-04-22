@@ -1,0 +1,64 @@
+%% Chief OS — Agent Runtime flow (ADR-0013)
+%% Shows the two-primitive path: ctx.ai() and ctx.harness()
+%% Embedded in: docs/02-architecture.md §Agent Runtime, docs/20-agent-runtime.md
+flowchart TD
+    subgraph L3["L3 — Pack (developer code)"]
+        PACK["Pack<br/>(e.g. HN Briefer,<br/>Gmail Triage)"]
+    end
+
+    subgraph SDK["chief-sdk public API"]
+        AIB["ctx.ai()<br/>single-shot structured"]
+        HRB["ctx.harness()<br/>multi-turn with tools"]
+        TH["ToolHandle<br/>(capability handle,<br/>session-bound)"]
+    end
+
+    subgraph L2AR["L2 — Agent Runtime (chief-core owns the loop)"]
+        CHECK["Capability Broker check<br/>per tool invocation"]
+        BUDGET["Budget / turn / wall<br/>enforcement"]
+        CEREMONY["External-action<br/>Ceremony gate<br/>(hard rule)"]
+        ATTEST["Per-turn<br/>SignedAttestation<br/>→ Event Log"]
+    end
+
+    subgraph L2ENG["Engine adapter (pluggable)"]
+        OC["OpencodeEngine v0"]
+        FUT1["SwarmEngine (future)"]
+        FUT2["CustomEngine (future)"]
+    end
+
+    subgraph L2INF["Inference layer"]
+        RTR[Model Router]
+        TIER["tier: Fast | Deep<br/>(from grant scope)"]
+        USERCFG["user's<br/>Controls → Models<br/>config"]
+        LOCAL[Local llama.cpp]
+        CLOUD[Cloud tiers<br/>ADR-0009]
+    end
+
+    subgraph L4OUT["L4 surfaces rendering harness output"]
+        BRIEF[Morning Brief card]
+        PROV[Provenance Explorer]
+    end
+
+    PACK --> AIB
+    PACK --> HRB
+    PACK -.passes.-> TH
+    TH -.to.-> HRB
+
+    AIB --> CHECK
+    HRB --> CHECK
+    CHECK --> BUDGET
+    BUDGET --> CEREMONY
+
+    CEREMONY --> OC
+    OC -. tool call .-> CHECK
+    OC --> ATTEST
+    ATTEST --> BRIEF
+    ATTEST --> PROV
+
+    OC --> RTR
+    TIER --> RTR
+    USERCFG --> RTR
+    RTR --> LOCAL
+    RTR --> CLOUD
+
+    FUT1 -. v1+ swap .-> OC
+    FUT2 -. v1+ swap .-> OC

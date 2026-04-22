@@ -70,6 +70,7 @@ Machine-readable map of all Chief OS documentation. Update when adding or renami
 | `diag-pack-lifecycle` | [`diagrams/pack-lifecycle.mmd`](./diagrams/pack-lifecycle.mmd) | `module-system`, `security-model` |
 | `diag-night-morning` | [`diagrams/night-morning-loop.mmd`](./diagrams/night-morning-loop.mmd) | `north-star`, `viral-loop` |
 | `diag-memory-schema` | [`diagrams/memory-schema.mmd`](./diagrams/memory-schema.mmd) | `memory-substrate` |
+| `diag-agent-runtime` | [`diagrams/agent-runtime.mmd`](./diagrams/agent-runtime.mmd) | `architecture`, `agent-runtime` |
 
 ## Requirements
 

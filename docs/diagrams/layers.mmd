@@ -1,22 +1,47 @@
-%% Chief OS — layer stack (L0–L4)
+%% Chief OS — layer stack (L0–L4) — updated 2026-04-21 post ADR-0010/11/12/13
 %% Embedded in: docs/02-architecture.md
 flowchart TD
-    subgraph L4[L4 — Surfaces]
-        MB[Morning Brief]
-        LV[Live Agent View]
-        PE[Provenance Explorer]
-        TL[Trust Ledger Viewer]
-        CE[Ceremony UI]
-        CH[Chat Pane]
-        QR[Quarterly Review]
+    subgraph L4["L4 — Surfaces (12)"]
+        direction TB
+        subgraph L4a["Daily rhythm"]
+            MB[Morning Brief]
+            QR[Quarterly Review]
+        end
+        subgraph L4b["Ambient"]
+            HI[HAX Inbox]
+            OB[Omnibar]
+            CP2[Clipboard Pane]
+            CH[Chat Pane]
+        end
+        subgraph L4c["Audit / observe"]
+            LV[Live Agent View]
+            PE[Provenance Explorer]
+            SP[Security & Privacy]
+        end
+        subgraph L4d["Policy / control"]
+            TL[Trust Ledger Viewer]
+            CE[Ceremony]
+            CT[Controls]
+        end
     end
-    subgraph L3[L3 — Module System]
+
+    subgraph L3["L3 — Developer Platform + Module System"]
+        direction LR
+        SDK["chief-sdk<br/>(Rust + TS)<br/>public API"]
+        UI["chief-ui<br/>(React + Rust)<br/>locked primitives"]
+        OAUTH["chief-oauth<br/>(session broker)"]
         CP[Capability Packs]
         SK[Stacks]
         RG[Pack Registry]
     end
-    subgraph L2[L2 — Chief Kernel]
-        AR[Agent Runtime]
+
+    subgraph L2["L2 — Chief Kernel"]
+        direction TB
+        subgraph L2AR["Agent Runtime"]
+            AI[".ai() dispatcher"]
+            HR[".harness() loop"]
+            EA["engine adapter<br/>(opencode v0,<br/>pluggable)"]
+        end
         CB[Capability Broker]
         MG[Memory Graph]
         PL[Provenance Log]
@@ -24,18 +49,22 @@ flowchart TD
         RR[Region Router]
         EB[Event Bus]
         MR[Model Router]
+        CI[chief-inference<br/>Signed Inference]
     end
-    subgraph L1[L1 — OS Primitives]
+
+    subgraph L1["L1 — OS Primitives"]
         NIX[NixOS]
         NS[Linux namespaces]
-        SN[systemd-nspawn / Firecracker]
+        SN[systemd-nspawn<br/>/ Firecracker]
         WL[Wayland]
-        LLM[Local LLM runtime]
-        EBPF[eBPF / eBPF-LSM]
+        LLM[Local LLM runtime<br/>llama.cpp]
+        EBPF[eBPF observability]
     end
-    subgraph L0[L0 — Hardware]
+
+    subgraph L0["L0 — Hardware"]
         CPU[x86_64 / ARM64]
         TPM[TPM / Secure Enclave]
         YK[YubiKey — optional]
     end
+
     L4 --> L3 --> L2 --> L1 --> L0

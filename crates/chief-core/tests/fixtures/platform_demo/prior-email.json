@@ -1,0 +1,7 @@
+{
+  "thread_id": "thr-acme-pilot",
+  "from": "maya@acme.example",
+  "to": ["santosh@northstar.example"],
+  "subject": "Acme pilot kickoff",
+  "body_text": "Can you confirm the kickoff timing and tell us who should join from security?"
+}

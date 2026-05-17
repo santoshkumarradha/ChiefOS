@@ -1,0 +1,35 @@
+[[grants]]
+pack = "document-pack"
+kind = "fs.read"
+scope = { paths = ["fixtures/platform_demo/acme-contract.md"] }
+usage_reason = "Read the Acme contract fixture for obligation extraction."
+
+[[grants]]
+pack = "document-pack"
+kind = "mem.write"
+scope = { types = ["finding", "artifact"] }
+usage_reason = "Persist extracted obligations and the Work Object aggregate."
+
+[[grants]]
+pack = "calendar-pack"
+kind = "mem.read"
+scope = { roots = ["mem://artifact/acme-follow-up"], types = ["artifact", "finding", "event"] }
+usage_reason = "Read Work Object obligations to propose follow-up slots."
+
+[[grants]]
+pack = "calendar-pack"
+kind = "mem.write"
+scope = { types = ["finding"] }
+usage_reason = "Persist candidate follow-up meeting windows."
+
+[[grants]]
+pack = "email-pack"
+kind = "mem.read"
+scope = { roots = ["mem://artifact/acme-follow-up"], types = ["artifact", "finding", "email"] }
+usage_reason = "Read Work Object context to draft the Acme reply."
+
+[[grants]]
+pack = "email-pack"
+kind = "mem.write"
+scope = { types = ["artifact"] }
+usage_reason = "Persist the drafted reply as an artifact for Ceremony review."

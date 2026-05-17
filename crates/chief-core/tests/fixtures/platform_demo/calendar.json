@@ -1,0 +1,19 @@
+{
+  "owner": "northstar-labs",
+  "events": [
+    {
+      "id": "evt-acme-kickoff-hold",
+      "title": "Acme pilot kickoff hold",
+      "start": "2026-06-03T15:00:00Z",
+      "end": "2026-06-03T15:30:00Z",
+      "attendees": ["santosh@northstar.example", "maya@acme.example"]
+    },
+    {
+      "id": "evt-product-review",
+      "title": "Product review",
+      "start": "2026-06-03T16:00:00Z",
+      "end": "2026-06-03T17:00:00Z",
+      "attendees": ["santosh@northstar.example"]
+    }
+  ]
+}

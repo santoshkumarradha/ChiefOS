@@ -53,7 +53,7 @@ The Platform MVP POC uses Work Object View as the visual center after a user goa
 - Contribution lanes: grouped by pack from the route's `contributions[].pack` field.
 - Authority state: rendered from `contributions[].authority_state`; the UI does not classify risk or grant authority.
 - Sources: rendered from `source_refs`.
-- Provenance/Rewind: provenance entries are read-only in Phase 4; rewind is visible but disabled until Phase 6 implements `POST /v1/work/:id/rewind`.
+- Provenance/Rewind: Phase 6 exposes `GET /v1/work/:id/provenance` and `POST /v1/work/:id/rewind`; the surface must call those L2 routes rather than mutating local contribution state.
 
 **Invariant:** Work Object View owns no workflow state. If a contribution is blocked, needs Ceremony, handled, shipped, stale, or rewound, L2 must project that state. The surface only displays it.
 

@@ -9,17 +9,21 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::{IntoResponse, Response},
-    routing::get,
+    routing::{get, post},
     Json, Router,
 };
-use chief_mem::{EdgeKind, Node, NodeType};
+use chief_event_log_proto::schema::Event;
+use chief_mem::{EdgeKind, Horizon, Node, NodeType};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::sync::Arc;
 use tracing::warn;
 
 pub fn routes() -> Router<Arc<AppState>> {
-    Router::new().route("/work/:id", get(handler))
+    Router::new()
+        .route("/work/:id", get(handler))
+        .route("/work/:id/provenance", get(provenance_handler))
+        .route("/work/:id/rewind", post(rewind_handler))
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -54,6 +58,22 @@ pub struct WorkContribution {
     pub body: Value,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct RewindRequest {
+    pub contribution_uri: String,
+    #[serde(default)]
+    pub reason: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct RewindResponse {
+    pub rewound: bool,
+    pub work_object_id: String,
+    pub contribution_uri: String,
+    pub event_id: String,
+    pub stale_marked: usize,
+}
+
 async fn handler(Path(id): Path<String>, State(state): State<Arc<AppState>>) -> Response {
     match load_work_object(&state, &id).await {
         Ok(Some(work)) => Json(work).into_response(),
@@ -71,6 +91,61 @@ async fn handler(Path(id): Path<String>, State(state): State<Arc<AppState>>) -> 
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(serde_json::json!({
                     "error": "work_object_projection_failed",
+                })),
+            )
+                .into_response()
+        }
+    }
+}
+
+async fn provenance_handler(
+    Path(id): Path<String>,
+    State(state): State<Arc<AppState>>,
+) -> Response {
+    match load_work_object(&state, &id).await {
+        Ok(Some(work)) => Json(work.provenance).into_response(),
+        Ok(None) => (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({
+                "error": "work_object_not_found",
+                "id": id,
+            })),
+        )
+            .into_response(),
+        Err(err) => {
+            warn!(error = %err, id = %id, "work object provenance failed");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({
+                    "error": "work_object_provenance_failed",
+                })),
+            )
+                .into_response()
+        }
+    }
+}
+
+async fn rewind_handler(
+    Path(id): Path<String>,
+    State(state): State<Arc<AppState>>,
+    Json(req): Json<RewindRequest>,
+) -> Response {
+    match rewind_contribution(&state, &id, req).await {
+        Ok(Some(response)) => Json(response).into_response(),
+        Ok(None) => (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({
+                "error": "contribution_not_found",
+                "id": id,
+            })),
+        )
+            .into_response(),
+        Err(err) => {
+            warn!(error = %err, id = %id, "work object rewind failed");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({
+                    "error": "work_object_rewind_failed",
                 })),
             )
                 .into_response()
@@ -121,22 +196,75 @@ async fn load_work_object(
         }
     }
 
-    let provenance = vec![serde_json::json!({
-        "kind": "memory_node",
-        "uri": uri,
-        "source": node.source,
-    })];
+    let provenance = provenance_rows(&mem, id, &uri, &node.source, &contributions)?;
 
     Ok(Some(WorkObjectResponse {
         id: id.to_string(),
-        uri: provenance[0]["uri"]
-            .as_str()
-            .unwrap_or_default()
-            .to_string(),
+        uri,
         title,
         source_refs,
         contributions,
         provenance,
+    }))
+}
+
+async fn rewind_contribution(
+    state: &AppState,
+    id: &str,
+    req: RewindRequest,
+) -> anyhow::Result<Option<RewindResponse>> {
+    let mem = state.mem.lock().await;
+    let contributions = load_contributions(&mem, id)?;
+    let Some(target) = contributions
+        .into_iter()
+        .find(|node| node.uri == req.contribution_uri)
+    else {
+        return Ok(None);
+    };
+
+    if !mem.tombstone_node(&target.uri)? {
+        return Ok(None);
+    }
+
+    let reason = req.reason.unwrap_or_else(|| "user rewind".into());
+    let target_uri = target.uri.clone();
+    let payload = serde_json::json!({
+        "work_object_id": id,
+        "contribution_uri": target_uri,
+        "reason": reason,
+    });
+    let payload_hash = *blake3::hash(payload.to_string().as_bytes()).as_bytes();
+    let event_id = state.event_log.append(Event::UIAction {
+        surface: "work-object".into(),
+        action: "rewind".into(),
+        payload_hash,
+    })?;
+
+    let stale_marked = mark_downstream_stale(&mem, id, &target_uri)?;
+    mem.put_node(Node::new(
+        NodeType::Decision,
+        Horizon::Medium,
+        "chief-core:work-rewind",
+        serde_json::json!({
+            "kind": "rewind_event",
+            "work_object_id": id,
+            "target_uri": target_uri,
+            "target_kind": target.kind,
+            "target_pack": target.pack,
+            "target_body": target.body,
+            "reason": reason,
+            "event_id": event_id.to_hex(),
+            "stale_marked": stale_marked
+        })
+        .to_string(),
+    ))?;
+
+    Ok(Some(RewindResponse {
+        rewound: true,
+        work_object_id: id.to_string(),
+        contribution_uri: req.contribution_uri,
+        event_id: event_id.to_hex(),
+        stale_marked,
     }))
 }
 
@@ -162,6 +290,12 @@ fn load_contributions(
             if body.get("kind").and_then(Value::as_str) == Some("work_object") {
                 continue;
             }
+            if matches!(
+                body.get("kind").and_then(Value::as_str),
+                Some("rewind_event" | "stale_marker")
+            ) {
+                continue;
+            }
             if body.get("work_object_id").and_then(Value::as_str) != Some(id) {
                 continue;
             }
@@ -169,6 +303,85 @@ fn load_contributions(
         }
     }
     Ok(out)
+}
+
+fn provenance_rows(
+    mem: &chief_mem::ChiefMem,
+    id: &str,
+    work_uri: &str,
+    work_source: &str,
+    contributions: &[WorkContribution],
+) -> anyhow::Result<Vec<Value>> {
+    let mut rows = vec![serde_json::json!({
+        "kind": "memory_node",
+        "uri": work_uri,
+        "source": work_source,
+    })];
+
+    for contribution in contributions {
+        rows.push(serde_json::json!({
+            "kind": "contribution_written",
+            "uri": contribution.uri,
+            "source": contribution.source,
+            "pack": contribution.pack,
+            "contribution_kind": contribution.kind,
+            "authority_state": contribution.authority_state,
+        }));
+    }
+
+    for stored in mem.nodes_by_type(NodeType::Decision)? {
+        let Ok(body) = serde_json::from_str::<Value>(&stored.node.body) else {
+            continue;
+        };
+        if body.get("work_object_id").and_then(Value::as_str) != Some(id) {
+            continue;
+        }
+        if !matches!(
+            body.get("kind").and_then(Value::as_str),
+            Some("rewind_event" | "stale_marker")
+        ) {
+            continue;
+        }
+        rows.push(serde_json::json!({
+            "kind": body.get("kind").and_then(Value::as_str).unwrap_or("decision"),
+            "uri": stored.uri,
+            "source": stored.node.source,
+            "body": body,
+        }));
+    }
+
+    Ok(rows)
+}
+
+fn mark_downstream_stale(
+    mem: &chief_mem::ChiefMem,
+    id: &str,
+    target_uri: &str,
+) -> anyhow::Result<usize> {
+    let mut marked = 0;
+    for contribution in load_contributions(mem, id)? {
+        if !contribution
+            .source_refs
+            .iter()
+            .any(|source_ref| source_ref == target_uri)
+        {
+            continue;
+        }
+        mem.put_node(Node::new(
+            NodeType::Decision,
+            Horizon::Medium,
+            "chief-core:work-rewind",
+            serde_json::json!({
+                "kind": "stale_marker",
+                "work_object_id": id,
+                "target_uri": contribution.uri,
+                "stale_because": target_uri,
+            })
+            .to_string(),
+        ))?;
+        marked += 1;
+    }
+    Ok(marked)
 }
 
 fn inline_contribution(_idx: usize, body: Value) -> WorkContribution {

@@ -325,12 +325,14 @@ Acceptance:
 - `crates/chief-core/src/routes/v1_brief.rs`
 - `crates/chief-core/src/routes/v1_work.rs`
 - `apps/chief-brief-ui/src/surfaces/`
+- `crates/chief-mem/src/lib.rs`
+- `docs/13-memory-substrate.md`
 
 **Build:**
 
 - `GET /v1/work/:id/provenance`.
 - `POST /v1/work/:id/rewind`.
-- Rewind removes/reverts a contribution while preserving log history.
+- Rewind tombstones a contribution while preserving replay history as signed event log state plus Memory Graph `decision` nodes.
 
 **End-to-end test:**
 
@@ -343,6 +345,7 @@ Acceptance:
 - Rewind of email draft removes draft contribution from active Work Object.
 - Provenance still shows the original draft and the rewind event.
 - Downstream affected contributions are marked stale or recomputed.
+- No new Memory Graph node type, edge kind, URI scheme, or capability kind is introduced; `rewind_event` and `stale_marker` are `decision` node body kinds.
 
 ### Phase 7: One-command demo packaging
 

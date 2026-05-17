@@ -206,6 +206,15 @@ impl ChiefMem {
         Ok(node)
     }
 
+    /// Tombstone a node so active projections no longer return it.
+    pub fn tombstone_node(&self, uri: &str) -> Result<bool> {
+        let updated = self.conn.execute(
+            "UPDATE nodes SET tombstoned = 1 WHERE uri = ?1 AND tombstoned = 0",
+            [uri],
+        )?;
+        Ok(updated > 0)
+    }
+
     /// List non-tombstoned nodes by type.
     pub fn nodes_by_type(&self, node_type: NodeType) -> Result<Vec<StoredNode>> {
         let mut stmt = self.conn.prepare(

@@ -16,7 +16,7 @@ use rusqlite::{params, Connection, OptionalExtension};
 use std::path::{Path, PathBuf};
 
 pub use edge::{Edge, EdgeKind};
-pub use node::{format_uri, Horizon, Node, NodeType};
+pub use node::{format_uri, Horizon, Node, NodeType, StoredNode};
 
 /// Main memory graph store.
 pub struct ChiefMem {
@@ -204,6 +204,42 @@ impl ChiefMem {
             .optional()?;
 
         Ok(node)
+    }
+
+    /// List non-tombstoned nodes by type.
+    pub fn nodes_by_type(&self, node_type: NodeType) -> Result<Vec<StoredNode>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT uri, content_hash, horizon, body, confidence, source, blob_ref, meta_json
+             FROM nodes WHERE type = ?1 AND tombstoned = 0 ORDER BY created_at DESC",
+        )?;
+
+        let nodes: Vec<StoredNode> = stmt
+            .query_map([node_type.to_string()], |row| {
+                let horizon_str: String = row.get(2)?;
+                let meta_json: Option<String> = row.get(7)?;
+                Ok(StoredNode {
+                    uri: row.get(0)?,
+                    content_hash: row.get(1)?,
+                    node: Node {
+                        node_type,
+                        horizon: horizon_str
+                            .parse()
+                            .map_err(|_| rusqlite::Error::InvalidQuery)?,
+                        body: row.get(3)?,
+                        confidence: row.get(4)?,
+                        source: row.get(5)?,
+                        blob_ref: row.get(6)?,
+                        meta_json: meta_json
+                            .as_deref()
+                            .map(serde_json::from_str)
+                            .transpose()
+                            .map_err(|_| rusqlite::Error::InvalidQuery)?,
+                    },
+                })
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+
+        Ok(nodes)
     }
 
     /// Get edges from a source node.

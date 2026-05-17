@@ -3,7 +3,7 @@ id: memory-substrate
 title: "Memory Substrate"
 status: draft
 owners: [santosh]
-last_updated: 2026-04-21
+last_updated: 2026-05-17
 related: [chief-kernel, architecture, hax-principles]
 depends_on: [architecture]
 tags: [memory, graph, storage, retrieval]
@@ -84,6 +84,36 @@ edge:
 - Content-hash is BLAKE3 of canonical payload; same content → same URI, forever.
 - URIs are the lingua franca of citations. When an agent drafts a reply "citing page 14 ¶3," that citation is `mem://file/a1b2.../14/3` — stable, verifiable.
 - Never broken by renames. Source path moves happen through edges (`replaces`).
+
+## Work Object aggregate (POC)
+
+The Platform MVP Demo uses a **Work Object** as product/demo language for an existing Memory Graph aggregate. It is not a new protocol, service, or storage namespace.
+
+| Concept | Representation | Constraint |
+|---|---|---|
+| Work Object | `mem://artifact/<hash>` node | `body.kind = "work_object"` |
+| Source inputs | Existing `email`, `file`, `event`, `finding`, or `artifact` nodes | Linked with existing edge kinds only |
+| Contributions | Existing `finding`, `artifact`, or `decision` nodes | No `contribution` node type at POC |
+| Authority state | Capability Broker decision + Provenance Log entry + optional Ceremony token | Not stored as UI-local state |
+| Projection route | `GET /v1/work/:id` and `chief work show <id> --json` | Route is a view over Memory Graph + Provenance Log |
+
+Example aggregate body:
+
+```json
+{
+  "kind": "work_object",
+  "id": "acme-follow-up",
+  "title": "Prepare the Acme follow-up",
+  "source_refs": [
+    "mem://file/...",
+    "mem://event/...",
+    "mem://email/..."
+  ],
+  "contributions": []
+}
+```
+
+The POC must not add `work://`, new Memory Graph node types, new edge kinds, or new capability kinds without an ADR. If the demo later proves that a first-class Work Object primitive is needed, that decision belongs in an ADR and must explain why `mem://artifact` plus projection routes are insufficient.
 
 ```mermaid
 flowchart LR

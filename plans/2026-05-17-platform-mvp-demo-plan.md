@@ -94,6 +94,17 @@ Target length: 5 minutes.
 
 ## Phase plan
 
+## End-to-end gate standard
+
+Every phase gate must exercise the real Chief setup available at that phase:
+
+- Boot real `AppState` with an ephemeral state directory for kernel-service tests.
+- Use real HTTP routes, CLI calls, or the local socket/internal channel when the phase claims channel parity.
+- Use real fixture files, real manifests, real Memory Graph writes, real Broker checks, and real Provenance/Event Log writes where those systems are in scope.
+- Use live provider calls only when the phase explicitly needs provider behavior. Secrets such as `OPENROUTER_API_KEY` must come from the environment and must never be committed, logged, or copied into issues.
+- Avoid pure unit tests as phase gates. Unit tests are allowed as supporting coverage, but each phase's named E2E test must run the actual integration path.
+- Update the architecture/docs in the same phase commit whenever behavior, API shape, route surface, storage shape, or demo contract changes. Do not leave old architecture references for later cleanup unless the phase explicitly records a follow-up.
+
 ### Phase 0: Demo contract and fixtures
 
 **Goal:** Lock the demo into one deterministic scenario.
@@ -120,9 +131,10 @@ cargo test -p chief-core --test platform_demo_contract
 
 Acceptance:
 
-- Fixture load creates one deterministic `mem://artifact/acme-follow-up`.
+- Fixture load boots real `AppState` with an ephemeral state directory and creates one deterministic `mem://artifact/acme-follow-up`.
 - Snapshot JSON contains the same Work Object id, title, source refs, and empty contribution list.
 - No fixture requires live Gmail, Calendar, or cloud storage credentials.
+- Relevant docs still match the fixture contract and do not reference a new `work://` primitive.
 
 ### Phase 1: Work Object memory aggregate
 
@@ -160,6 +172,7 @@ Acceptance:
 - The persisted identity is still a `mem://artifact/...` URI; `/v1/work/:id` is a projection route, not a new storage namespace.
 - If the Unix-socket channel is not active yet, this phase must either expose the same read handler there or record a narrow channel-parity exception with a follow-up task.
 - No new Memory Graph node type, edge kind, URI scheme, or capability kind is introduced by this phase.
+- `docs/13-memory-substrate.md` documents the Work Object aggregate shape and projection rule.
 
 ### Phase 2: First three packs compose through OS memory
 
@@ -264,6 +277,7 @@ Acceptance:
 - Empty, partial, blocked, and completed states are covered.
 - No business logic lives in the UI; the surface is a projection of L2 state.
 - Same Work Object state is inspectable through CLI JSON, preserving Axiom 8 channel parity for the demo.
+- Surface docs are updated if Work Object View becomes a named or reusable L4 surface.
 
 ### Phase 5: Live pack install proves platform extensibility
 

@@ -1,4 +1,6 @@
-use chief_mem::{ChiefMem, Edge, EdgeKind, Horizon, Node, NodeType};
+use chief_core::state::{AppConfig, BackendKind};
+use chief_core::AppState;
+use chief_mem::{Edge, EdgeKind, Horizon, Node, NodeType};
 use serde_json::{json, Value};
 use tempfile::tempdir;
 
@@ -8,10 +10,17 @@ const PRIOR_EMAIL: &str = include_str!("fixtures/platform_demo/prior-email.json"
 const EXPECTED: &str = include_str!("fixtures/platform_demo/expected-work-object.json");
 const GRANTS: &str = include_str!("fixtures/platform_demo/grants.toml");
 
-#[test]
-fn fixture_contract_creates_deterministic_work_object() {
+#[tokio::test]
+async fn fixture_contract_boots_real_state_and_creates_deterministic_work_object() {
     let tmp = tempdir().expect("tempdir");
-    let mem = ChiefMem::open(&tmp.path().join("nodes.db")).expect("open mem");
+    let config = AppConfig {
+        state_dir: Some(tmp.path().to_path_buf()),
+        dev_mode: true,
+        backend: BackendKind::Stub,
+        model_path: None,
+    };
+    let state = AppState::new(config).await.expect("boot real AppState");
+    let mem = state.mem.lock().await;
 
     let contract_uri = mem
         .put_node(Node::new(

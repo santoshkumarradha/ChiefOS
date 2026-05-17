@@ -33,6 +33,19 @@ The one-line message:
 
 > Agent apps do not integrate with each other. They integrate with the operating system.
 
+## Primitive audit
+
+This plan must not invent new kernel primitives. "Work Object" is demo/product language for an aggregate over existing primitives.
+
+| Demo concept | Existing primitive used | New primitive? | Rule |
+|---|---|---|---|
+| Work Object | `mem://artifact/...` node with `body.kind = "work_object"` | No | Do not add `work://` without ADR |
+| Contribution | Existing `finding`, `artifact`, or `decision` nodes linked to the Work Object | No | Do not add a `contribution` node type for the demo |
+| Work graph | Existing Memory Graph edges: `derived-from`, `depends-on`, `refers-to`, `authored-by`, `cites`, `updates`, `contradicts` | No | Do not add edge kinds without ADR |
+| Approval / denial | Capability Broker decision + Provenance Log entry + Ceremony token | No | Do not model authority as UI-local state |
+| Work Object View | L4 surface projection over `/v1/work/:id` | No | Surface renders state; it does not own workflow logic |
+| Risk pack install | Capability Pack lifecycle + manifest grants | No | No custom plugin path for the demo |
+
 ## MVP demo scenario
 
 User drops an Acme contract PDF or markdown fixture into Chief and enters:
@@ -41,10 +54,10 @@ User drops an Acme contract PDF or markdown fixture into Chief and enters:
 Prepare the Acme follow-up.
 ```
 
-Chief creates one Work Object:
+Chief creates one Work Object. This is not a new substrate or URI scheme; it is a typed Memory Graph aggregate:
 
 ```text
-work://acme-follow-up
+mem://artifact/acme-follow-up
 ```
 
 Independent packs contribute through OS primitives only:
@@ -59,10 +72,11 @@ Independent packs contribute through OS primitives only:
 The packs must not call each other. They communicate only through:
 
 - `mem://...` nodes and edges
-- `event://...` log entries
+- Provenance Log entries and signed receipts
 - capability handles
-- `surface://...` cards
-- signed receipts
+- `surface.pane` cards rendered by OS-owned surfaces
+
+Implementation rule: do not add a new `work://` protocol for the demo. A Work Object is a `mem://artifact/...` node with existing typed edges to sources, findings, draft artifacts, and stale/recomputed descendants. Approvals and denials remain Provenance Log / Broker facts, referenced from the projection; they are not new Memory Graph edge kinds. If the implementation later needs a dedicated Memory Graph node type, edge kind, or URI scheme, that requires the normal ADR discipline.
 
 ## Final demo flow
 
@@ -70,7 +84,7 @@ Target length: 5 minutes.
 
 | Beat | What viewer sees | What it proves |
 |---|---|---|
-| 1 | User creates `work://acme-follow-up` from one file and one sentence | Chief has an OS-level work object, not app-local state |
+| 1 | User creates `mem://artifact/acme-follow-up` from one file and one sentence | Chief has an OS-level work object, not app-local state |
 | 2 | Document pack extracts obligations with citations | Pack can write structured memory through public SDK |
 | 3 | Calendar and email packs pick up the same Work Object | Independent packs compose without direct integration |
 | 4 | Work Object View shows one coherent outcome | Surfaces are projections over OS state |
@@ -96,6 +110,7 @@ Target length: 5 minutes.
 - Calendar fixture.
 - Prior-email fixture.
 - Expected Work Object JSON shape.
+- Demo grant manifest for each fixture-backed pack.
 
 **End-to-end test:**
 
@@ -105,10 +120,11 @@ cargo test -p chief-core --test platform_demo_contract
 
 Acceptance:
 
-- Fixture load creates one deterministic `work://acme-follow-up`.
+- Fixture load creates one deterministic `mem://artifact/acme-follow-up`.
 - Snapshot JSON contains the same Work Object id, title, source refs, and empty contribution list.
+- No fixture requires live Gmail, Calendar, or cloud storage credentials.
 
-### Phase 1: Work Object substrate
+### Phase 1: Work Object memory aggregate
 
 **Goal:** Add the minimum shared object model that packs can independently extend.
 
@@ -117,15 +133,18 @@ Acceptance:
 - `crates/chief-core/src/brief.rs`
 - `crates/chief-core/src/state.rs`
 - `crates/chief-core/src/routes/`
+- `crates/chief-cli/src/main.rs`
 - `crates/chief-sdk/src/`
 - `crates/chief-mem/src/`
 
 **Build:**
 
-- `WorkObject` type.
-- `Contribution` type.
-- Memory edges: `derived-from`, `contributes-to`, `blocks`, `approves`.
+- `WorkObject` projection DTO assembled from Memory Graph + Provenance Log state.
+- `Contribution` projection DTO assembled from existing `finding`, `artifact`, or `decision` nodes.
+- Memory edges use only existing kinds: `derived-from`, `depends-on`, `refers-to`, `authored-by`, `cites`, `updates`, `contradicts`.
 - API route: `GET /v1/work/:id`.
+- CLI route: `chief work show <id> --json`.
+- Shared read handler that can be exposed over the local Unix-socket channel when enabled.
 
 **End-to-end test:**
 
@@ -136,8 +155,11 @@ cargo test -p chief-core --test work_object_e2e
 Acceptance:
 
 - Creating a Work Object writes memory nodes and provenance entries.
-- `GET /v1/work/acme-follow-up` returns a graph with sources and zero pack contributions.
+- `GET /v1/work/acme-follow-up` and `chief work show acme-follow-up --json` return the same graph with sources and zero pack contributions.
 - Test does not use mock cross-pack calls.
+- The persisted identity is still a `mem://artifact/...` URI; `/v1/work/:id` is a projection route, not a new storage namespace.
+- If the Unix-socket channel is not active yet, this phase must either expose the same read handler there or record a narrow channel-parity exception with a follow-up task.
+- No new Memory Graph node type, edge kind, URI scheme, or capability kind is introduced by this phase.
 
 ### Phase 2: First three packs compose through OS memory
 
@@ -154,8 +176,8 @@ Acceptance:
 **Build:**
 
 - Pack A extracts obligations from the contract fixture.
-- Pack B reads obligation nodes and proposes slots from calendar fixture.
-- Pack C reads obligations and slots and drafts a reply.
+- Pack B reads obligation nodes through a scoped `mem.read` grant and proposes slots from a fixture-backed calendar adapter.
+- Pack C reads obligations and slots through a scoped `mem.read` grant and drafts a reply.
 - Each pack uses public `chief-sdk` APIs only.
 
 **End-to-end test:**
@@ -169,6 +191,8 @@ Acceptance:
 - Running the three packs in any valid order converges to the same Work Object graph.
 - No pack imports `chief_core`, `chief_mem`, or another pack.
 - Static import scan passes.
+- Every cross-pack read is authorized by a scoped Memory Graph grant tied to the Work Object; no broad "read all pack memory" shortcut.
+- Every `mem.link` uses an existing edge kind; any desired new edge kind is documented as an ADR candidate, not implemented in the demo path.
 - Final Work Object has at least:
   - 3 obligations,
   - 2 proposed slots,
@@ -192,6 +216,7 @@ Acceptance:
 - Attempted send creates a pending Ceremony card.
 - Ceremony approval token is bound to exact payload hash.
 - Payload mutation invalidates approval.
+- Trust Ledger / Region Router classify the send attempt as requiring Ceremony; the UI does not make that decision.
 
 **End-to-end test:**
 
@@ -205,6 +230,7 @@ Acceptance:
 - Send attempt without grant returns `ceremony_required`.
 - Approval for payload A does not authorize payload B.
 - UI shows the pending approval and can approve only via hold-to-confirm.
+- The approved action flows through Broker verification after Ceremony; the surface never directly ships the action.
 
 ### Phase 4: Work Object surface
 
@@ -237,6 +263,7 @@ Acceptance:
 - UI renders from `/v1/work/:id` only.
 - Empty, partial, blocked, and completed states are covered.
 - No business logic lives in the UI; the surface is a projection of L2 state.
+- Same Work Object state is inspectable through CLI JSON, preserving Axiom 8 channel parity for the demo.
 
 ### Phase 5: Live pack install proves platform extensibility
 
@@ -251,7 +278,7 @@ Acceptance:
 
 **Build:**
 
-- `risk-pack` reads existing `work://acme-follow-up`.
+- `risk-pack` reads existing `mem://artifact/acme-follow-up` through its granted Work Object scope.
 - It writes risk findings and links them to existing obligations.
 - Install path checks manifest grants and signature placeholder.
 
@@ -266,6 +293,7 @@ Acceptance:
 - Before install, Work Object has no risk contribution.
 - After install and tick, Work Object gains risk contribution.
 - No existing pack or surface code is changed to know about `risk-pack`.
+- The install path displays the risk pack's requested grants before activation, even in the demo.
 
 ### Phase 6: Provenance replay and rewind
 
@@ -314,6 +342,7 @@ Acceptance:
 - Runs all demo packs.
 - Serves Work Object View and Brief.
 - Provides deterministic logs and reset command.
+- Exposes HTTP and CLI inspection paths for the same Work Object.
 
 **End-to-end test:**
 
@@ -324,9 +353,11 @@ curl -fsS http://localhost:8080/v1/work/acme-follow-up
 
 Acceptance:
 
-- Clean volume reaches completed Work Object state without manual database edits.
+- Clean volume reaches completed `mem://artifact/acme-follow-up` state without manual database edits.
 - UI at `http://localhost:8080` shows Work Object, pending Ceremony, and pack contributions.
 - Reset removes all generated state and rerun produces same core graph.
+- `curl /v1/work/acme-follow-up` and CLI JSON agree on the Work Object graph.
+- Local socket inspection returns the same graph when the socket channel is enabled.
 
 ## Parallelizable workstreams
 
@@ -356,10 +387,14 @@ Those are important later, but they distract from the phase-zero platform proof.
 
 - [ ] Four packs contribute to one Work Object through OS primitives only.
 - [ ] No pack imports another pack or a kernel-internal crate.
+- [ ] Work Object is represented as Memory Graph state (`mem://artifact/...`), not a new storage protocol.
+- [ ] Demo introduces no new Memory Graph node types, edge kinds, URI schemes, or capability kinds without ADR.
+- [ ] Cross-pack reads are explicitly grant-scoped to the Work Object.
 - [ ] At least one external action is blocked until Ceremony.
 - [ ] Approval token is payload-bound.
 - [ ] Newly installed pack contributes to existing Work Object without UI/backend special-casing.
 - [ ] Work Object graph has memory, event-log, capability, and surface projections.
+- [ ] Work Object is available through HTTP, CLI JSON, local socket/internal channel, and L4 surface.
 - [ ] Rewind changes active state while preserving provenance.
 - [ ] Demo runs from a clean checkout with one command.
 
@@ -368,7 +403,10 @@ Those are important later, but they distract from the phase-zero platform proof.
 | Risk | Mitigation |
 |---|---|
 | Demo becomes a workflow app | Keep Work Object state in L2; UI must only project `/v1/work/:id` |
+| Work Object becomes an accidental new substrate | Store it as `mem://artifact/...`; any new Memory Graph type or URI scheme requires ADR |
 | Packs accidentally couple through Rust imports | Static import scan in every pack E2E test |
+| Cross-pack reads weaken capability boundaries | Require Work Object-scoped `mem.read` and `mem.link` grants for every pack contribution |
+| Demo needs a new edge/capability kind mid-build | Stop and write an ADR candidate; do not smuggle it into implementation as "demo-only" |
 | Scenario feels synthetic | Use realistic contract/calendar/email fixtures, but keep them deterministic |
 | Ceremony dominates the story | Use it as one beat; the main proof is pack interoperability through OS primitives |
 | Too much to build before showing value | Phase 2 already proves the central thesis in terminal/API form |

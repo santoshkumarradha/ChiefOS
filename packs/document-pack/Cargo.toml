@@ -1,0 +1,14 @@
+[package]
+name = "document-pack"
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+description = "POC document pack for the Platform MVP demo."
+
+[dependencies]
+async-trait.workspace = true
+chief-sdk = { path = "../../crates/chief-sdk" }
+serde_json.workspace = true

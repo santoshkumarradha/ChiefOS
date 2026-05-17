@@ -1,0 +1,16 @@
+name = "document-pack"
+version = "0.1.0"
+description = "Extracts obligations from the Acme contract fixture for the Platform MVP demo."
+signature = "ed25519:document-pack-poc"
+
+[[grants]]
+kind = "mem.read"
+types = ["artifact", "file"]
+usage_reason = "Read the Work Object and contract fixture."
+
+[[grants]]
+kind = "mem.write"
+types = ["finding"]
+usage_reason = "Persist extracted obligations as Memory Graph findings."
+
+agents = ["document-agent"]

@@ -16,6 +16,9 @@ members = [
     "packs/hn-briefer",
     "packs/file-watcher-briefer",
     "packs/hello-world-pack",
+    "packs/document-pack",
+    "packs/calendar-pack",
+    "packs/email-pack",
 
     # tools/ — dev / CI tools
     "tools/chief-ts-lint",

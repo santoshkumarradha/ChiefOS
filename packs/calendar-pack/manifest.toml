@@ -1,0 +1,16 @@
+name = "calendar-pack"
+version = "0.1.0"
+description = "Proposes Acme follow-up slots from Work Object obligations."
+signature = "ed25519:calendar-pack-poc"
+
+[[grants]]
+kind = "mem.read"
+types = ["artifact", "finding", "event"]
+usage_reason = "Read Work Object obligations and calendar fixture."
+
+[[grants]]
+kind = "mem.write"
+types = ["finding"]
+usage_reason = "Persist candidate follow-up meeting windows."
+
+agents = ["calendar-agent"]

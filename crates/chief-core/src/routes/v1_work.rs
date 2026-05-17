@@ -86,11 +86,12 @@ async fn load_work_object(
         .and_then(Value::as_str)
         .unwrap_or(id)
         .to_string();
-    let contributions = body
+    let mut contributions = body
         .get("contributions")
         .and_then(Value::as_array)
         .cloned()
         .unwrap_or_default();
+    contributions.extend(load_contributions(&mem, id)?);
 
     let mut source_refs = Vec::new();
     for edge in mem.get_edges_from(&uri)? {
@@ -128,6 +129,30 @@ fn source_ref(uri: String, node: Node) -> WorkSourceRef {
         source: node.source,
         summary: summarize_body(&node.body),
     }
+}
+
+fn load_contributions(mem: &chief_mem::ChiefMem, id: &str) -> anyhow::Result<Vec<Value>> {
+    let mut out = Vec::new();
+    for node_type in [NodeType::Finding, NodeType::Artifact, NodeType::Decision] {
+        for stored in mem.nodes_by_type(node_type)? {
+            let Ok(body) = serde_json::from_str::<Value>(&stored.node.body) else {
+                continue;
+            };
+            if body.get("kind").and_then(Value::as_str) == Some("work_object") {
+                continue;
+            }
+            if body.get("work_object_id").and_then(Value::as_str) != Some(id) {
+                continue;
+            }
+            out.push(serde_json::json!({
+                "uri": stored.uri,
+                "node_type": stored.node.node_type.to_string(),
+                "source": stored.node.source,
+                "body": body,
+            }));
+        }
+    }
+    Ok(out)
 }
 
 fn summarize_body(body: &str) -> String {

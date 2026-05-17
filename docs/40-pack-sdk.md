@@ -3,7 +3,7 @@ id: pack-sdk
 title: "Pack SDK — developer contract"
 status: draft
 owners: [santosh]
-last_updated: 2026-04-21
+last_updated: 2026-05-17
 related: [module-system, security-model, os-ceremonies, chief-kernel]
 depends_on: [module-system]
 tags: [sdk, developer-contract, capabilities]
@@ -254,6 +254,18 @@ Per steward directive 2026-04-21:
 4. **Calendar negotiator** — `net.oauth2 + ritual + policy + tool.invoke + surface.pane`. Adds rituals and policies to the mix.
 
 Gaps surfaced by building these become SDK primitives via ADR.
+
+## Platform MVP POC packs
+
+The Platform MVP Demo adds three fixture-backed POC packs to prove pack interoperability through OS primitives. These are not the long-term Chief-of-Staff Stack; they are a narrow platform proof.
+
+| Pack | Purpose | Reads | Writes | Constraint |
+|---|---|---|---|---|
+| `document-pack` | Extract Acme contract obligations | `artifact`, `file` | `finding` | Uses public `chief-sdk`; no `chief_core`, `chief_mem`, or pack imports |
+| `calendar-pack` | Propose follow-up meeting slots | `artifact`, `finding`, `event` | `finding` | Reads obligations through scoped memory context |
+| `email-pack` | Draft Acme follow-up reply | `artifact`, `finding`, `email` | `artifact` | Drafts only; send authority belongs to Broker/Ceremony |
+
+The POC E2E path boots real `AppState`, seeds a `mem://artifact/...` Work Object, runs the three pack agents through `CapabilityContext`, and verifies `/v1/work/:id`. The packs must not call each other or import kernel internals. Cross-pack composition happens through Memory Graph state and scoped SDK connectors.
 
 ## Related
 

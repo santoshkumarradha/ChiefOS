@@ -1,0 +1,16 @@
+name = "email-pack"
+version = "0.1.0"
+description = "Drafts the Acme follow-up reply from Work Object context."
+signature = "ed25519:email-pack-poc"
+
+[[grants]]
+kind = "mem.read"
+types = ["artifact", "finding", "email"]
+usage_reason = "Read Work Object obligations, candidate slots, and prior email."
+
+[[grants]]
+kind = "mem.write"
+types = ["artifact"]
+usage_reason = "Persist a draft reply artifact for Ceremony review."
+
+agents = ["email-agent"]

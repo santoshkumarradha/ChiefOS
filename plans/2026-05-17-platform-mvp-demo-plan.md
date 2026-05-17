@@ -255,13 +255,16 @@ Acceptance:
 - `apps/chief-brief-ui/src/api.ts`
 - `apps/chief-brief-ui/src/types.ts`
 - `apps/chief-brief-ui/src/styles/`
+- `crates/chief-core/src/routes/v1_work.rs`
+- `docs/30-surfaces.md`
 
 **Build:**
 
 - Central Work Object header.
 - Contribution lanes by pack.
 - Source/citation column.
-- Authority state: handled, blocked, needs Ceremony, shipped.
+- `/v1/work/:id` projection fields for `pack`, `kind`, `title`, `summary`, `source_refs`, and `authority_state`.
+- Authority state rendered as handled, blocked, needs Ceremony, shipped.
 - Provenance/rewind affordance.
 
 **End-to-end test:**
@@ -275,7 +278,7 @@ Acceptance:
 
 - UI renders from `/v1/work/:id` only.
 - Empty, partial, blocked, and completed states are covered.
-- No business logic lives in the UI; the surface is a projection of L2 state.
+- No business logic lives in the UI; the surface renders authority and contribution fields projected by L2.
 - Same Work Object state is inspectable through CLI JSON, preserving Axiom 8 channel parity for the demo.
 - Surface docs are updated if Work Object View becomes a named or reusable L4 surface.
 

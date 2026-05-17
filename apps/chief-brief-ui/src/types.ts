@@ -83,6 +83,50 @@ export type OmnibarSearchResult = {
   took_ms?: number;
 };
 
+/* ---------- Work Object ---------- */
+
+export type WorkAuthorityState =
+  | "handled"
+  | "blocked"
+  | "needs_ceremony"
+  | "shipped";
+
+export type WorkSourceRef = {
+  uri: string;
+  node_type: string;
+  source: string;
+  summary: string;
+};
+
+export type WorkContribution = {
+  uri: string;
+  node_type: string;
+  source: string;
+  pack: string;
+  kind: string;
+  title: string;
+  summary: string;
+  authority_state: WorkAuthorityState;
+  source_refs: string[];
+  body: Record<string, unknown>;
+};
+
+export type WorkProvenanceRow = {
+  kind: string;
+  uri?: string;
+  source?: string;
+  ts?: string;
+};
+
+export type WorkObject = {
+  id: string;
+  uri: string;
+  title: string;
+  source_refs: WorkSourceRef[];
+  contributions: WorkContribution[];
+  provenance: WorkProvenanceRow[];
+};
+
 /* ---------- Ceremony ---------- */
 
 export type CeremonyEvidenceRow = {

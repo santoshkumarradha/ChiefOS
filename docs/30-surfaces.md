@@ -3,7 +3,7 @@ id: surfaces
 title: "Surfaces (L4)"
 status: draft
 owners: [santosh]
-last_updated: 2026-04-21
+last_updated: 2026-05-17
 related: [architecture, chief-kernel, hax-principles, apple-design]
 depends_on: [architecture, chief-kernel]
 tags: [ui, ux, surfaces, hax]
@@ -13,8 +13,8 @@ tags: [ui, ux, surfaces, hax]
 
 ## TL;DR
 
-- 7 surfaces. Each is a declarative projection over L2 state — no business logic.
-- Default surface post-boot: **Morning Brief.**
+- Core OS surfaces are declarative projections over L2 state — no business logic.
+- Default ritual post-boot: **Morning Brief**; the Platform MVP POC centers an active **Work Object View** during the day.
 - Friction tier rendered by surface type: Queue Card (tier 1) → Evidence Card (tier 2) → Ceremony (tiers 3–4).
 - Apple-style guardrails: one way to do each thing, rituals not workflows, typography as substance.
 
@@ -35,10 +35,27 @@ tags: [ui, ux, surfaces, hax]
 | **Controls** | 1, 2 | **~28 hand-curated cosmetic preferences.** No security / authority / routing items. | Omnibar |
 | **Models** | 4 | **Tier→model bindings + cloud-provider enrollment.** Cloud bindings are Ceremony-gated. | Menubar brain glyph / Omnibar |
 | Quarterly Review | 4, 8 | Renegotiation ritual every 90d | Guided walk |
+| **Work Object View (POC)** | 3, 4, 5, 7 | **All-day center for one active Work Object: pack lanes, citations, authority state, provenance.** | `GET /v1/work/:id` |
 
 Three new surfaces (**HAX Inbox, Omnibar, Clipboard Pane**) come from the substrate-spine research ([`research/2026-04-21-ai-native-primitive-rethinks.md`](./research/2026-04-21-ai-native-primitive-rethinks.md)). They are first-class, not add-ons.
 
-**Security & Privacy**, **Controls**, and **Models** are added per [`adr-0012`](../adr/0012-no-settings-app.md) + [`adr-0013`](../adr/0013-agent-runtime-two-tier-llm.md). Chief OS does not ship a Settings app; control is decomposed across surfaces matched to HAX region — Security & Privacy (read-dominant audit), Controls (cosmetic preferences), Models (tier→model routing). Detailed spec: [`31-ui-standardization.md`](./31-ui-standardization.md) (primitives) and [`32-controls-and-policy.md`](./32-controls-and-policy.md) (implementation). Total surface count: 13.
+**Security & Privacy**, **Controls**, and **Models** are added per [`adr-0012`](../adr/0012-no-settings-app.md) + [`adr-0013`](../adr/0013-agent-runtime-two-tier-llm.md). Chief OS does not ship a Settings app; control is decomposed across surfaces matched to HAX region — Security & Privacy (read-dominant audit), Controls (cosmetic preferences), Models (tier→model routing). Detailed spec: [`31-ui-standardization.md`](./31-ui-standardization.md) (primitives) and [`32-controls-and-policy.md`](./32-controls-and-policy.md) (implementation). Total surface count including the POC Work Object View: 14.
+
+## Work Object View — the POC all-day center
+
+The Platform MVP POC uses Work Object View as the visual center after a user goal exists. This does not create a new substrate primitive; it renders the existing [`memory-substrate`](./13-memory-substrate.md) aggregate exposed by `GET /v1/work/:id`.
+
+**Data contract:** reads only `/v1/work/:id`.
+
+**Rendered projection:**
+
+- Header: Work Object title and canonical `mem://artifact/...` URI.
+- Contribution lanes: grouped by pack from the route's `contributions[].pack` field.
+- Authority state: rendered from `contributions[].authority_state`; the UI does not classify risk or grant authority.
+- Sources: rendered from `source_refs`.
+- Provenance/Rewind: provenance entries are read-only in Phase 4; rewind is visible but disabled until Phase 6 implements `POST /v1/work/:id/rewind`.
+
+**Invariant:** Work Object View owns no workflow state. If a contribution is blocked, needs Ceremony, handled, shipped, stale, or rewound, L2 must project that state. The surface only displays it.
 
 ## Morning Brief — the flagship
 

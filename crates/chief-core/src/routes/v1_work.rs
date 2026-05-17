@@ -28,7 +28,7 @@ pub struct WorkObjectResponse {
     pub uri: String,
     pub title: String,
     pub source_refs: Vec<WorkSourceRef>,
-    pub contributions: Vec<Value>,
+    pub contributions: Vec<WorkContribution>,
     pub provenance: Vec<Value>,
 }
 
@@ -38,6 +38,20 @@ pub struct WorkSourceRef {
     pub node_type: String,
     pub source: String,
     pub summary: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WorkContribution {
+    pub uri: String,
+    pub node_type: String,
+    pub source: String,
+    pub pack: String,
+    pub kind: String,
+    pub title: String,
+    pub summary: String,
+    pub authority_state: String,
+    pub source_refs: Vec<String>,
+    pub body: Value,
 }
 
 async fn handler(Path(id): Path<String>, State(state): State<Arc<AppState>>) -> Response {
@@ -86,11 +100,15 @@ async fn load_work_object(
         .and_then(Value::as_str)
         .unwrap_or(id)
         .to_string();
-    let mut contributions = body
+    let mut contributions: Vec<WorkContribution> = body
         .get("contributions")
         .and_then(Value::as_array)
         .cloned()
-        .unwrap_or_default();
+        .unwrap_or_default()
+        .into_iter()
+        .enumerate()
+        .map(|(idx, contribution)| inline_contribution(idx, contribution))
+        .collect();
     contributions.extend(load_contributions(&mem, id)?);
 
     let mut source_refs = Vec::new();
@@ -131,7 +149,10 @@ fn source_ref(uri: String, node: Node) -> WorkSourceRef {
     }
 }
 
-fn load_contributions(mem: &chief_mem::ChiefMem, id: &str) -> anyhow::Result<Vec<Value>> {
+fn load_contributions(
+    mem: &chief_mem::ChiefMem,
+    id: &str,
+) -> anyhow::Result<Vec<WorkContribution>> {
     let mut out = Vec::new();
     for node_type in [NodeType::Finding, NodeType::Artifact, NodeType::Decision] {
         for stored in mem.nodes_by_type(node_type)? {
@@ -144,15 +165,134 @@ fn load_contributions(mem: &chief_mem::ChiefMem, id: &str) -> anyhow::Result<Vec
             if body.get("work_object_id").and_then(Value::as_str) != Some(id) {
                 continue;
             }
-            out.push(serde_json::json!({
-                "uri": stored.uri,
-                "node_type": stored.node.node_type.to_string(),
-                "source": stored.node.source,
-                "body": body,
-            }));
+            out.push(stored_contribution(stored.uri, stored.node, body));
         }
     }
     Ok(out)
+}
+
+fn inline_contribution(_idx: usize, body: Value) -> WorkContribution {
+    let kind = body
+        .get("kind")
+        .and_then(Value::as_str)
+        .unwrap_or("inline")
+        .to_string();
+    let title = contribution_title(&kind, &body);
+    let uri = body
+        .get("uri")
+        .and_then(Value::as_str)
+        .unwrap_or_default()
+        .to_string();
+    WorkContribution {
+        uri,
+        node_type: "artifact".into(),
+        source: "work-object:inline".into(),
+        pack: "work-object".into(),
+        kind,
+        title,
+        summary: contribution_summary(&body),
+        authority_state: authority_state(&body),
+        source_refs: source_refs(&body),
+        body,
+    }
+}
+
+fn stored_contribution(uri: String, node: Node, body: Value) -> WorkContribution {
+    let kind = body
+        .get("kind")
+        .and_then(Value::as_str)
+        .unwrap_or("unknown")
+        .to_string();
+    let title = contribution_title(&kind, &body);
+    WorkContribution {
+        uri,
+        node_type: node.node_type.to_string(),
+        pack: pack_name(&node.source),
+        source: node.source,
+        kind,
+        title,
+        summary: contribution_summary(&body),
+        authority_state: authority_state(&body),
+        source_refs: source_refs(&body),
+        body,
+    }
+}
+
+fn pack_name(source: &str) -> String {
+    source
+        .strip_prefix("pack:")
+        .unwrap_or(source)
+        .split('/')
+        .next()
+        .unwrap_or(source)
+        .to_string()
+}
+
+fn contribution_title(kind: &str, body: &Value) -> String {
+    if let Some(title) = body.get("title").and_then(Value::as_str) {
+        return title.to_string();
+    }
+    match kind {
+        "obligation" => format!(
+            "Obligation {}",
+            body.get("ordinal")
+                .and_then(Value::as_u64)
+                .map(|n| n.to_string())
+                .unwrap_or_else(|| "found".into())
+        ),
+        "candidate_slot" => format!(
+            "Candidate slot {}",
+            body.get("ordinal")
+                .and_then(Value::as_u64)
+                .map(|n| n.to_string())
+                .unwrap_or_else(|| "found".into())
+        ),
+        "draft_reply" => body
+            .get("subject")
+            .and_then(Value::as_str)
+            .unwrap_or("Draft reply")
+            .to_string(),
+        other => other.replace('_', " "),
+    }
+}
+
+fn contribution_summary(body: &Value) -> String {
+    for key in [
+        "content",
+        "rationale",
+        "summary",
+        "subject",
+        "recipient",
+        "body",
+    ] {
+        if let Some(text) = body.get(key).and_then(Value::as_str) {
+            return text.chars().take(220).collect();
+        }
+    }
+    body.to_string().chars().take(220).collect()
+}
+
+fn authority_state(body: &Value) -> String {
+    if let Some(status) = body.get("authority_state").and_then(Value::as_str) {
+        return status.to_string();
+    }
+    if body.get("shipped").and_then(Value::as_bool) == Some(true) {
+        return "shipped".into();
+    }
+    if body.get("requires_ceremony").and_then(Value::as_bool) == Some(true) {
+        return "needs_ceremony".into();
+    }
+    "handled".into()
+}
+
+fn source_refs(body: &Value) -> Vec<String> {
+    body.get("source_refs")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .map(ToOwned::to_owned)
+        .collect()
 }
 
 fn summarize_body(body: &str) -> String {

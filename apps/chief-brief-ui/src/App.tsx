@@ -3,7 +3,8 @@
  *
  * Surfaces:
  *   - Menubar (always visible)
- *   - MorningBrief (primary, always visible)
+ *   - WorkObjectView (all-day demo center)
+ *   - MorningBrief (ritual surface, mounted underneath)
  *   - InboxDrawer (⌘I)
  *   - Omnibar (⌘Space)
  *   - Ceremony (overlay; auto-opens when the inbox stream surfaces a
@@ -15,6 +16,7 @@
 
 import { useEffect, useState } from "react";
 import Menubar from "./surfaces/Menubar";
+import WorkObjectView from "./surfaces/WorkObjectView";
 import MorningBrief from "./MorningBrief";
 import InboxDrawer from "./surfaces/InboxDrawer";
 import Omnibar from "./surfaces/Omnibar";
@@ -26,7 +28,8 @@ export default function App() {
   const [inboxOpen, setInboxOpen] = useState(false);
   const [omnibarOpen, setOmnibarOpen] = useState(false);
   const [activeCeremony, setActiveCeremony] = useState<string | null>(null);
-  const [offline, setOffline] = useState(false);
+  const [briefOffline, setBriefOffline] = useState(false);
+  const [workOffline, setWorkOffline] = useState(false);
 
   // Listen to the inbox stream at shell level too, so we can auto-promote a
   // new pending ceremony regardless of whether the drawer is open. The drawer
@@ -72,9 +75,10 @@ export default function App() {
   return (
     <div className="shell-root">
       <Menubar />
+      <WorkObjectView id="acme-follow-up" onOffline={setWorkOffline} />
       <MorningBrief
         onCeremonyClick={handleCeremonyOpen}
-        onOffline={setOffline}
+        onOffline={setBriefOffline}
       />
       <InboxDrawer
         open={inboxOpen}
@@ -89,7 +93,7 @@ export default function App() {
         />
       ) : null}
 
-      {offline ? (
+      {briefOffline || workOffline ? (
         <div
           className="shell-toast tone-warn"
           role="status"

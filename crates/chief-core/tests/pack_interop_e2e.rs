@@ -128,10 +128,17 @@ async fn three_packs_converge_on_one_work_object_without_direct_coupling() {
         .iter()
         .filter(|node| node["body"]["kind"] == "draft_reply")
         .count();
+    let ceremony_bound = contributions.iter().any(|node| {
+        node["body"]["kind"] == "draft_reply" && node["authority_state"] == "needs_ceremony"
+    });
 
     assert!(obligations >= 3, "expected obligations: {contributions:?}");
     assert!(slots >= 2, "expected candidate slots: {contributions:?}");
     assert_eq!(drafts, 1, "expected one draft reply: {contributions:?}");
+    assert!(
+        ceremony_bound,
+        "draft reply should project Ceremony authority state: {contributions:?}"
+    );
 }
 
 fn ctx_for(state: Arc<AppState>, read_types: &[&str], write_types: &[&str]) -> CapabilityContext {

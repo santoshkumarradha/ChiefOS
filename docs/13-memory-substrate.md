@@ -115,6 +115,8 @@ Example aggregate body:
 
 The POC must not add `work://`, new Memory Graph node types, new edge kinds, or new capability kinds without an ADR. If the demo later proves that a first-class Work Object primitive is needed, that decision belongs in an ADR and must explain why `mem://artifact` plus projection routes are insufficient.
 
+Projection responses may include UI-ready contribution fields such as `pack`, `kind`, `title`, `summary`, `source_refs`, and `authority_state`. These are derived fields over existing Memory Graph, Broker, and Provenance state; they are not new persisted primitives. L4 surfaces must render these fields instead of recomputing authority locally.
+
 ```mermaid
 flowchart LR
     F[mem://file/abcd<br/>stanford-paper.pdf]

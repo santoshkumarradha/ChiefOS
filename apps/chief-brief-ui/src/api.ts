@@ -26,6 +26,8 @@ import type {
   ModelCost,
   OmnibarSearchResult,
   TrustLedger,
+  WorkAuthorityState,
+  WorkObject,
 } from "./types";
 
 const LEGACY_BASE: string =
@@ -365,6 +367,84 @@ export async function v1OmnibarSearch(query: string): Promise<OmnibarSearchResul
       ref: h.ref ?? null,
     })),
   };
+}
+
+/**
+ * Work Object projection (/v1/work/{id}).
+ *
+ * The backend owns the graph projection, contribution summaries, and authority
+ * state. The UI only groups and renders the returned rows.
+ */
+export async function v1GetWorkObject(id: string): Promise<WorkObject> {
+  type RawContribution = {
+    uri: string;
+    node_type: string;
+    source: string;
+    pack?: string | null;
+    kind?: string | null;
+    title?: string | null;
+    summary?: string | null;
+    authority_state?: string | null;
+    source_refs?: string[] | null;
+    body?: Record<string, unknown> | null;
+  };
+  type RawWorkObject = {
+    id: string;
+    uri: string;
+    title: string;
+    source_refs?: WorkObject["source_refs"] | null;
+    contributions?: RawContribution[] | null;
+    provenance?: WorkObject["provenance"] | null;
+  };
+
+  const raw = await jsonGet<RawWorkObject>(
+    `${V1_BASE}/work/${encodeURIComponent(id)}`,
+  );
+  return {
+    id: raw.id,
+    uri: raw.uri,
+    title: raw.title,
+    source_refs: raw.source_refs ?? [],
+    contributions: (raw.contributions ?? []).map((c) => ({
+      uri: c.uri,
+      node_type: c.node_type,
+      source: c.source,
+      pack: c.pack ?? packName(c.source),
+      kind: c.kind ?? String(c.body?.kind ?? "unknown"),
+      title: c.title ?? String(c.body?.title ?? c.body?.subject ?? "Contribution"),
+      summary: c.summary ?? contributionFallbackSummary(c.body),
+      authority_state: normalizeAuthority(c.authority_state),
+      source_refs: c.source_refs ?? [],
+      body: c.body ?? {},
+    })),
+    provenance: raw.provenance ?? [],
+  };
+}
+
+function packName(source: string): string {
+  return source.replace(/^pack:/, "").split("/")[0] || source;
+}
+
+function normalizeAuthority(value?: string | null): WorkAuthorityState {
+  if (
+    value === "blocked" ||
+    value === "needs_ceremony" ||
+    value === "shipped"
+  ) {
+    return value;
+  }
+  return "handled";
+}
+
+function contributionFallbackSummary(
+  body?: Record<string, unknown> | null
+): string {
+  if (!body) return "";
+  for (const key of ["content", "rationale", "summary", "subject", "body"]) {
+    const value = body[key];
+    if (typeof value === "string") return value;
+  }
+  return "";
 }
 
 /**

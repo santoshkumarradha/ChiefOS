@@ -6,6 +6,7 @@ import {
   postApprove,
   postVerify,
   postRewind,
+  v1GetWorkObject,
 } from "../api";
 
 // Mock fetch globally
@@ -216,6 +217,44 @@ describe("API Client", () => {
       // The request should abort before completing
       // Note: actual timeout behavior depends on AbortController implementation
       expect(fetch).toBeDefined();
+    });
+  });
+
+  describe("v1GetWorkObject", () => {
+    it("fetches a Work Object from the /v1 projection route", async () => {
+      const mockWork = {
+        id: "acme-follow-up",
+        uri: "mem://artifact/acme-follow-up",
+        title: "Prepare the Acme follow-up",
+        source_refs: [],
+        contributions: [
+          {
+            uri: "mem://finding/obligation",
+            node_type: "finding",
+            source: "pack:document-pack/document-agent",
+            pack: "document-pack",
+            kind: "obligation",
+            title: "Obligation 1",
+            summary: "Deliver the pilot workspace.",
+            authority_state: "handled",
+            source_refs: [],
+            body: { kind: "obligation" },
+          },
+        ],
+        provenance: [],
+      };
+
+      (fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockWork,
+      });
+
+      const result = await v1GetWorkObject("acme-follow-up");
+      expect(result).toEqual(mockWork);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/v1/work/acme-follow-up"),
+        expect.any(Object)
+      );
     });
   });
 });

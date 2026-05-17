@@ -9,6 +9,7 @@ vi.mock("../../api", () => ({
   v1GetModelCost: vi.fn().mockRejectedValue(new Error("offline")),
   v1InboxStreamUrl: vi.fn(() => "http://localhost/v1/inbox/stream"),
   v1OmnibarSearch: vi.fn().mockResolvedValue({ hits: [], query: "" }),
+  v1GetWorkObject: vi.fn().mockRejectedValue(new Error("offline")),
   v1GetCeremony: vi.fn().mockResolvedValue(null),
   v1ApproveCeremony: vi.fn(),
   v1DenyCeremony: vi.fn(),

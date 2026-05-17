@@ -3,7 +3,7 @@ id: docs-index
 title: "Docs Index"
 status: stable
 owners: [santosh]
-last_updated: 2026-04-22
+last_updated: 2026-05-17
 tags: [meta, navigation]
 ---
 
@@ -118,6 +118,13 @@ Grouped by topic (numbered ranges):
 | Non-functional | [`requirements/non-functional.md`](./requirements/non-functional.md) |
 | Security | [`requirements/security.md`](./requirements/security.md) |
 | Performance | [`requirements/performance.md`](./requirements/performance.md) |
+
+## Implementation Plans
+
+| ID | File | Status | Purpose |
+|---|---|---|---|
+| `plans-readme` | [`../plans/README.md`](../plans/README.md) | stable | Plan format and workflow |
+| `plan-platform-mvp-demo` | [`../plans/2026-05-17-platform-mvp-demo-plan.md`](../plans/2026-05-17-platform-mvp-demo-plan.md) | draft | Phase-zero platform demo: independent packs composing through OS primitives |
 
 ## Ideation
 

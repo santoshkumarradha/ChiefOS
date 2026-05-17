@@ -3,7 +3,7 @@ id: north-star
 title: "North Star"
 status: draft
 owners: [santosh]
-last_updated: 2026-04-21
+last_updated: 2026-05-17
 related: [charter, v0-scope, viral-loop]
 tags: [mission, product, persona]
 ---
@@ -12,10 +12,10 @@ tags: [mission, product, persona]
 
 ## TL;DR
 
-- AI-native OS; agents are first-class, humans are approvers.
-- Wedge: **Night Handoff → Morning Brief** daily ritual.
+- AI-native OS; agents are first-class workers, humans steer and approve.
+- Wedge: one **Work Object** that follows the user all day, with Morning Brief as the daily ritual.
 - P0: high-agency prosumer-founders (3–5M globally).
-- Goal: B2C virality via the Morning Reveal demo + forkable Stacks.
+- Goal: let users delegate cross-app work without becoming managers of agent tools.
 
 ## The loop
 
@@ -26,14 +26,29 @@ sequenceDiagram
     participant Ag as Agents (overnight)
     participant L as Trust Ledger
 
-    H->>C: Night Handoff (30s intent)
-    C->>Ag: Decompose + dispatch with capabilities
-    Ag->>Ag: Run 8 hours, emit provenance
-    Ag->>C: Synthesized artifacts + proposed actions
-    C->>L: Classify each action via Region Router
-    H->>C: Morning Brief (approve / rewind / defer)
-    C->>L: Update delegation (success++ / rollback--)
+    H->>C: Create or update Work Object
+    C->>Ag: Dispatch packs with scoped capabilities
+    Ag->>C: Write contributions to Memory Graph
+    C->>L: Classify authority state
+    H->>C: Work Object View / Brief / Inbox / Ceremony
+    C->>L: Update delegation and replayable state
 ```
+
+## What users uniquely get
+
+Chief OS should be judged by enabled work, not by proof artifacts alone.
+
+| User capability | What it feels like | Why Chief OS is different |
+|---|---|---|
+| Delegate one outcome across many tools | "Prepare the Acme follow-up" becomes obligations, slots, risk checks, and a draft without app-hopping | Packs compose through one OS-owned Work Object instead of point integrations |
+| Keep working while agents keep updating the object | The same object stays live through the day: sources, drafts, risk, approvals, rewind | Surfaces are projections over L2 state; the Work Object is not trapped in a chat or app |
+| Add a new capability midstream | Install `risk-pack`; it contributes to existing work without changing document/calendar/email packs | New packs integrate with the OS substrate, not with every other pack |
+| Let low-stakes work proceed while high-stakes work stops | Drafting happens automatically; sending waits for Ceremony | Authority is OS-owned and consistent across packs |
+| Ask "what changed?" and undo it | Rewind a draft contribution while preserving the history and marking downstream work stale | Rollback is a platform primitive, not a per-app undo button |
+
+The product promise:
+
+> Chief OS turns scattered agent actions into one inspectable, steerable, reversible unit of work.
 
 ## Person Zero
 

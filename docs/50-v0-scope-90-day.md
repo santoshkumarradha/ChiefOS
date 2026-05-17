@@ -3,7 +3,7 @@ id: v0-scope
 title: "v0 — 90-Day MVP Scope"
 status: draft
 owners: [santosh]
-last_updated: 2026-04-21
+last_updated: 2026-05-17
 related: [north-star, chief-kernel, security-model, base-and-hardware, viral-loop]
 depends_on: [chief-kernel, security-model, base-and-hardware]
 tags: [scope, mvp, milestones]
@@ -13,21 +13,41 @@ tags: [scope, mvp, milestones]
 
 ## TL;DR
 
-- Ship one thing: **the Night Handoff → Morning Brief loop.**
-- Single human, single laptop, one cloud twin (optional), hardcoded Chief-of-Staff Stack.
+- Ship one coherent loop: **Work Object → pack contributions → authority gate → rewind**, with Morning Brief as one ritual surface.
+- Single human, single laptop, deterministic Chief-of-Staff Stack proof.
 - All 7 OS-only capabilities present; quality over breadth.
 - 4 external OSS integrations accelerate 6+ months of eng: **Sigstore/Rekor, opencode, MCP-over-vsock, bootc/Lanzaboote, Agent-Sandbox CRD schema.** (See [`research`](./research/2026-04-21-oss-landscape-scan.md).)
-- Demo-ready: the Morning Reveal hero video rehearsable end-to-end by day 90.
+- Demo-ready: a viewer can see one user goal become a multi-pack Work Object that stays inspectable through HTTP, CLI, and UI.
 
 ## What ships
 
 ### Core loop
 
-1. **Night Handoff** — 30-second typed-or-spoken intent. Commits to Memory Graph.
-2. **Overnight synthesis** — agents dispatched per declared intent; all runs cap-sandboxed, all outputs provenanced.
-3. **Morning Brief** — one page, renders in ≤3s on spacebar tap.
-4. **Approval flow** — single-tap → evidence card → ceremony, gated by Region Router.
-5. **Rewind** — `chief rewind <time>` spans files, memory, queued drafts.
+1. **Work Object creation** — one human outcome becomes `mem://artifact/...` state.
+2. **Pack contribution** — independent packs add obligations, slots, risks, and drafts through `chief-sdk`.
+3. **All-day surface** — Work Object View shows current state; Morning Brief summarizes ritual checkpoints.
+4. **Approval flow** — external authority moves through Ceremony, gated by Broker/Region Router.
+5. **Rewind** — contribution-level rewind removes active state while preserving replay history.
+
+### Platform MVP POC
+
+The phase-zero demo now exists as the deterministic Docker path:
+
+```bash
+docker compose -f deploy/docker/docker-compose.yml up --build
+curl -fsS http://localhost:8080/v1/work/acme-follow-up
+```
+
+It proves the v0 shape with fixture-backed packs:
+
+| Pack | Contribution |
+|---|---|
+| `document-pack` | Contract obligations |
+| `calendar-pack` | Candidate follow-up slots |
+| `email-pack` | Draft reply requiring Ceremony before send |
+| `risk-pack` | Payment/compliance risk after install |
+
+This POC is intentionally narrower than the full 90-day scope, but it demonstrates the core OS claim: packs compose through Chief OS-owned memory, authority, provenance, and surfaces.
 
 ### 7 OS-only capabilities (non-negotiable)
 

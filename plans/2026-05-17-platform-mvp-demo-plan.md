@@ -291,13 +291,14 @@ Acceptance:
 - `packs/risk-pack/`
 - `crates/chief-core/src/routes/`
 - `crates/chief-sdk/src/manifest.rs`
+- `docs/40-pack-sdk.md`
 - `tools/chief-ts-lint/` if TS pack checks are needed
 
 **Build:**
 
 - `risk-pack` reads existing `mem://artifact/acme-follow-up` through its granted Work Object scope.
 - It writes risk findings and links them to existing obligations.
-- Install path checks manifest grants and signature placeholder.
+- `POST /v1/packs/install-preview` checks manifest grants, usage reasons, and signature placeholder before activation.
 
 **End-to-end test:**
 
@@ -311,6 +312,7 @@ Acceptance:
 - After install and tick, Work Object gains risk contribution.
 - No existing pack or surface code is changed to know about `risk-pack`.
 - The install path displays the risk pack's requested grants before activation, even in the demo.
+- Install preview does not grant ambient authority; the pack still runs through `CapabilityContext`.
 
 ### Phase 6: Provenance replay and rewind
 

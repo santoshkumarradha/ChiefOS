@@ -20,6 +20,7 @@ mod v1_ceremony;
 mod v1_inbox;
 mod v1_models;
 mod v1_omnibar;
+mod v1_packs;
 mod v1_trust;
 mod v1_work;
 
@@ -64,6 +65,7 @@ fn v1_routes() -> Router<Arc<AppState>> {
         .merge(v1_brief::routes())
         .merge(v1_inbox::routes())
         .merge(v1_omnibar::routes())
+        .merge(v1_packs::routes())
         .merge(v1_ceremony::routes())
         .merge(v1_trust::routes())
         .merge(v1_models::routes())

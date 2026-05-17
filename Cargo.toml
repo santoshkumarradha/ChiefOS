@@ -19,6 +19,7 @@ members = [
     "packs/document-pack",
     "packs/calendar-pack",
     "packs/email-pack",
+    "packs/risk-pack",
 
     # tools/ — dev / CI tools
     "tools/chief-ts-lint",

@@ -1,0 +1,16 @@
+name = "risk-pack"
+version = "0.1.0"
+description = "Detects payment and compliance risk on an existing Work Object."
+signature = "ed25519:risk-pack-poc"
+
+[[grants]]
+kind = "mem.read"
+types = ["artifact", "finding"]
+usage_reason = "Read the Work Object and extracted obligations."
+
+[[grants]]
+kind = "mem.write"
+types = ["finding"]
+usage_reason = "Persist risk findings linked to the Work Object."
+
+agents = ["risk-agent"]

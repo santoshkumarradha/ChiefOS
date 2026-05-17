@@ -1,18 +1,15 @@
 # Chief OS — Live Demo Image
 # -------------------------------------------------------------------
 # Three stages:
-#   1. rust-builder : builds the `demo_run` binary (release)
+#   1. rust-builder : builds the `platform_demo_run` binary + `chief` CLI
 #   2. node-builder : builds apps/chief-brief-ui into /dist
 #   3. runtime      : slim ubuntu image with just the binary + bundle
 #
 # One-line invocation from the repo root:
 #   docker build -f deploy/docker/Dockerfile -t chief-os-demo:latest .
 #
-# Run (requires OPENROUTER_API_KEY in the caller's env):
-#   docker run -p 8080:8080 \
-#              -e OPENROUTER_API_KEY=$OPENROUTER_API_KEY \
-#              -v $(pwd)/chief-state:/var/chief \
-#              chief-os-demo:latest
+# Run:
+#   docker run -p 8080:8080 -v $(pwd)/chief-state:/var/chief chief-os-demo:latest
 
 # ────────────────────────────────────────────────────────────────────
 # Stage 1: Rust build
@@ -41,11 +38,12 @@ COPY packs/ ./packs/
 COPY spikes/ ./spikes/
 COPY tools/ ./tools/
 
-# Build just the demo binary.
-RUN cargo build --release -p chief-core --bin demo_run
+# Build the deterministic Platform MVP demo runner plus CLI inspection tool.
+RUN cargo build --release -p chief-core --bin platform_demo_run \
+    && cargo build --release -p chief-cli --bin chief
 
-# Sanity — the binary must exist for the final stage to copy it.
-RUN test -x /src/target/release/demo_run
+# Sanity — binaries must exist for the final stage to copy them.
+RUN test -x /src/target/release/platform_demo_run && test -x /src/target/release/chief
 
 # ────────────────────────────────────────────────────────────────────
 # Stage 2: Frontend build (Morning Brief React bundle)
@@ -87,8 +85,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Binary from stage 1.
-COPY --from=rust-builder /src/target/release/demo_run /usr/local/bin/chief-os-demo
+# Binaries from stage 1.
+COPY --from=rust-builder /src/target/release/platform_demo_run /usr/local/bin/chief-os-demo
+COPY --from=rust-builder /src/target/release/chief /usr/local/bin/chief
 
 # Static bundle from stage 2. `demo_run` serves this under `/`.
 COPY --from=node-builder /src/dist/ /usr/local/share/chief-os/dist/
@@ -112,11 +111,12 @@ ENV CHIEF_OS_DIST_PATH=/usr/local/share/chief-os/dist
 
 # Default log filter — can be overridden at runtime with RUST_LOG.
 ENV RUST_LOG=info,reqwest=warn
+ENV CHIEF_CORE_URL=http://127.0.0.1:8080
 
 EXPOSE 8080
 
-# Container health: /v1/status returns {uptime_s, version, services}.
+# Container health: /status returns {uptime_s, version, services}.
 HEALTHCHECK --interval=15s --timeout=3s --start-period=45s --retries=3 \
-    CMD curl -fsS http://localhost:8080/v1/status || exit 1
+    CMD curl -fsS http://localhost:8080/status || exit 1
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

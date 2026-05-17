@@ -93,7 +93,14 @@ Details per layer: [`docs/10-architecture.md`](./docs/10-architecture.md). Runti
 
 Work in progress. Building in public.
 
-L2 kernel services are implemented and tested against live OpenRouter: Agent Runtime, Capability Broker, Memory Graph (sqlite-vec + fastembed-rs), Signed Event Log, Model Router, Signed Inference, Kernel Principal. L3 SDK is at 0.3.1 with Rust and TypeScript parity. Two first-party packs run against live models. L4 has 4 surfaces prototyped in React; 8 surfaces designed but unbuilt. This is not a daily driver. Things break. Expect churn.
+L2 kernel services are implemented: Agent Runtime, Capability Broker, Memory Graph, Signed Event Log, Model Router, Signed Inference, Kernel Principal. L3 SDK is at 0.3.1 with Rust and TypeScript parity. The Platform MVP POC has four fixture-backed packs composing through one Work Object and an L4 Work Object surface. This is not a daily driver. Things break. Expect churn.
+
+Run the deterministic POC:
+
+```bash
+docker compose -f deploy/docker/docker-compose.yml up --build
+curl -fsS http://localhost:8080/v1/work/acme-follow-up
+```
 
 ## Discussions
 

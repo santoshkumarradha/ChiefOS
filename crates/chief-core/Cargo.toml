@@ -44,6 +44,10 @@ chief-oauth = { path = "../../crates/chief-oauth" }
 # Internal crates
 chief-mem                 = { path = "../../crates/chief-mem" }
 chief-inference           = { path = "../../crates/chief-inference" }
+document-pack             = { path = "../../packs/document-pack" }
+calendar-pack             = { path = "../../packs/calendar-pack" }
+email-pack                = { path = "../../packs/email-pack" }
+risk-pack                 = { path = "../../packs/risk-pack" }
 
 # Legacy prototypes (still consumed; slated for removal when chief-core fully supersedes them)
 chief-harness-proto       = { path = "../../spikes/harness", package = "chief-harness-proto" }
@@ -65,12 +69,12 @@ path = "src/bin/chief_core_server.rs"
 name = "demo_run"
 path = "src/bin/demo_run.rs"
 
+[[bin]]
+name = "platform_demo_run"
+path = "src/bin/platform_demo_run.rs"
+
 [dev-dependencies]
 tempfile.workspace = true
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "net", "time", "sync"] }
 futures-util = "0.3"
-document-pack = { path = "../../packs/document-pack" }
-calendar-pack = { path = "../../packs/calendar-pack" }
-email-pack = { path = "../../packs/email-pack" }
-risk-pack = { path = "../../packs/risk-pack" }

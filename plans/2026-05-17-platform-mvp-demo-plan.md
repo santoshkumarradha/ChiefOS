@@ -365,6 +365,7 @@ Acceptance:
 - Serves Work Object View and Brief.
 - Provides deterministic logs and reset command.
 - Exposes HTTP and CLI inspection paths for the same Work Object.
+- Uses `platform_demo_run`; no OpenRouter or external API key is required for the deterministic POC.
 
 **End-to-end test:**
 

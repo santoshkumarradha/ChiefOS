@@ -1,25 +1,7 @@
 #!/bin/sh
 # Chief OS demo entrypoint.
-# Validates required env, prepares state dirs, execs the demo binary.
+# Prepares state dirs and execs the deterministic platform demo binary.
 set -e
-
-# ────────────────────────────────────────────────────────────────────
-# Required env
-# ────────────────────────────────────────────────────────────────────
-if [ -z "${OPENROUTER_API_KEY:-}" ]; then
-  echo ""
-  echo "ERROR: OPENROUTER_API_KEY env var is required."
-  echo ""
-  echo "Example:"
-  echo "  docker run -p 8080:8080 \\"
-  echo "             -e OPENROUTER_API_KEY=sk-or-... \\"
-  echo "             -v \$(pwd)/chief-state:/var/chief \\"
-  echo "             chief-os-demo:latest"
-  echo ""
-  echo "Get a key: https://openrouter.ai/keys"
-  echo ""
-  exit 1
-fi
 
 # ────────────────────────────────────────────────────────────────────
 # State directories
@@ -48,9 +30,9 @@ echo "  bind   : 0.0.0.0:8080"
 echo "  state  : $CHIEF_HOME"
 echo "  dist   : ${CHIEF_OS_DIST_PATH:-/usr/local/share/chief-os/dist}"
 echo "  browse : http://localhost:8080"
+echo "  inspect: chief work show acme-follow-up --json"
 echo ""
-echo "hn-briefer : running immediately, re-runs every 15 min"
-echo "file-watch : scanning /workspace every 5 min"
+echo "platform-demo : seeding Acme Work Object and running POC packs"
 echo ""
 
 # ────────────────────────────────────────────────────────────────────

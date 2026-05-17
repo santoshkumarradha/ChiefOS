@@ -35,6 +35,8 @@ __pycache__/
 .chief/
 state/
 cache/
+deploy/docker/chief-state/
+deploy/docker/workspace/
 
 # PlanDB — binary .plandb.db is NOT tracked (causes merge conflicts across
 # parallel worktrees). Task state is committed instead as a text SQL dump at

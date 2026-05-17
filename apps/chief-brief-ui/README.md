@@ -7,14 +7,14 @@ last_updated: 2026-04-21
 tags: [prototype, morning-brief, surface]
 ---
 
-# Morning Brief Surface Prototype
+# Chief OS Surface Prototype
 
 ## Hypothesis
 
-The Morning Reveal can make delegated agent work legible in one cold render:
-Brief surface + HAX Inbox drawer + Omnibar + Ceremony overlay, all wired to a
-live chief-core `/v1/*` HTTP API. No mock data in production — empty API
-responses render as empty states.
+The Work Object surface can make all-day delegated agent work legible in one
+place: Work Object View + Brief + HAX Inbox + Omnibar + Ceremony overlay, all
+wired to a live chief-core `/v1/*` HTTP API. No mock data in production —
+empty API responses render as empty states.
 
 ## Run
 
@@ -33,7 +33,8 @@ chief-core kernel.
 
 ## Surfaces
 
-- `src/MorningBrief.tsx` — primary surface bound to `/v1/brief`.
+- `src/surfaces/WorkObjectView.tsx` — all-day POC center bound to `/v1/work/:id`.
+- `src/MorningBrief.tsx` — ritual surface bound to `/v1/brief`.
 - `src/surfaces/InboxDrawer.tsx` — HAX Inbox, `⌘I`, streams `/v1/inbox/stream`.
 - `src/surfaces/Omnibar.tsx` — floating palette, `⌘Space`, `/v1/omnibar/search`.
 - `src/surfaces/Ceremony.tsx` — full-screen co-sign with hold-to-confirm ring.

@@ -30,6 +30,8 @@ pub fn routes() -> Router<Arc<AppState>> {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ApproveRequest {
     pub held_ms: u64,
+    #[serde(default)]
+    pub payload_hash: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -68,7 +70,7 @@ async fn approve_handler(
 
     match state
         .ceremonies
-        .approve(&id, req.held_ms, &state.broker)
+        .approve(&id, req.held_ms, req.payload_hash.as_deref(), &state.broker)
         .await
     {
         Ok(ceremony) => {
@@ -113,6 +115,15 @@ async fn approve_handler(
             StatusCode::GONE,
             Json(serde_json::json!({
                 "error": "expired",
+            })),
+        )
+            .into_response(),
+        Err(CeremonyError::PayloadHashMismatch { expected, actual }) => (
+            StatusCode::CONFLICT,
+            Json(serde_json::json!({
+                "error": "payload_hash_mismatch",
+                "expected": expected,
+                "actual": actual,
             })),
         )
             .into_response(),

@@ -704,6 +704,7 @@ async fn run_hn_briefer_tick(state: &Arc<AppState>, http: &Client, or: &OpenRout
                     source_agent: HN_BRIEFER_PRINCIPAL.to_string(),
                     trust_context: 6,
                     proposed_grant,
+                    payload_hash: None,
                     target_principal: HN_BRIEFER_PRINCIPAL.to_string(),
                     rollback_window: chrono::Duration::hours(72),
                     ceremony_ttl: chrono::Duration::hours(24),

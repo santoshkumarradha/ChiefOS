@@ -3,7 +3,7 @@ id: security-model
 title: "Security Model"
 status: draft
 owners: [santosh]
-last_updated: 2026-04-21
+last_updated: 2026-05-17
 related: [chief-kernel, module-system, regulatory]
 depends_on: [architecture, chief-kernel]
 tags: [security, capabilities, trust-chain]
@@ -105,7 +105,8 @@ sequenceDiagram
 
 Tokens are:
 
-- **Single-use.** Bound to `(action_id, timestamp)`.
+- **Single-use.** Bound to `(action_id, timestamp, payload_hash)`.
+- **Payload-bound.** The approved payload hash must match the draft the human saw. If recipient, body, amount, document, or other committed payload changes after review, Broker rejects the approval with a payload mismatch.
 - **Short-lived.** Expire in minutes, not hours.
 - **Non-replayable.** Broker journals consumed tokens.
 - **Linkable.** Provenance Log entry forever references the token hash.

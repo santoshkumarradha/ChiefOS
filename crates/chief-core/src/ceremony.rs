@@ -51,6 +51,12 @@ pub struct CeremonyItem {
     pub trust_context: u8,
     /// Serialized grant that will be issued on approval.
     pub proposed_grant: Grant,
+    /// Optional BLAKE3 hash of the exact action payload being approved.
+    ///
+    /// When present, approval requests must present the same hash. This keeps
+    /// Ceremony authorization bound to the draft the human saw instead of to a
+    /// mutable UI object.
+    pub payload_hash: Option<String>,
     /// Principal that receives the grant on approval.
     pub target_principal: String,
     /// Window (in seconds) during which the approved grant can be rolled
@@ -71,6 +77,7 @@ pub struct NewCeremony {
     pub source_agent: String,
     pub trust_context: u8,
     pub proposed_grant: Grant,
+    pub payload_hash: Option<String>,
     pub target_principal: String,
     pub rollback_window: Duration,
     pub ceremony_ttl: Duration,
@@ -86,6 +93,11 @@ pub enum CeremonyError {
     HoldTooShort { held_ms: u64, required_ms: u64 },
     #[error("ceremony expired")]
     Expired,
+    #[error("payload hash mismatch")]
+    PayloadHashMismatch {
+        expected: String,
+        actual: Option<String>,
+    },
     #[error("grant issuance failed: {0}")]
     GrantIssueFailed(String),
 }
@@ -112,6 +124,7 @@ impl CeremonyStore {
             source_agent: input.source_agent,
             trust_context: input.trust_context,
             proposed_grant: input.proposed_grant,
+            payload_hash: input.payload_hash,
             target_principal: input.target_principal,
             rollback_window_secs: input.rollback_window.num_seconds(),
             created_at: now,
@@ -152,6 +165,7 @@ impl CeremonyStore {
         &self,
         id: &str,
         held_ms: u64,
+        payload_hash: Option<&str>,
         broker: &CapabilityBroker,
     ) -> Result<CeremonyItem, CeremonyError> {
         if held_ms < MIN_HOLD_MS {
@@ -173,6 +187,14 @@ impl CeremonyStore {
 
         if snapshot.status != CeremonyStatus::Pending {
             return Err(CeremonyError::AlreadyResolved(snapshot.status));
+        }
+        if let Some(expected) = snapshot.payload_hash.as_deref() {
+            if payload_hash != Some(expected) {
+                return Err(CeremonyError::PayloadHashMismatch {
+                    expected: expected.to_string(),
+                    actual: payload_hash.map(ToOwned::to_owned),
+                });
+            }
         }
         if Utc::now() > snapshot.expires_at {
             // Mark it expired while we're here.

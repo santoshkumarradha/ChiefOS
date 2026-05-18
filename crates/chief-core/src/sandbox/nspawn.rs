@@ -30,7 +30,7 @@
 //! `policy.env`. Callers that want to audit env should do so at their
 //! own call site with explicit redaction.
 
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
 use std::path::Path;
 
 use tokio::process::{Child, Command};

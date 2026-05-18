@@ -18,7 +18,7 @@ CHIEF_DEMO_PORT=18082 scripts/poc1-headless-node.sh
 
 What it checks:
 
-- `/status` is healthy.
+- `/v1/status` identifies the headless Chief Node mode.
 - `/v1/work/acme-follow-up` returns the Work Object projection.
 - `/v1/work/acme-follow-up/provenance` returns provenance.
 - `/v1/inbox` exposes the pending approval/Ceremony state.

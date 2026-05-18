@@ -21,9 +21,9 @@ compose() {
 }
 
 wait_for_status() {
-  echo "Waiting for $BASE_URL/status..."
+  echo "Waiting for $BASE_URL/v1/status..."
   for i in $(seq 1 90); do
-    if curl -fsS "$BASE_URL/status" >"$TMP_DIR/status.json" 2>/dev/null; then
+    if curl -fsS "$BASE_URL/v1/status" >"$TMP_DIR/status.json" 2>/dev/null; then
       return 0
     fi
     if [ "$i" = "90" ]; then
@@ -54,6 +54,8 @@ echo "Work Object: $WORK_ID"
 
 compose up -d --build
 wait_for_status
+require_json_field "$TMP_DIR/status.json" '"mode"[[:space:]]*:[[:space:]]*"headless_chief_node"' "headless node mode"
+require_json_field "$TMP_DIR/status.json" '"ui_runtime_required"[[:space:]]*:[[:space:]]*false' "no live UI runtime flag"
 
 echo "Checking HTTP Work Object projection..."
 curl -fsS "$BASE_URL/v1/work/$WORK_ID" >"$TMP_DIR/work-http.json"
@@ -81,7 +83,7 @@ compose exec -T chief-os-demo sh -lc '
 '
 
 echo "POC 1 headless node gate passed."
-echo "  status     : $BASE_URL/status"
+echo "  status     : $BASE_URL/v1/status"
 echo "  work       : $BASE_URL/v1/work/$WORK_ID"
 echo "  provenance : $BASE_URL/v1/work/$WORK_ID/provenance"
 echo "  inbox      : $BASE_URL/v1/inbox"

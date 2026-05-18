@@ -122,6 +122,39 @@ async fn v1_brief_empty_state_returns_empty_arrays() {
 }
 
 #[tokio::test]
+async fn v1_status_describes_headless_node_contract() {
+    let srv = spawn_default().await;
+    let body: Value = reqwest::get(srv.url("/v1/status"))
+        .await
+        .expect("GET status")
+        .json()
+        .await
+        .expect("json");
+
+    assert_eq!(body["api_version"].as_str(), Some("v1"));
+    assert_eq!(body["node"]["mode"].as_str(), Some("headless_chief_node"));
+    assert_eq!(body["node"]["ui_runtime_required"].as_bool(), Some(false));
+    assert_eq!(
+        body["demo"]["fixture_work_object_id"].as_str(),
+        Some("acme-follow-up")
+    );
+
+    let channels = body["channels"].as_array().expect("channels array");
+    assert!(
+        channels
+            .iter()
+            .any(|channel| channel["name"] == "http" && channel["status"] == "active"),
+        "http channel active"
+    );
+    assert!(
+        channels
+            .iter()
+            .any(|channel| channel["name"] == "cli" && channel["status"] == "active"),
+        "cli channel active"
+    );
+}
+
+#[tokio::test]
 async fn v1_inbox_append_and_list() {
     let srv = spawn_default().await;
 

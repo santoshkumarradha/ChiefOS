@@ -1,7 +1,7 @@
 ---
 id: plan-platform-mvp-demo
 title: "Platform MVP Demo Plan"
-status: draft
+status: complete
 owners: [santosh]
 last_updated: 2026-05-18
 related: [architecture, chief-kernel, module-system, memory-substrate, security-model, agent-runtime, surfaces, pack-sdk, v0-scope, headless-chief-node]
@@ -12,12 +12,15 @@ tags: [plans, demo, mvp, platform, packs]
 
 ## TL;DR
 
+- This plan is now **POC 0** for the [`headless-agent-os-poc`](./2026-05-18-headless-agent-os-poc-plan.md) ladder.
 - The demo must prove platform necessity: independent agent packs compose through Chief OS primitives instead of integrating with each other.
 - The core object is a shared **Work Object**: one user goal, many pack contributions, one memory/provenance/authority trail.
 - The MVP demo is not "Morning Brief only"; it is a headless-first all-day OS substrate demo with Brief and Work Object View as reference surfaces.
 - Every phase ends with an executable end-to-end test so the demo stays real as it grows.
 
 ## Demo thesis
+
+Completion note: this plan shipped the deterministic Platform MVP POC and remains the regression fixture for the next ladder. POC 1-3 continue from it in [`headless-agent-os-poc`](./2026-05-18-headless-agent-os-poc-plan.md).
 
 Chief OS should exist because agent software needs OS-owned primitives that apps and frameworks cannot enforce uniformly:
 

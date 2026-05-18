@@ -2,6 +2,29 @@
 
 Deterministic phase-zero demo for the OS-level Work Object platform proof.
 
+## POC 1 Headless Node Gate
+
+The next proof treats the Docker runner as a headless Chief Node, not as a UI demo server. It validates the deterministic Work Object over HTTP and CLI without requiring a separate UI process:
+
+```bash
+scripts/poc1-headless-node.sh
+```
+
+The script defaults to `CHIEF_DEMO_PORT=18081` to avoid common local `8080` conflicts. Override it if needed:
+
+```bash
+CHIEF_DEMO_PORT=18082 scripts/poc1-headless-node.sh
+```
+
+What it checks:
+
+- `/status` is healthy.
+- `/v1/work/acme-follow-up` returns the Work Object projection.
+- `/v1/work/acme-follow-up/provenance` returns provenance.
+- `/v1/inbox` exposes the pending approval/Ceremony state.
+- `chief work show acme-follow-up --json` reads the same node through the CLI.
+- The runtime image does not need Node/NPM as a live UI process.
+
 ## Quickstart
 
 ```bash

@@ -3,8 +3,8 @@ id: north-star
 title: "North Star"
 status: draft
 owners: [santosh]
-last_updated: 2026-05-17
-related: [charter, v0-scope, viral-loop]
+last_updated: 2026-05-18
+related: [charter, v0-scope, viral-loop, headless-chief-node]
 tags: [mission, product, persona]
 ---
 
@@ -13,9 +13,19 @@ tags: [mission, product, persona]
 ## TL;DR
 
 - AI-native OS; agents are first-class workers, humans steer and approve.
-- Wedge: one **Work Object** that follows the user all day, with Morning Brief as the daily ritual.
-- P0: high-agency prosumer-founders (3–5M globally).
-- Goal: let users delegate cross-app work without becoming managers of agent tools.
+- Wedge: one **Work Object** that follows the user all day, addressable through protocol first and visible through surfaces second.
+- Initial design persona: high-agency operator-builders doing cross-app work.
+- Goal: let users delegate cross-app work without becoming managers of agent tools or agent servers.
+
+## Product definition note
+
+Current working definition:
+
+> Chief OS is an agent-native operating substrate. Apps and agents run on top of a shared kernel that owns work state, capabilities, provenance, authority, and human approval.
+
+"iOS for agents" remains useful shorthand for the platform ambition: a common contract beneath many apps. For the v0 build order, the more precise shape is headless-first: `chiefd`, `chief`/future `chiefctl`, HTTP/local-socket APIs, packs, and optional L4 surfaces. The visual OS matters because humans need oversight and approval, but UI should never become the source of truth.
+
+This definition is expected to keep refining. Changes should preserve the axioms: no ambient authority, channel parity, dogfood parity, and demos that improve the Work Object / Stack flywheel.
 
 ## The loop
 
@@ -50,48 +60,46 @@ The product promise:
 
 > Chief OS turns scattered agent actions into one inspectable, steerable, reversible unit of work.
 
-## Person Zero
+## Initial design persona
 
-**High-agency prosumer-founder.**
+**High-agency operator-builder.**
 
 | Attribute | Signal |
 |---|---|
-| Already pays | $200–500/mo across AI + productivity SaaS |
-| Tool count | 12+ open tabs, 8 idle dashboards |
-| Identity | "Not a manager of my tools" |
-| Reads | Every.to, Tiago Forte / David Perell, PG essays |
-| Early-adopter index | Rabbit, Humane, Perplexity, Arc, Granola buyer |
-| Willingness-to-pay | $49 entry / $149 pro |
-| Market size | 3–5M globally |
-| LTV horizon | 36+ mo once ledger matures (90d+) |
+| Work shape | Cross-app coordination across email, calendar, docs, files, and project systems |
+| Tool count | Many open tabs, dashboards, agents, scripts, and personal workflows |
+| Identity | "I want to delegate outcomes, not manage tools" |
+| Technical comfort | Comfortable with CLI/API inspection when trust or debugging requires it |
+| Trust need | Wants agents to act, but only with visible authority, receipts, and rollback |
+| Failure mode today | Context, permissions, memory, approvals, and logs are scattered across tools |
 
-**Not-P0:** enterprise (v3+), creators (Arc/Notion crowding), mainstream non-technical (trust vocab gap), every-knowledge-worker (too generic).
+**Not the initial design center:** generic chat users, coding-agent-only workflows, creator-tool workflows, and large enterprise governance. Those can become later deployment contexts, but they are not the clearest first lens.
 
 ## Why now
 
 | Forcing function | Evidence |
 |---|---|
 | Tool-use reliability crossed shipping floor | 2025 harness benchmarks > 90% on bounded tasks |
-| 24/7 agent economics feasible | Haiku-tier + local Qwen enable $15–40/mo COGS at scale |
+| Long-running agent operation is feasible | Fast cloud tiers plus local Qwen/Llama-class models make always-on bounded tasks practical |
 | Category demand proven, no trust floor yet | Rabbit / Humane failed precisely on trust + OS-absence |
 
 ## Staged vision
 
 | Stage | Timeline | Scope | Primary metric |
 |---|---|---|---|
-| v0 — Night Loop | 90 days | Single-human, hardcoded Chief-of-Staff Stack, no money/legal | Hero video views × waitlist signups |
-| v1 — Trust Graduates | +6 mo | Public pack API, auto-ship low-stakes, multi-device, renegotiation ritual | Day-30 retention |
-| v2 — Money & Legal | +12 mo | Ceremony UI, e-sign, wire rails, federation (Chief-to-Chief) | Autonomous-ship rate |
-| v3 — Branded Device | +24 mo | Reference hardware, enterprise-ready trust ledger | Device sell-through + enterprise pilots |
+| v0 — Headless Work Loop | 90 days | Single-human, deterministic Chief-of-Staff Stack, Work Object loop through HTTP/CLI/UI | Work Object loop completes end-to-end without UI-only state |
+| v1 — Trust Graduates | +6 mo | Public pack API, auto-ship low-stakes, multi-device, renegotiation ritual | Repeated approved actions with low rewind rate |
+| v2 — Consequential Work | +12 mo | Stronger Ceremony flows, higher-stakes document and commitment workflows, federation (Chief-to-Chief) | Consequential actions remain inspectable and reversible where possible |
+| v3 — Full OS Experience | +24 mo | Reference hardware or full visual shell, enterprise-ready trust ledger | Daily work happens primarily through Chief-managed Work Objects |
 
 ## Success criteria
 
 | Stage | Primary | Secondary | Kill signal |
 |---|---|---|---|
-| v0 | Hero views × waitlist | Day-7 retention | Install completion < 15% |
-| v1 | Day-30 retention | # third-party packs | Ledger growth stalls for > 60% users |
-| v2 | Autonomous-ship rate | Federation pairs | Regulatory rollback of posture |
-| v3 | Device sell-through | Enterprise pilots | Device flop + weak enterprise demand |
+| v0 | Work Object loop runs through real daemon + HTTP + CLI + reference surface | Human can approve, inspect, and rewind from the same substrate state | Demo depends on UI-local state or scripted data mutation |
+| v1 | Packs can be built and installed without private APIs | Third-party pack can contribute to an existing Work Object | Pack coordination requires pairwise integration |
+| v2 | Higher-stakes work produces clear authority, evidence, and rollback boundaries | Chief-to-Chief federation preserves receipts | Authority becomes ambiguous or app-local |
+| v3 | Visual OS improves human control without weakening protocol parity | Surfaces remain projections over L2 state | UI becomes the product source of truth |
 
 ## Explicit non-goals
 

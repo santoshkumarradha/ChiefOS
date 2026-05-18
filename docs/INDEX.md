@@ -3,7 +3,7 @@ id: docs-index
 title: "Docs Index"
 status: stable
 owners: [santosh]
-last_updated: 2026-05-17
+last_updated: 2026-05-18
 tags: [meta, navigation]
 ---
 
@@ -43,6 +43,7 @@ Grouped by topic (numbered ranges):
 | `harness-resume-protocol` | [`16-harness-resume-protocol.md`](./16-harness-resume-protocol.md) | draft | Ceremony-interrupted harness sessions |
 | `os-ceremonies` | [`17-os-ceremonies-and-boundaries.md`](./17-os-ceremonies-and-boundaries.md) | draft | What the OS absorbs (OAuth, pickers, payment, e-sign, devices); threat model |
 | `base-and-hardware` | [`18-base-and-hardware.md`](./18-base-and-hardware.md) | draft | NixOS base + hardware targets |
+| `headless-chief-node` | [`19-headless-chief-node.md`](./19-headless-chief-node.md) | draft | Product definition for headless `chiefd` + protocol-first deployment |
 
 ## Surfaces and UI (30-39)
 

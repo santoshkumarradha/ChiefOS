@@ -3,8 +3,8 @@ id: surfaces
 title: "Surfaces (L4)"
 status: draft
 owners: [santosh]
-last_updated: 2026-05-17
-related: [architecture, chief-kernel, hax-principles, apple-design]
+last_updated: 2026-05-18
+related: [architecture, chief-kernel, hax-principles, apple-design, headless-chief-node]
 depends_on: [architecture, chief-kernel]
 tags: [ui, ux, surfaces, hax]
 ---
@@ -14,11 +14,14 @@ tags: [ui, ux, surfaces, hax]
 ## TL;DR
 
 - Core OS surfaces are declarative projections over L2 state — no business logic.
+- Surfaces are optional clients over the headless Chief Node; they must never become the source of truth.
 - Default ritual post-boot: **Morning Brief**; the Platform MVP POC centers an active **Work Object View** during the day.
 - Friction tier rendered by surface type: Queue Card (tier 1) → Evidence Card (tier 2) → Ceremony (tiers 3–4).
 - Apple-style guardrails: one way to do each thing, rituals not workflows, typography as substance.
 
 ## Surface inventory
+
+See [`headless-chief-node`](./19-headless-chief-node.md) for the product-mode split. L4 is how humans inspect, approve, and steer the node. It is not where packs coordinate, where authority is classified, or where work state is stored.
 
 | Surface | Region(s) | Purpose | Primary input |
 |---|---|---|---|

@@ -3,8 +3,8 @@ id: chief-kernel
 title: "Chief Kernel — L2 Services"
 status: draft
 owners: [santosh]
-last_updated: 2026-04-21
-related: [architecture, security-model, memory-substrate, hax-principles]
+last_updated: 2026-05-18
+related: [architecture, security-model, memory-substrate, hax-principles, headless-chief-node]
 depends_on: [architecture]
 tags: [kernel, services, api]
 ---
@@ -14,6 +14,7 @@ tags: [kernel, services, api]
 ## TL;DR
 
 - 7 services. All expose HTTP + CLI + Unix socket + internal API.
+- Product packaging target: headless `chiefd` owns these services; UI surfaces are clients, not required runtime dependencies.
 - Agent Runtime hosts harnesses. **Harness interface is swappable** (opencode v0, AgentField / Claude Agent SDK / custom later).
 - Capability Broker is the single enforcement point for Axiom 2.
 - Region Router is deterministic rule-table code; no LLM in the hot path.
@@ -204,6 +205,8 @@ Canonical decision in [ADR-0009](../adr/0009-signed-inference.md). This service 
 - *Custody* — cloud model without TEE; chain-of-custody claim only.
 
 ## API channel matrix
+
+The matrix is the target contract for channel parity. The current POC has HTTP and CLI parity for Work Objects; Unix socket coverage is still a tracked implementation gap until the local channel is active.
 
 | Service | HTTP | CLI | Unix socket | Internal (in-proc) |
 |---|---|---|---|---|

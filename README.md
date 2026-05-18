@@ -1,8 +1,8 @@
 <h1 align="center">Chief OS</h1>
 
-<p align="center"><em>Think iOS, for agents.</em></p>
+<p align="center"><em>Think iOS for agents, with Unix-shaped protocol access underneath.</em></p>
 
-<p align="center">An AI-native operating system. Linux kernel inside. Agent primitives below. Human-agent experience above.</p>
+<p align="center">An AI-native operating system. Headless kernel substrate first. Human-agent experience above.</p>
 
 <p align="center">
   <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square"></a>
@@ -24,6 +24,23 @@ Chief OS is not a multi-agent framework. Not a Python runtime. Not a policy wrap
 | **Chief OS** | The operating system the agent lives in. It boots. Your agent is a kernel-issued principal with typed capabilities. Every LLM call is broker-gated and signs an attestation. You see its work through one surface, not ten chat windows. |
 
 Closest prior art by shape: **ChromeOS**, **SteamOS**. A Linux-based OS with novel userland, shipped as a distinct product.
+
+## Product definition
+
+Chief OS is an agent-native operating substrate. Apps and agents run on top of a shared kernel that owns work state, capabilities, provenance, authority, and human approval.
+
+The first product mode is a **headless Chief Node**:
+
+| Mode | What it means |
+|---|---|
+| `chiefd` | Long-running daemon for kernel services, packs, Work Objects, Ceremony queue, provenance, and rewind. |
+| `chief` / future `chiefctl` | CLI control plane for humans, scripts, and agent-server operators. |
+| HTTP / local socket APIs | Protocol surface for apps, packs, and external agents. If UI can see it, the protocol should expose it too. |
+| L4 surfaces | Optional reference/control clients over the same state, not the source of truth. |
+
+This product definition is intentionally live. The vision will keep refining, but the current direction is clear: prove the OS substrate first, then deepen the visual OS experience.
+
+The Linux analogy is deliberate. Linux gave server software processes, users, files, sockets, packages, service supervision, and audit logs. Chief OS gives agentic software principals, capabilities, Work Objects, Memory Graph state, signed packs, managed agent runtime, approvals, provenance, and rewind.
 
 ## Why an OS, not an app
 
@@ -82,6 +99,7 @@ Details per layer: [`docs/10-architecture.md`](./docs/10-architecture.md). Runti
 | [`CHARTER.md`](./CHARTER.md) | Ten axioms, the constitution |
 | [`docs/00-north-star.md`](./docs/00-north-star.md) | Wedge, Person Zero, staged vision |
 | [`docs/10-architecture.md`](./docs/10-architecture.md) | L0 through L4 in depth |
+| [`docs/19-headless-chief-node.md`](./docs/19-headless-chief-node.md) | Headless `chiefd` product definition |
 | [`docs/15-agent-runtime.md`](./docs/15-agent-runtime.md) | `ctx.ai()` and `ctx.harness()` spec |
 | [`docs/14-security-model.md`](./docs/14-security-model.md) | Capabilities, attestation, enforcement |
 | [`docs/30-surfaces.md`](./docs/30-surfaces.md) | Surface catalog |

@@ -3,8 +3,8 @@ id: v0-scope
 title: "v0 — 90-Day MVP Scope"
 status: draft
 owners: [santosh]
-last_updated: 2026-05-17
-related: [north-star, chief-kernel, security-model, base-and-hardware, viral-loop]
+last_updated: 2026-05-18
+related: [north-star, chief-kernel, security-model, base-and-hardware, viral-loop, headless-chief-node]
 depends_on: [chief-kernel, security-model, base-and-hardware]
 tags: [scope, mvp, milestones]
 ---
@@ -13,13 +13,27 @@ tags: [scope, mvp, milestones]
 
 ## TL;DR
 
-- Ship one coherent loop: **Work Object → pack contributions → authority gate → rewind**, with Morning Brief as one ritual surface.
+- Ship one coherent loop: **Work Object → pack contributions → authority gate → rewind**, through a headless Chief Node first and Morning Brief as one ritual surface.
 - Single human, single laptop, deterministic Chief-of-Staff Stack proof.
 - All 7 OS-only capabilities present; quality over breadth.
 - 4 external OSS integrations accelerate 6+ months of eng: **Sigstore/Rekor, opencode, MCP-over-vsock, bootc/Lanzaboote, Agent-Sandbox CRD schema.** (See [`research`](./research/2026-04-21-oss-landscape-scan.md).)
-- Demo-ready: a viewer can see one user goal become a multi-pack Work Object that stays inspectable through HTTP, CLI, and UI.
+- Demo-ready: a viewer can see one user goal become a multi-pack Work Object that stays inspectable through HTTP, CLI, and UI, with local socket/MCP tracked as protocol-parity follow-ups where not yet active.
 
 ## What ships
+
+### Product mode
+
+v0 proves the **Headless Chief Node** before it tries to prove a full visual OS. See [`headless-chief-node`](./19-headless-chief-node.md).
+
+| Ship | v0 meaning |
+|---|---|
+| `chiefd` / `chief-core` daemon | Runs L2 kernel services, packs, Work Objects, Ceremony queue, provenance, and rewind without requiring a UI process. |
+| `chief` / future `chiefctl` CLI | Reads and controls the same state as HTTP and surfaces. |
+| HTTP API | Primary demo and automation protocol. `/v1/work/:id` is the canonical POC read path. |
+| Local socket / MCP | Required direction for agent-server deployments; exact v0 coverage must be explicit per phase gate. |
+| L4 surfaces | Reference/control clients over the node, not the source of truth. |
+
+This is a product-definition checkpoint, not a new architectural primitive. Work Objects remain Memory Graph aggregates; authority remains Broker/Ceremony; rewind remains Memory Graph tombstone plus provenance history.
 
 ### Core loop
 
@@ -179,7 +193,7 @@ From [`research/2026-04-21-oss-landscape-scan.md`](./research/2026-04-21-oss-lan
 | Provenance / security engineer | 1 | Sigstore, in-toto, ceremony cryptography, eBPF |
 | Surfaces engineer (UI + rendering) | 1 | Morning Brief, Live Agent View, Ceremony, Wayland compositor config |
 | Brand + product design | 1 | Typography, sound, demo storyboard, landing page |
-| PM / founder | 1 | Distribution, waitlist, creator Stacks, press |
+| PM / founder | 1 | Product definition, demo coherence, design-persona feedback, public docs |
 
 Parallelizable across codex-on-worktree for independent workstreams (see [`AGENTS.md`](../AGENTS.md) and plandb entries).
 
@@ -194,6 +208,7 @@ Parallelizable across codex-on-worktree for independent workstreams (see [`AGENT
 ## Acceptance (ship criteria)
 
 - [ ] Day-90 gate met: external user completes Night Handoff → Morning Brief unsupervised.
+- [ ] Headless node gate met: the same Work Object loop runs through daemon + HTTP + CLI without a UI process.
 - [ ] Morning Reveal hero video shot and approved.
 - [ ] All 7 OS-only capabilities demonstrable in the hero video.
 - [ ] Sigstore verification passes on every artifact shown in the demo.

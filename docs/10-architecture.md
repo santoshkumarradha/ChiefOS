@@ -3,8 +3,8 @@ id: architecture
 title: "Architecture — Layers L0–L4"
 status: draft
 owners: [santosh]
-last_updated: 2026-04-21
-related: [charter, chief-kernel, security-model, base-and-hardware, module-system, surfaces, pack-sdk, ui-standardization, controls-and-policy, agent-runtime]
+last_updated: 2026-05-18
+related: [charter, chief-kernel, security-model, base-and-hardware, module-system, surfaces, pack-sdk, ui-standardization, controls-and-policy, agent-runtime, headless-chief-node]
 tags: [architecture, layers]
 ---
 
@@ -14,7 +14,8 @@ tags: [architecture, layers]
 
 - 5 layers. L0 commodity, L1 boring (Nix + Linux), L2 novel (kernel services), L3 extension (developer platform + packs), L4 product (12 surfaces).
 - We own L2–L4. We vendor L0–L1.
-- The OS is a protocol (HTTP + CLI + socket + surface). Channel parity is non-negotiable.
+- The OS is a protocol (HTTP + CLI + socket + surface). Channel parity is non-negotiable; see [`headless-chief-node`](./19-headless-chief-node.md).
+- First product mode: headless Chief Node (`chiefd` + `chief`/future `chiefctl` + HTTP/local socket APIs). L4 is an optional client layer over the same state.
 - **Substrate spine** (from research): signed typed event log, CAS filesystem, `kbd://` clipboard, HAX inbox, omnibar. Everything else is a view.
 - **Signed Inference** ([ADR-0009](../adr/0009-signed-inference.md)): every model call mediated by `chief-inference` and accompanied by a ~400 B cryptographic attestation. Category-defining for regulatory posture + anti-impersonation.
 - **Developer platform at L3** ([ADR-0010](../adr/0010-sdk-public-api-stability.md), [ADR-0011](../adr/0011-ui-stack-and-component-library.md)): `chief-sdk` is the stable public API all packs use; `chief-ui` is the locked component kit (React primitives + Rust mirror) that every surface composes. First-party packs use the same public surface as third-party packs (dogfood parity).
@@ -116,6 +117,18 @@ Security & Privacy and Controls are new per [ADR-0012](../adr/0012-no-settings-a
 | L2 Chief Kernel | Chief OS | Novel primitives: **Agent Runtime** (two-tier LLM + loop), capabilities, memory, provenance, trust, regions, model routing, signed inference | Capability Broker, Region Router, Model Router, `ctx.harness()` loop, engine adapter | Replacing Linux syscalls |
 | L1 OS Primitives | Vendor (NixOS, Linux) | Boring infrastructure we reuse | Immutable root, Wayland, microVMs, llama.cpp | Rewriting the kernel |
 | L0 Hardware | Vendor | Commodity compute + hardware trust root | TPM-sealed keys | Custom silicon (v5+) |
+
+## Product deployment modes
+
+Chief OS should be usable without a visual shell. The v0 build order is substrate first, surfaces second.
+
+| Mode | Primary user | Purpose | Must share state with |
+|---|---|---|---|
+| Headless Chief Node | Agent servers, pack developers, power users | Run `chiefd`, packs, Work Objects, Broker, Memory Graph, Event Log, Ceremony queue, provenance, and rewind without UI | CLI, HTTP, socket, optional surfaces |
+| Reference surface | Humans | Inspect and steer L2 state through Work Object View, Inbox, Ceremony, Brief, and Provenance Explorer | Headless node APIs |
+| Full visual OS | Humans using Chief as daily environment | Native shell/compositor/ritual experience once the substrate is stable | Same L2 protocol contract |
+
+This is a product-definition note, not a new primitive. `chiefd` is the daemon packaging of L2/L3 services; Work Objects remain `mem://artifact/...` aggregates; L4 surfaces remain declarative projections. If a future deployment mode needs a new storage namespace, edge kind, capability kind, or authority path, it requires ADR review.
 
 ## Developer platform (L3) — new
 

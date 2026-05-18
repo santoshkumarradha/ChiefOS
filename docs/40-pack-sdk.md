@@ -294,6 +294,12 @@ The same app can run in Ceremony mode for the POC 3A authority gate:
 scripts/poc3-external-app-ceremony.sh
 ```
 
+POC 3B verifies exact payload binding and rewind on that app contribution:
+
+```bash
+scripts/poc3-payload-rewind.sh
+```
+
 ## Related
 
 - [`adr/0010-sdk-public-api-stability.md`](../adr/0010-sdk-public-api-stability.md) — canonical decision.

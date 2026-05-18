@@ -50,6 +50,15 @@ chief ceremony list --json
 POST /v1/ceremony/:id/approve
 ```
 
+POC 3B adds payload rejection and rewind:
+
+```text
+POST /v1/ceremony/:id/approve       # mutated hash returns payload_hash_mismatch
+POST /v1/work/:id/rewind
+GET  /v1/work/:id/provenance
+chief work show :id --json
+```
+
 Request identity:
 
 ```http
@@ -141,6 +150,7 @@ Invariants:
 - [x] CLI reads the same contribution as HTTP.
 - [x] E2E gate: `scripts/poc2-sales-followup-app.sh`.
 - [x] Ceremony gate: `scripts/poc3-external-app-ceremony.sh`.
+- [x] Payload + rewind gate: `scripts/poc3-payload-rewind.sh`.
 
 ## Related
 

@@ -45,6 +45,12 @@ Run the same app in Ceremony mode:
 scripts/poc3-external-app-ceremony.sh
 ```
 
+Verify payload-hash rejection and rewind:
+
+```bash
+scripts/poc3-payload-rewind.sh
+```
+
 ## Decisions
 
 1. **Use Python stdlib only.**

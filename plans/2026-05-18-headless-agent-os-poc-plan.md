@@ -129,7 +129,7 @@ Work Object, Inbox/Provenance, CLI, and optional UI all show the same app contri
 
 ## POC 3 — Authority boundary and rewind proof
 
-**Status:** in progress; POC 3A headless Ceremony for the external app is implemented on the feature branch.
+**Status:** complete for the POC ladder gate.
 
 **Question answered:** Why does this need to be OS-level rather than an app-local agent feature?
 
@@ -161,11 +161,11 @@ downstream state is marked stale
 **Acceptance:**
 
 - [x] Consequential action cannot ship without Broker/Ceremony.
-- [x] Approval token is bound to exact payload hash for POC 3A approval.
-- [ ] Mutated payload is rejected.
-- [ ] Rewind changes active Work Object state without deleting event history.
+- [x] Approval token is bound to exact payload hash.
+- [x] Mutated payload is rejected.
+- [x] Rewind changes active Work Object state without deleting event history.
 - [x] HTTP and CLI show the same pending Ceremony state.
-- [ ] HTTP and CLI show the same rewind state.
+- [x] HTTP and CLI show the same rewind state.
 
 ## POC 4 — Bring-your-own orchestrator proof
 
@@ -256,6 +256,7 @@ cargo test -p chief-cli
 scripts/poc-live-openrouter.sh
 scripts/poc2-sales-followup-app.sh
 scripts/poc3-external-app-ceremony.sh
+scripts/poc3-payload-rewind.sh
 CHIEF_DEMO_PORT=18081 docker compose -f deploy/docker/docker-compose.yml up --build -d
 curl -fsS http://localhost:18081/v1/work/acme-follow-up
 ```

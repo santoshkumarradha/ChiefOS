@@ -1336,6 +1336,10 @@ dependencies:
   kind: blocks
 context:
 - kind: discovery
+  content: 'progress: POC 3B payload + rewind gate added; scripts/poc3-payload-rewind.sh rejects mutated approval hash, approves exact hash, rewinds external app contribution, and verifies replayable provenance via HTTP and CLI'
+  tags: []
+  task_ref: null
+- kind: discovery
   content: 'progress: POC 3A external app Ceremony gate added; contribution writes can include ceremony payload, scripts/poc3-external-app-ceremony.sh verifies HTTP and CLI pending Ceremony plus exact payload-hash approval'
   tags: []
   task_ref: null

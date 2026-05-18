@@ -60,6 +60,12 @@ Grouped by topic (numbered ranges):
 | `pack-sdk` | [`40-pack-sdk.md`](./40-pack-sdk.md) | draft | Developer contract — public SDK, CapabilityKind closed enum |
 | `local-vs-cloud` | [`41-local-vs-cloud.md`](./41-local-vs-cloud.md) | draft | Hybrid runtime + Model Router swappability |
 
+## Examples
+
+| ID | File | Status | Purpose |
+|---|---|---|---|
+| `example-sales-followup-app` | [`../examples/sales-followup-app/README.md`](../examples/sales-followup-app/README.md) | draft | POC 2 external app using only Chief HTTP protocol |
+
 ## Deployment and scope (50-59)
 
 | ID | File | Status | Purpose |

@@ -1335,6 +1335,10 @@ dependencies:
   to_ref: task-84
   kind: blocks
 context:
+- kind: discovery
+  content: 'progress: POC 2B external sales-followup app E2E added; scripts/poc2-sales-followup-app.sh starts Chief Node, runs examples/sales-followup-app/app.py over HTTP only, and verifies Work Object/provenance/CLI app contribution'
+  tags: []
+  task_ref: null
 - kind: decision
   content: 'decision: revised headless POC ladder to POC 2 first real Chief app, POC 3 authority/rewind on that app, POC 4 external orchestrator/AgentField; GitHub milestone #2 retitled and issues #75-#81 mapped accordingly'
   tags: []

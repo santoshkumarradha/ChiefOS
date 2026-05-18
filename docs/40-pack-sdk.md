@@ -282,6 +282,12 @@ GET  /v1/work/:id/provenance
 
 The external app sends `x-chief-principal: app:<name>`, writes only `finding`, `artifact`, or `decision` contributions, and receives the same Work Object projection every surface receives. The route checks Broker `mem.write` and persists ordinary Memory Graph nodes. This is a public protocol path for app development, not a new storage primitive and not semantic orchestration inside Chief.
 
+The POC 2B reference app lives at [`../examples/sales-followup-app`](../examples/sales-followup-app). Its E2E gate is:
+
+```bash
+scripts/poc2-sales-followup-app.sh
+```
+
 ## Related
 
 - [`adr/0010-sdk-public-api-stability.md`](../adr/0010-sdk-public-api-stability.md) — canonical decision.

@@ -95,7 +95,7 @@ curl /v1/inbox
 
 ## POC 2 — First real Chief app proof
 
-**Status:** in progress; POC 2A public contribution-write API is implemented on the feature branch.
+**Status:** in progress; POC 2A public contribution-write API and POC 2B external app E2E are implemented on the feature branch.
 
 **Question answered:** Can a developer build an actual Chief app on top of OS primitives instead of linking to kernel internals?
 
@@ -114,17 +114,17 @@ Work Object, Inbox/Provenance, CLI, and optional UI all show the same app contri
 1. Add public contribution-write API if the current write path is too internal.
 2. Attribute external app writes to an app principal while still passing through Broker.
 3. Add a tiny external app example that imports no `chief-core` internals.
-4. Add an E2E script that runs Chief Node plus the external app process.
+4. Add an E2E script that runs Chief Node plus the external app process: `scripts/poc2-sales-followup-app.sh`.
 5. Document the app developer contract: read Work Object, request/use scoped capability, write contribution, inspect provenance.
 
 **Acceptance:**
 
-- [ ] External app has no internal crate imports.
-- [ ] External app reads work state through public protocol.
-- [ ] External app writes a contribution through public protocol.
-- [ ] Contribution is persisted as an existing Memory Graph node type, not a new primitive.
-- [ ] Provenance identifies the external app principal.
-- [ ] HTTP and CLI show the same app contribution.
+- [x] External app has no internal crate imports.
+- [x] External app reads work state through public protocol.
+- [x] External app writes a contribution through public protocol.
+- [x] Contribution is persisted as an existing Memory Graph node type, not a new primitive.
+- [x] Provenance identifies the external app principal.
+- [x] HTTP and CLI show the same app contribution.
 
 ## POC 3 — Authority boundary and rewind proof
 
@@ -250,6 +250,7 @@ cargo test -p chief-core --test work_object_e2e --test ceremony_payload_e2e --te
 cargo test -p chief-core --bin platform_demo_run
 cargo test -p chief-cli
 scripts/poc-live-openrouter.sh
+scripts/poc2-sales-followup-app.sh
 CHIEF_DEMO_PORT=18081 docker compose -f deploy/docker/docker-compose.yml up --build -d
 curl -fsS http://localhost:18081/v1/work/acme-follow-up
 ```

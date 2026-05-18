@@ -54,7 +54,7 @@ use tracing_subscriber::EnvFilter;
 // Constants
 // ────────────────────────────────────────────────────────────────────────────
 
-/// Host the HTTP server binds to inside the container.
+/// Host the HTTP server binds to when `CHIEF_BIND` is not set.
 const DEFAULT_BIND: &str = "0.0.0.0:8080";
 
 /// Filesystem default for the React bundle. Overridable via
@@ -106,8 +106,8 @@ async fn main() -> Result<()> {
 
     // 1. Required env — fail fast if the operator forgot.
     let openrouter_key = require_openrouter_key()?;
-    let openrouter_model = std::env::var("OPENROUTER_MODEL")
-        .unwrap_or_else(|_| DEFAULT_OPENROUTER_MODEL.to_string());
+    let openrouter_model =
+        std::env::var("OPENROUTER_MODEL").unwrap_or_else(|_| DEFAULT_OPENROUTER_MODEL.to_string());
 
     // 2. State dir + dist path + workspace mount.
     let state_dir = resolve_state_dir();
@@ -156,9 +156,10 @@ async fn main() -> Result<()> {
     let app = build_http_router(Arc::clone(&state), dist_path.clone());
 
     // 7. Spawn the HTTP server.
-    let addr: SocketAddr = DEFAULT_BIND
+    let bind = std::env::var("CHIEF_BIND").unwrap_or_else(|_| DEFAULT_BIND.to_string());
+    let addr: SocketAddr = bind
         .parse()
-        .context("parse hardcoded DEFAULT_BIND address")?;
+        .with_context(|| format!("parse CHIEF_BIND address {bind:?}"))?;
     let listener = tokio::net::TcpListener::bind(&addr)
         .await
         .with_context(|| format!("bind TCP listener on {addr}"))?;
@@ -250,9 +251,7 @@ fn require_openrouter_key() -> Result<String> {
             eprintln!("ERROR: OPENROUTER_API_KEY env var is required.");
             eprintln!();
             eprintln!("Example:");
-            eprintln!(
-                "  docker run -p 8080:8080 -e OPENROUTER_API_KEY=sk-or-... \\"
-            );
+            eprintln!("  docker run -p 8080:8080 -e OPENROUTER_API_KEY=sk-or-... \\");
             eprintln!("             -v $(pwd)/chief-state:/var/chief chief-os-demo:latest");
             eprintln!();
             eprintln!("Get a key: https://openrouter.ai/keys");
@@ -442,7 +441,9 @@ async fn static_file_handler(State(ctx): State<Arc<StaticCtx>>, uri: Uri) -> Res
                 .status(StatusCode::OK)
                 .header(header::CONTENT_TYPE, ct)
                 .body(axum::body::Body::from(bytes))
-                .unwrap_or_else(|_| (StatusCode::INTERNAL_SERVER_ERROR, "body build").into_response())
+                .unwrap_or_else(|_| {
+                    (StatusCode::INTERNAL_SERVER_ERROR, "body build").into_response()
+                })
         }
         Err(_) => {
             // SPA fallback — serve index.html for unknown paths so React Router works.
@@ -546,7 +547,8 @@ async fn run_hn_briefer_tick(state: &Arc<AppState>, http: &Client, or: &OpenRout
 
     // 3. Real scoring via OpenRouter for up to 5 stories.
     let mut scored = Vec::new();
-    for hit in hits.iter().take(5) {
+    let score_limit = hn_score_limit();
+    for hit in hits.iter().take(score_limit) {
         let title = match hit.title.as_deref() {
             Some(t) if !t.is_empty() => t,
             _ => continue,
@@ -616,7 +618,10 @@ async fn run_hn_briefer_tick(state: &Arc<AppState>, http: &Client, or: &OpenRout
         .iter()
         .take(3)
         .map(|it| {
-            let title = it.get("title").and_then(|v| v.as_str()).unwrap_or("(untitled)");
+            let title = it
+                .get("title")
+                .and_then(|v| v.as_str())
+                .unwrap_or("(untitled)");
             let score = it.get("score").and_then(|v| v.as_u64()).unwrap_or(0);
             format!("• {} (score {})", title, score)
         })
@@ -635,11 +640,17 @@ async fn run_hn_briefer_tick(state: &Arc<AppState>, http: &Client, or: &OpenRout
         .await;
     state
         .trust_ledger
-        .record("hn-briefer", chief_core::trust_ledger::LedgerDelta::Approval)
+        .record(
+            "hn-briefer",
+            chief_core::trust_ledger::LedgerDelta::Approval,
+        )
         .await;
     state
         .trust_ledger
-        .record("hn-briefer", chief_core::trust_ledger::LedgerDelta::Attestation)
+        .record(
+            "hn-briefer",
+            chief_core::trust_ledger::LedgerDelta::Attestation,
+        )
         .await;
     info!("hn-briefer: queued REAL Card from live HN + OpenRouter output");
 
@@ -683,7 +694,8 @@ async fn run_hn_briefer_tick(state: &Arc<AppState>, http: &Client, or: &OpenRout
             let proposed_grant = Grant::new(vec![CapabilityKind::NetHttp {
                 hosts: vec!["astralcodexten.substack.com".to_string()],
                 methods: vec![HttpMethod::Get],
-                usage_reason: "Expand hn-briefer to fetch Astral Codex Ten RSS for the daily brief".to_string(),
+                usage_reason: "Expand hn-briefer to fetch Astral Codex Ten RSS for the daily brief"
+                    .to_string(),
             }]);
 
             let ceremony = state
@@ -782,6 +794,14 @@ async fn fetch_hn_top_stories(http: &Client) -> Result<Vec<HnHit>> {
         }
     }
     Ok(out)
+}
+
+fn hn_score_limit() -> usize {
+    std::env::var("CHIEF_HN_SCORE_LIMIT")
+        .ok()
+        .and_then(|v| v.parse::<usize>().ok())
+        .map(|n| n.clamp(1, 5))
+        .unwrap_or(5)
 }
 
 async fn score_title(or: &OpenRouterCtx, title: &str, source: &str) -> Result<f32> {
@@ -996,10 +1016,12 @@ async fn scan_workspace(root: &Path) -> Result<Vec<WorkspaceEntry>> {
             let modified = meta
                 .modified()
                 .ok()
-                .and_then(|t| chrono::DateTime::<chrono::Utc>::from_timestamp(
-                    t.duration_since(std::time::UNIX_EPOCH).ok()?.as_secs() as i64,
-                    0,
-                ))
+                .and_then(|t| {
+                    chrono::DateTime::<chrono::Utc>::from_timestamp(
+                        t.duration_since(std::time::UNIX_EPOCH).ok()?.as_secs() as i64,
+                        0,
+                    )
+                })
                 .map(|dt| dt.to_rfc3339())
                 .unwrap_or_else(|| Utc::now().to_rfc3339());
             out.push(WorkspaceEntry {

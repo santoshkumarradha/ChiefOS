@@ -200,6 +200,7 @@ POC 1 must come before POC 3 because external agent servers need a stable headle
 Each issue must land with a real end-to-end check, not only unit tests.
 
 - POC 1 gate: deterministic Docker or local runner plus HTTP and CLI checks.
+- Live user-facing gate: `scripts/poc-live-openrouter.sh` with `OPENROUTER_API_KEY` from the environment; this must hit real OpenRouter and user-facing `/v1/inbox`, `/v1/brief`, and `/` surfaces.
 - POC 2 gate: real Ceremony/Broker/Rewind path with HTTP and CLI assertions.
 - POC 3 gate: Chief Node plus external process, no internal crate imports, provenance attributed to external principal.
 
@@ -209,6 +210,7 @@ Before merging the feature branch:
 cargo test -p chief-core --test work_object_e2e --test ceremony_payload_e2e --test work_rewind_e2e
 cargo test -p chief-core --bin platform_demo_run
 cargo test -p chief-cli
+scripts/poc-live-openrouter.sh
 CHIEF_DEMO_PORT=18081 docker compose -f deploy/docker/docker-compose.yml up --build -d
 curl -fsS http://localhost:18081/v1/work/acme-follow-up
 ```

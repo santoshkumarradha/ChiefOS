@@ -25,6 +25,16 @@ What it checks:
 - `chief work show acme-follow-up --json` reads the same node through the CLI.
 - The runtime image does not need Node/NPM as a live UI process.
 
+## Live OpenRouter Gate
+
+The deterministic gate above proves the node shape. The live gate uses the real `demo_run` path, real HN data, and real OpenRouter calls from `OPENROUTER_API_KEY` in the environment:
+
+```bash
+OPENROUTER_API_KEY=... scripts/poc-live-openrouter.sh
+```
+
+The script never prints the key. It uses a temporary `CHIEF_HOME`, removes it on exit, and fails if the key appears under the repo tree.
+
 ## Quickstart
 
 ```bash

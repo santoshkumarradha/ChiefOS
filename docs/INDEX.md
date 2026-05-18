@@ -68,6 +68,7 @@ Grouped by topic (numbered ranges):
 | `example-sales-followup-app` | [`../examples/sales-followup-app/README.md`](../examples/sales-followup-app/README.md) | draft | POC 2 external app using only Chief HTTP protocol |
 | `example-external-orchestrator` | [`../examples/external-orchestrator/README.md`](../examples/external-orchestrator/README.md) | draft | POC 4 external orchestrator using Chief as substrate |
 | `example-agentfield-adapter` | [`../examples/agentfield-adapter/README.md`](../examples/agentfield-adapter/README.md) | draft | POC 4 AgentField adapter using Chief as substrate |
+| `acme-chief-app-ts` | [`../examples/acme-chief-app-ts/README.md`](../examples/acme-chief-app-ts/README.md) | draft | POC 5 SDK-only TypeScript Chief app with real Chief-mediated LLM |
 
 ## Deployment and scope (50-59)
 

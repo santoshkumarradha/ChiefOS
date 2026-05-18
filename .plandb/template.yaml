@@ -1335,6 +1335,10 @@ dependencies:
   to_ref: task-84
   kind: blocks
 context:
+- kind: implementation
+  content: 'POC 5 SDK-first app landed: Chief Core now exposes brokered /v1/ai/generate using existing llm.generate, packages/chief-sdk-ts exports ChiefApp, examples/acme-chief-app-ts imports only @chief-os/sdk, and scripts/poc5-sdk-ts-chief-app.sh verifies live OpenRouter -> contribution -> Ceremony -> CLI/HTTP parity.'
+  tags: []
+  task_ref: null
 - kind: discovery
   content: 'progress: POC 4B AgentField adapter gate added; examples/agentfield-adapter stays user-space, uses Chief HTTP protocol as app:agentfield-adapter, and scripts/poc4-agentfield-adapter.sh verifies Work Object/provenance/CLI Ceremony plus payload-hash approval'
   tags: []

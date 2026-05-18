@@ -471,6 +471,45 @@ async fn v1_models_unbound_returns_none() {
 }
 
 #[tokio::test]
+async fn v1_ai_generate_uses_brokered_stub_without_openrouter() {
+    std::env::set_var("CHIEF_AI_DISABLE_OPENROUTER", "1");
+    let srv = spawn_default().await;
+    let client = reqwest::Client::new();
+    let body: Value = client
+        .post(srv.url("/v1/ai/generate"))
+        .json(&serde_json::json!({
+            "prompt": "Return a short app plan.",
+            "tier": "fast",
+            "input": {"work_object_id": "acme-follow-up"},
+        }))
+        .send()
+        .await
+        .expect("POST ai generate")
+        .json()
+        .await
+        .expect("json");
+
+    assert_eq!(body["provider"].as_str(), Some("local"));
+    assert!(
+        body["model"]
+            .as_str()
+            .unwrap_or_default()
+            .starts_with("local:llama-cpp-"),
+        "model={}",
+        body["model"]
+    );
+    assert!(
+        body["text"]
+            .as_str()
+            .unwrap_or_default()
+            .contains("Return a short app plan."),
+        "text={}",
+        body["text"]
+    );
+    assert!(body["attestation"]["id"].is_array());
+}
+
+#[tokio::test]
 async fn v1_static_placeholder_when_dist_missing() {
     let srv = spawn_default().await;
     let resp = reqwest::get(srv.url("/")).await.expect("GET root");

@@ -17,6 +17,7 @@ tags: [plans, poc, headless, agent-server, platform]
 - **POC 2** proves a real app can be built on Chief primitives through public protocol, without importing kernel internals.
 - **POC 3** proves why authority, approval, provenance, and rewind must be OS-level substrate, not app-local features.
 - **POC 4** proves external agent servers, including AgentField-style apps, can bring their own orchestration while Chief provides identity, capabilities, memory, audit, approval, and rewind.
+- **POC 5** proves the developer experience with an SDK-only TypeScript app using real Chief-mediated LLM inference.
 
 ## Prerequisites
 
@@ -204,6 +205,43 @@ high-risk action is still blocked by Ceremony
 - [x] High-risk action is still blocked by Chief, regardless of external orchestrator.
 - [x] AgentField adapter uses the same public protocol boundary.
 
+## POC 5 — SDK-first app proof
+
+**Status:** complete for the POC ladder gate.
+
+**Question answered:** Can a developer build a small "Swift-like" Chief app using only the public SDK, while still getting OS-level inference, provenance, and authority?
+
+**Demo flow:**
+
+```text
+Chief Node runs with Acme Work Object
+TypeScript app imports @chief-os/sdk
+app reads Work Object through SDK
+app calls Chief-mediated llm.generate with real OpenRouter
+app chooses its own agent plan from model output
+app writes a contribution through SDK
+Chief opens payload-bound Ceremony
+operator approves exact payload hash over HTTP/CLI
+```
+
+**Build:**
+
+1. Add brokered `POST /v1/ai/generate` using the existing `llm.generate` capability.
+2. Extend `packages/chief-sdk-ts` with `ChiefApp`, `work`, `ai`, and `ceremony` clients.
+3. Add `examples/acme-chief-app-ts` as the canonical SDK-only app.
+4. Add live E2E gate `scripts/poc5-sdk-ts-chief-app.sh`.
+5. Document that Chief-mediated inference is substrate; app-owned planning remains user-space.
+
+**Acceptance:**
+
+- [x] Example app imports only `@chief-os/sdk` from Chief code.
+- [x] App uses real OpenRouter through Chief, not a direct provider call.
+- [x] Broker checks `llm.generate` before inference.
+- [x] Inference response includes provider/model identity and OS-signed attestation.
+- [x] Contribution source is `app:acme-chief-ts`.
+- [x] Ceremony is bound to the exact outbound payload hash.
+- [x] HTTP and CLI see the same pending Ceremony.
+
 ## Dependencies
 
 ```text
@@ -220,9 +258,12 @@ POC 3 authority + rewind on app contribution
    |
    v
 POC 4 external orchestrator / AgentField
+   |
+   v
+POC 5 SDK-only TypeScript app
 ```
 
-POC 1 must come before POC 2 because app developers need a stable headless node contract. POC 3 comes after POC 2 so the authority proof is attached to a real external app workflow, not only a fixture. POC 4 comes last because AgentField/custom orchestrators should prove they are user-space applications on the same contract, not privileged kernel extensions.
+POC 1 must come before POC 2 because app developers need a stable headless node contract. POC 3 comes after POC 2 so the authority proof is attached to a real external app workflow, not only a fixture. POC 4 proves AgentField/custom orchestrators are user-space applications on the same contract, not privileged kernel extensions. POC 5 then tightens the developer experience so the same proof is understandable as a small app, not only protocol scripts.
 
 ## GitHub issue map
 
@@ -239,6 +280,7 @@ POC 1 must come before POC 2 because app developers need a stable headless node 
 | [#79](https://github.com/santoshkumarradha/ChiefOS/issues/79) POC 3B: Payload-bound rejection + rewind for external app | #78 | Show OS-bound approval cannot be reused and rewind preserves history. |
 | [#80](https://github.com/santoshkumarradha/ChiefOS/issues/80) POC 4A: External orchestrator E2E | #79 | Prove app-owned orchestration on Chief substrate. |
 | [#81](https://github.com/santoshkumarradha/ChiefOS/issues/81) POC 4B: AgentField example adapter | #80 | Prove AgentField can be a user-space app server on the same protocol. |
+| [#82](https://github.com/santoshkumarradha/ChiefOS/issues/82) POC 5: SDK-only TypeScript Chief app with real LLM | #81 | Prove the clean SDK-first app developer experience with Chief-mediated inference. |
 
 ## Verification
 
@@ -249,6 +291,7 @@ Each issue must land with a real end-to-end check, not only unit tests.
 - POC 2 gate: Chief Node plus external app process, no internal crate imports, public contribution write, provenance attributed to external principal.
 - POC 3 gate: real Ceremony/Broker/Rewind path with HTTP and CLI assertions, using the external app workflow.
 - POC 4 gate: Chief Node plus external orchestrator process, no internal crate imports, provenance attributed to external principal.
+- POC 5 gate: `scripts/poc5-sdk-ts-chief-app.sh` with `OPENROUTER_API_KEY`; app imports only `@chief-os/sdk`, calls real Chief-mediated inference, writes contribution, and approves exact Ceremony payload hash.
 
 Before merging the feature branch:
 
@@ -262,8 +305,9 @@ scripts/poc3-external-app-ceremony.sh
 scripts/poc3-payload-rewind.sh
 scripts/poc4-external-orchestrator.sh
 scripts/poc4-agentfield-adapter.sh
+scripts/poc5-sdk-ts-chief-app.sh
 CHIEF_DEMO_PORT=18081 docker compose -f deploy/docker/docker-compose.yml up --build -d
 curl -fsS http://localhost:18081/v1/work/acme-follow-up
 ```
 
-Add more exact commands as POC 1-3 implementation adds scripts and external-process tests.
+Add more exact commands as future POC implementation adds scripts and external-process tests.

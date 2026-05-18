@@ -15,7 +15,7 @@ Canonical developer-facing surface for building Chief OS applications ("packs").
 
 ## TL;DR
 
-- **One public API surface.** `crates/chief-sdk` (Rust) + `packages/chief-sdk-ts` (TypeScript). Kernel crates are NOT importable from packs.
+- **One public API surface.** `crates/chief-sdk` (Rust) + `packages/chief-sdk-ts` (TypeScript). Kernel crates are NOT importable from packs or apps.
 - **Semver-versioned.** Breaking change requires major bump + deprecation window.
 - **Closed-enum `CapabilityKind`.** Adding a kind requires an ADR.
 - **Declarative manifest + imperative code.** Manifest is what the OS enforces; code is what your pack does.
@@ -208,6 +208,40 @@ impl Agent for HnBriefer {
 ```
 
 `CapabilityContext` is the *only* object through which a pack touches the outside world. Every method checks the pack's declared grants before dispatching to the kernel. Attempted access outside granted scope returns a typed `CapabilityDenied` error.
+
+## SDK shape (TypeScript — apps)
+
+For headless/user-space apps, the TypeScript SDK exposes a `ChiefApp` client over the public protocol:
+
+```ts
+import { ChiefApp } from "@chief-os/sdk";
+
+const chief = new ChiefApp({
+  baseUrl: process.env.CHIEF_BASE_URL,
+  principal: "app:acme-chief-ts",
+});
+
+const work = await chief.work("acme-follow-up").get();
+const plan = await chief.ai.generate({
+  tier: "fast",
+  prompt: "Return JSON with selected_agents, steps, risk_notes, recommendation, email.",
+  input: { work_object: work },
+});
+
+await chief.work("acme-follow-up").contribute({
+  node_type: "artifact",
+  kind: "chief_app_followup_plan",
+  body: plan.json,
+  ceremony: {
+    title: "Send Acme follow-up",
+    summary: "Approve the exact outbound email payload.",
+    category: "email.send",
+    payload: (plan.json as any).email,
+  },
+});
+```
+
+The SDK client is ergonomic only. Chief Core still enforces the same protocol path: `llm.generate`, `mem.write`, provenance, payload-bound Ceremony, and rewind.
 
 ## SDK shape (TypeScript — panes)
 

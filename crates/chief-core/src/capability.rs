@@ -421,6 +421,13 @@ impl CapabilityKind {
                     ScopeDecision::ScopeExceeded
                 }
             }
+            (Self::LlmGenerate { backends, .. }, RequestedOp::LlmGenerate { backend }) => {
+                if allows_str(backends, backend) {
+                    ScopeDecision::Allowed
+                } else {
+                    ScopeDecision::ScopeExceeded
+                }
+            }
             _ if self.name() == op.kind() => ScopeDecision::ScopeExceeded,
             _ => ScopeDecision::WrongKind,
         }
@@ -616,6 +623,9 @@ pub enum RequestedOp {
         provider: Provider,
         scopes: Vec<String>,
     },
+    LlmGenerate {
+        backend: String,
+    },
     MetaRootOfTrust,
 }
 
@@ -659,6 +669,12 @@ impl RequestedOp {
         }
     }
 
+    pub fn llm_generate(backend: impl Into<String>) -> Self {
+        Self::LlmGenerate {
+            backend: backend.into(),
+        }
+    }
+
     pub fn meta_root_of_trust() -> Self {
         Self::MetaRootOfTrust
     }
@@ -671,6 +687,7 @@ impl RequestedOp {
             Self::LedgerRead { .. } => "ledger.read",
             Self::NetHttp { .. } => "net.http",
             Self::NetOauth2 { .. } => "net.oauth2",
+            Self::LlmGenerate { .. } => "llm.generate",
             Self::MetaRootOfTrust => "meta.root_of_trust",
         }
     }

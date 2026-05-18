@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { CapabilityContext, AiBuilder, HarnessBuilder } from "../src/index.js";
+import { CapabilityContext, AiBuilder, HarnessBuilder, ChiefApp } from "../src/index.js";
 
 describe("Basic SDK surface", () => {
   it("should create AI builders", () => {
@@ -44,5 +44,29 @@ describe("Basic SDK surface", () => {
       .maxTurns(5)
       .run();
     expect(result).not.toBeNull();
+  });
+
+  it("should call Chief OS app APIs with principal attribution", async () => {
+    const calls: Array<{ url: string; init: RequestInit }> = [];
+    const fetchImpl = async (url: RequestInfo | URL, init?: RequestInit) => {
+      calls.push({ url: String(url), init: init ?? {} });
+      return new Response(JSON.stringify({ id: "acme-follow-up", source_refs: [] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    };
+
+    const app = new ChiefApp({
+      baseUrl: "http://chief.test/",
+      principal: "app:acme-chief-ts",
+      fetchImpl,
+    });
+
+    await app.work("acme-follow-up").get();
+
+    expect(calls[0].url).toBe("http://chief.test/v1/work/acme-follow-up");
+    expect((calls[0].init.headers as Record<string, string>)["x-chief-principal"]).toBe(
+      "app:acme-chief-ts",
+    );
   });
 });

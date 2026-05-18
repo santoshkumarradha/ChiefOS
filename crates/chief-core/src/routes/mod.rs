@@ -15,6 +15,7 @@
 
 pub mod legacy;
 mod static_fallback;
+mod v1_ai;
 mod v1_brief;
 mod v1_ceremony;
 mod v1_inbox;
@@ -63,6 +64,7 @@ fn default_dist_dir() -> Option<PathBuf> {
 /// The v1 routes merged under `/v1`.
 fn v1_routes() -> Router<Arc<AppState>> {
     Router::new()
+        .merge(v1_ai::routes())
         .merge(v1_brief::routes())
         .merge(v1_inbox::routes())
         .merge(v1_omnibar::routes())

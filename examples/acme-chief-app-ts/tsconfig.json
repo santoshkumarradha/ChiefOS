@@ -4,14 +4,9 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "strict": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
     "outDir": "dist",
     "rootDir": "src",
-    "skipLibCheck": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true
+    "skipLibCheck": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules"]

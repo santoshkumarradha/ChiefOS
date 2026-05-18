@@ -15,7 +15,7 @@ tags: [developer-platform, app-protocol, poc]
 
 - A Chief app is user-space software that uses Chief as its OS substrate.
 - The app owns domain logic; Chief owns identity, capabilities, memory, provenance, approval, and rewind.
-- POC 2 uses the smallest protocol loop: read Work Object, write contribution, inspect provenance.
+- POC 2 uses the smallest protocol loop: read Work Object, write contribution, inspect provenance; POC 5 makes that loop SDK-first with real Chief-mediated inference.
 - This is a protocol contract over existing primitives, not a new kernel primitive.
 
 ## Context
@@ -76,6 +76,18 @@ AgentField-shaped adapter owns reasoner graph
 Chief remains HTTP substrate
 Provenance source is app:agentfield-adapter
 High-risk action still goes through Ceremony
+```
+
+POC 5 proves the clean SDK app loop:
+
+```text
+import { ChiefApp } from "@chief-os/sdk"
+GET  /v1/work/:id                 # through SDK
+POST /v1/ai/generate              # brokered llm.generate + signed attestation
+POST /v1/work/:id/contributions   # through SDK, with Ceremony payload
+GET  /v1/work/:id/provenance      # through SDK or operator API
+chief ceremony list --json
+POST /v1/ceremony/:id/approve
 ```
 
 Request identity:
@@ -141,6 +153,7 @@ Invariants:
 - If `ceremony` is present, Chief creates a real pending Ceremony and Inbox item.
 - Ceremony approval is bound to the exact payload hash Chief returned.
 - The app does not coordinate with packs directly.
+- If the app uses LLMs, inference goes through Chief `llm.generate`; the app receives provider/model identity and an OS-signed attestation.
 
 ## Decisions
 
@@ -168,6 +181,14 @@ Invariants:
 
    Rationale: [`../examples/agentfield-adapter`](../examples/agentfield-adapter) demonstrates the adapter pattern without making Chief import AgentField or depend on an AgentField control plane.
 
+7. **TypeScript is the first SDK-first app surface.**
+
+   Rationale: [`../examples/acme-chief-app-ts`](../examples/acme-chief-app-ts) gives developers a small, typed, SDK-only app experience while preserving the same protocol boundary. Python remains useful for adapters and ecosystem bridges.
+
+8. **Chief-mediated inference is substrate, not orchestration.**
+
+   Rationale: `/v1/ai/generate` checks the existing `llm.generate` capability, calls the configured model backend, and signs the prompt/output pair. It does not choose agents, steps, or workflow for the app.
+
 ## Acceptance
 
 - [x] Example app imports no Chief kernel crates.
@@ -180,6 +201,7 @@ Invariants:
 - [x] Payload + rewind gate: `scripts/poc3-payload-rewind.sh`.
 - [x] External orchestrator gate: `scripts/poc4-external-orchestrator.sh`.
 - [x] AgentField adapter gate: `scripts/poc4-agentfield-adapter.sh`.
+- [x] SDK-only TypeScript app gate with real OpenRouter: `scripts/poc5-sdk-ts-chief-app.sh`.
 
 ## Related
 

@@ -42,6 +42,8 @@ This product definition is intentionally live. The vision will keep refining, bu
 
 The Linux analogy is deliberate. Linux gave server software processes, users, files, sockets, packages, service supervision, and audit logs. Chief OS gives agentic software principals, capabilities, Work Objects, Memory Graph state, signed packs, managed agent runtime, approvals, provenance, and rewind.
 
+Chief OS is not the semantic orchestrator. Simple packs, AgentField apps, LangGraph/CrewAI/AutoGen apps, and custom agent servers bring their own planning and domain workflow. Chief provides the substrate they run against: identity, capabilities, memory, runtime, logs, approval, rewind, and protocol access.
+
 ## Why an OS, not an app
 
 Every interaction-paradigm shift has required a new operating system, not a new app. Terminal became GUI. PC became phone. Each shift reorganized the machine from the bottom: new primitives for input, for state, for identity. An app inside the old OS could not carry the shift.

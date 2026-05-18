@@ -130,6 +130,8 @@ Chief OS should be usable without a visual shell. The v0 build order is substrat
 
 This is a product-definition note, not a new primitive. `chiefd` is the daemon packaging of L2/L3 services; Work Objects remain `mem://artifact/...` aggregates; L4 surfaces remain declarative projections. If a future deployment mode needs a new storage namespace, edge kind, capability kind, or authority path, it requires ADR review.
 
+Chief OS is not a semantic orchestrator. L2 can supervise processes, enforce capabilities, deliver events, mediate model/tool calls, and gate authority. Planning, task decomposition, agent selection, and domain workflow live in L3 packs, first-party stack code, or external agent servers such as AgentField, LangGraph, CrewAI, AutoGen, or custom services.
+
 ## Developer platform (L3) — new
 
 The developer platform layer is what packs (first-party and third-party) consume. It sits between L2 kernel services and L4 surfaces, providing a stable public contract that survives kernel-internal churn.

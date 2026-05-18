@@ -3,7 +3,7 @@ id: os-ceremonies
 title: "OS Ceremonies & Boundaries — what the OS absorbs"
 status: draft
 owners: [santosh]
-last_updated: 2026-04-21
+last_updated: 2026-05-18
 related: [pack-sdk, security-model, module-system]
 depends_on: [security-model]
 tags: [sdk, ceremonies, threat-model, agent-autonomy]
@@ -83,7 +83,7 @@ No prior consumer OS has absorbed these because no prior consumer OS has agents.
 |---|---|
 | **Inter-agent communication** | Cross-pack agent-to-agent traffic without OS mediation = collusion / exfiltration. Goes through broker; both sides declare compatible capabilities. |
 | **Sub-agent spawning depth** | Prompt-injected agent spawning 10 sub-agents = confused-deputy bomb. `agent.spawn { max_depth }` declared + enforced. |
-| **Ritual invocation** | A ritual is privilege escalation (coordinating multiple agents). Packs can participate in rituals; only OS can *start* them from user intent. |
+| **Ritual invocation** | A ritual is privilege escalation across OS state and authority. Packs can participate in rituals; only OS can *start* the authority boundary from user intent. This is not semantic multi-agent orchestration. |
 | **Meta-prompting** | Pack building prompts from untrusted ingested content = prompt injection. `meta.prompt` is **default-deny**. When granted: OS keeps prompt templates reviewed at install; packs parameterise, never provide raw template text. |
 | **Memory-graph cross-pack reads** | Pack X reading Pack Y's nodes = exfiltration. Cross-pack edges require user consent ("let X see travel-related things from Y"). |
 | **Capability escalation at runtime** | Packs cannot request new capability kinds post-install. Re-install + re-consent required. (Prevents "free-trial-now-demands-your-bank-account.") |

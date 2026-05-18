@@ -15,6 +15,7 @@ tags: [architecture, product, headless, deployment]
 
 - Chief OS is first a protocol and kernel substrate, not a desktop UI.
 - The first product mode is a headless Chief Node: `chiefd` + `chief`/future `chiefctl` + HTTP/local-socket APIs + packs.
+- Chief OS is not the semantic orchestrator; packs, apps, and external agent servers own planning and domain workflow.
 - UI surfaces are optional clients over the same state; they are not allowed to own workflow logic.
 - This is a working product definition and will keep evolving as the vision sharpens.
 
@@ -46,6 +47,48 @@ Linux made server software reliable by giving programs a common substrate:
 
 Chief OS should play the same role for agents that Linux plays for services: the boring, durable substrate underneath many independently authored programs. The difference is that agentic work needs new first-class objects: work state, memory, model calls, tool authority, human approval, and rewind.
 
+## Substrate, not orchestrator
+
+Chief OS should not decide the semantic plan for a user's work. It should not choose the agent graph, decide the business workflow, or replace orchestration frameworks. That belongs above the OS boundary.
+
+| Chief OS owns | Apps / packs / agent servers own |
+|---|---|
+| Principal identity | Domain-specific planning |
+| Capability checks | Agent selection |
+| Runtime isolation and lifecycle | Task decomposition |
+| Shared Work Object state | Business workflow |
+| Model/tool mediation | Prompting and reasoning strategy |
+| Provenance and receipts | Domain-specific correctness |
+| Ceremony and approval gates | When to request an action |
+| Rewind mechanics | How to recompute after rewind |
+
+Linux has CPU schedulers, process supervisors, sockets, files, users, permissions, logs, and package installation. It does not decide whether an application should be a web server, database, CI runner, or workflow engine. Chief should take the same posture: it can mechanically coordinate resources, events, authority, and state, but semantic orchestration lives in user-space programs.
+
+```text
+Human / CLI / API / Surface
+          |
+          v
++------------------------------------------+
+|                Chief OS                  |
+| identity | capabilities | memory         |
+| runtime  | event log    | approval       |
+| rewind   | HTTP/socket  | pack install   |
++--------------------+---------------------+
+                     |
+                     v
++------------------------------------------+
+| Apps / Packs / Agent Servers             |
+| simple script                            |
+| event handler                            |
+| AgentField app                           |
+| LangGraph / CrewAI / AutoGen app         |
+| custom orchestrator                      |
+| first-party Chief-of-Staff pack stack    |
++------------------------------------------+
+```
+
+Users do not always need to bring an explicit orchestrator. A simple pack can be a script or event handler. A complex app can embed AgentField, LangGraph, CrewAI, AutoGen, or a custom orchestrator. Chief treats all of them as user-space applications that request capabilities, read/write Work Objects, and emit receipts.
+
 ## Usage model
 
 People do not primarily "use" a headless Chief Node by opening an app. They run it as the place where agentic work happens.
@@ -56,7 +99,7 @@ People do not primarily "use" a headless Chief Node by opening an app. They run 
 | Agent / pack | Reads scoped work state, requests capabilities, writes contributions, emits signed receipts. |
 | Developer | Builds packs against `chief-sdk` instead of rebuilding auth, memory, approval, audit, and tool policy per app. |
 | Operator | Runs nodes, connects tools, manages pack install, observes health, exports logs. |
-| External agent server | Treats Chief as a local/remote capability and memory server through protocol APIs. |
+| External agent server | Treats Chief as a local/remote capability and memory server through protocol APIs. Examples: AgentField, LangGraph, CrewAI, AutoGen, or a custom service. |
 
 The key product behavior is that users manage durable work, not individual agent sessions. A Work Object is the thing they return to throughout the day; agents, packs, surfaces, and approvals are participants around it.
 
@@ -86,13 +129,14 @@ The product boundary is: Chief owns the substrate; packs own domain behavior; su
 | `chief` / future `chiefctl` | CLI control plane for humans and automation. Anything visible in UI must be inspectable here. |
 | HTTP API | Remote and local protocol surface for Work Objects, inbox, packs, provenance, rewind, and approvals. |
 | Local socket API | Same semantic contract as HTTP for local agents and low-latency host integrations. v0 may lag here, but every exception needs a tracked follow-up. |
-| MCP / agent-server API | Future compatibility layer for agent runtimes that want to treat Chief as their tool/capability server. This must wrap existing Broker/Memory/Event primitives, not bypass them. |
+| MCP / agent-server API | Future compatibility layer for agent runtimes such as AgentField, LangGraph, CrewAI, AutoGen, or custom services that want to treat Chief as their tool/capability server. This must wrap existing Broker/Memory/Event primitives, not bypass them. |
 | L4 surfaces | Optional reference/control clients. They render L2 state and submit user intent back through the kernel. |
 
 Invariants:
 
 - No surface owns authority, memory, or workflow state.
 - No pack calls another pack directly for coordination.
+- No Chief kernel service owns semantic orchestration or domain planning.
 - No new storage namespace is introduced for "work"; Work Objects remain projections over `mem://artifact/...`.
 - New developer-facing protocol affordances must map to existing kernel primitives or get an ADR.
 
@@ -118,6 +162,10 @@ Invariants:
 
    Rationale: names like Chief Node, Chief Control, and Work Object help humans understand the product. They must remain mappings onto the existing architecture unless an ADR introduces a new primitive.
 
+6. **Orchestration is user-space.**
+
+   Rationale: Chief exists to make agent apps safe, stateful, inspectable, and governable. It should support AgentField, LangGraph, CrewAI, AutoGen, custom orchestrators, and simple scripts without making any of them the kernel's planning model.
+
 ## Diagram
 
 ```mermaid
@@ -126,7 +174,7 @@ flowchart LR
         A1[document-pack]
         A2[calendar-pack]
         A3[email-pack]
-        AS[external agent server]
+        AS[AgentField / external agent server]
     end
 
     subgraph Node["Headless Chief Node"]
@@ -167,6 +215,7 @@ flowchart LR
 - [ ] Local socket parity is either implemented or explicitly tracked as a narrow exception.
 - [ ] Pack install, contribution, Ceremony queue, provenance, and rewind work without a visual client.
 - [ ] Any UI demo can be replayed through CLI/API calls over the same state.
+- [ ] A simple pack works without an orchestrator, and an external AgentField/custom agent server can use the same protocol boundary.
 - [ ] Public docs describe usage and architecture without pricing, monetization, or commercial packaging language.
 
 ## Open questions

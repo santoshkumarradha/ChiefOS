@@ -27,10 +27,10 @@ v0 proves the **Headless Chief Node** before it tries to prove a full visual OS.
 
 | Ship | v0 meaning |
 |---|---|
-| `chiefd` / `chief-core` daemon | Runs L2 kernel services, packs, Work Objects, Ceremony queue, provenance, and rewind without requiring a UI process. |
+| `chiefd` / `chief-core` daemon | Runs L2 kernel services, packs, Work Objects, Ceremony queue, provenance, and rewind without requiring a UI process. It does not own semantic orchestration. |
 | `chief` / future `chiefctl` CLI | Reads and controls the same state as HTTP and surfaces. |
 | HTTP API | Primary demo and automation protocol. `/v1/work/:id` is the canonical POC read path. |
-| Local socket / MCP | Required direction for agent-server deployments; exact v0 coverage must be explicit per phase gate. |
+| Local socket / MCP | Required direction for agent-server deployments, including AgentField/custom services; exact v0 coverage must be explicit per phase gate. |
 | L4 surfaces | Reference/control clients over the node, not the source of truth. |
 
 This is a product-definition checkpoint, not a new architectural primitive. Work Objects remain Memory Graph aggregates; authority remains Broker/Ceremony; rewind remains Memory Graph tombstone plus provenance history.
@@ -167,7 +167,7 @@ From [`research/2026-04-21-oss-landscape-scan.md`](./research/2026-04-21-oss-lan
 
 ### Day 60 — "Stack complete, demo rehearsable"
 
-- All 6 Chief-of-Staff packs installed + coordinated.
+- All 6 Chief-of-Staff packs installed and contributing through Work Objects.
 - Live Agent View renders at 60fps with ≥ 20 active agents.
 - Rewind primitive (`chief rewind 4h`) works end-to-end.
 - Local-inference fallback demonstrated with network cable pulled.

@@ -1336,6 +1336,10 @@ dependencies:
   kind: blocks
 context:
 - kind: discovery
+  content: 'progress: POC 3A external app Ceremony gate added; contribution writes can include ceremony payload, scripts/poc3-external-app-ceremony.sh verifies HTTP and CLI pending Ceremony plus exact payload-hash approval'
+  tags: []
+  task_ref: null
+- kind: discovery
   content: 'progress: POC 2 developer walkthrough added in docs/42-chief-app-protocol.md; it documents external app identity, Work Object read, contribution write, provenance, and the no-new-primitive boundary'
   tags: []
   task_ref: null

@@ -4,10 +4,12 @@
 //! with `body.kind = "work_object"`. This route does not introduce a new
 //! storage namespace or kernel primitive.
 
-use crate::state::AppState;
 use crate::{
-    capability::RequestedOp,
+    capability::{CapabilityKind, Grant, RequestedOp},
+    ceremony::{CeremonyEvidence, CeremonyItem, NewCeremony},
+    inbox::{BadgeVariant, InboxKind, NewInboxItem},
     routes::legacy::{capability_denied_response, principal_for_request},
+    state::AppState,
 };
 use axum::{
     extract::{Path, State},
@@ -86,12 +88,28 @@ pub struct ContributionWriteRequest {
     pub source_refs: Vec<String>,
     #[serde(default)]
     pub body: Value,
+    #[serde(default)]
+    pub ceremony: Option<ContributionCeremonyRequest>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ContributionCeremonyRequest {
+    pub title: String,
+    pub summary: String,
+    pub category: String,
+    pub payload: Value,
+    #[serde(default)]
+    pub trust_context: Option<u8>,
+    #[serde(default)]
+    pub target_principal: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ContributionWriteResponse {
     pub work_object_id: String,
     pub contribution: WorkContribution,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ceremony: Option<CeremonyItem>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -287,16 +305,18 @@ async fn write_contribution(
     node_type: NodeType,
     req: ContributionWriteRequest,
 ) -> anyhow::Result<Option<ContributionWriteResponse>> {
-    let mem = state.mem.lock().await;
-    let artifacts = mem.nodes_by_type(NodeType::Artifact)?;
-    let work_exists = artifacts.into_iter().any(|stored| {
-        serde_json::from_str::<Value>(&stored.node.body)
-            .ok()
-            .is_some_and(|body| {
-                body.get("kind").and_then(Value::as_str) == Some("work_object")
-                    && body.get("id").and_then(Value::as_str) == Some(id)
-            })
-    });
+    let work_exists = {
+        let mem = state.mem.lock().await;
+        let artifacts = mem.nodes_by_type(NodeType::Artifact)?;
+        artifacts.into_iter().any(|stored| {
+            serde_json::from_str::<Value>(&stored.node.body)
+                .ok()
+                .is_some_and(|body| {
+                    body.get("kind").and_then(Value::as_str) == Some("work_object")
+                        && body.get("id").and_then(Value::as_str) == Some(id)
+                })
+        })
+    };
 
     if !work_exists {
         return Ok(None);
@@ -331,7 +351,24 @@ async fn write_contribution(
     }
 
     let source = contribution_source(headers, state);
+    let ceremony = if let Some(ceremony_req) = req.ceremony {
+        let ceremony = open_contribution_ceremony(state, id, &source, &ceremony_req).await;
+        body.insert("requires_ceremony".into(), Value::Bool(true));
+        body.insert(
+            "authority_state".into(),
+            Value::String("needs_ceremony".into()),
+        );
+        body.insert("ceremony_id".into(), Value::String(ceremony.id.clone()));
+        if let Some(payload_hash) = ceremony.payload_hash.clone() {
+            body.insert("payload_hash".into(), Value::String(payload_hash));
+        }
+        Some(ceremony)
+    } else {
+        None
+    };
+
     let body = Value::Object(body);
+    let mem = state.mem.lock().await;
     let uri = mem.put_node(Node::new(
         node_type,
         Horizon::Medium,
@@ -346,6 +383,7 @@ async fn write_contribution(
     Ok(Some(ContributionWriteResponse {
         work_object_id: id.to_string(),
         contribution,
+        ceremony,
     }))
 }
 
@@ -450,6 +488,66 @@ fn contribution_source(headers: &HeaderMap, state: &AppState) -> String {
         .filter(|value| !value.is_empty())
         .map(ToOwned::to_owned)
         .unwrap_or_else(|| principal_for_request(headers, state).to_string())
+}
+
+async fn open_contribution_ceremony(
+    state: &AppState,
+    work_object_id: &str,
+    source: &str,
+    req: &ContributionCeremonyRequest,
+) -> CeremonyItem {
+    let payload_hash = payload_hash(&req.payload);
+    let target_principal = req
+        .target_principal
+        .clone()
+        .unwrap_or_else(|| source.to_string());
+    let ceremony = state
+        .ceremonies
+        .open(NewCeremony {
+            title: req.title.clone(),
+            evidence: CeremonyEvidence {
+                summary: req.summary.clone(),
+                details: serde_json::json!({
+                    "work_object_id": work_object_id,
+                    "source": source,
+                    "category": req.category,
+                    "payload": req.payload,
+                    "payload_hash": payload_hash,
+                }),
+            },
+            source_agent: source.to_string(),
+            trust_context: req.trust_context.unwrap_or(3),
+            proposed_grant: Grant::new(vec![CapabilityKind::ceremony_request(
+                vec![req.category.clone()],
+                format!(
+                    "Permit committing the exact {} payload approved in Ceremony.",
+                    req.category
+                ),
+            )]),
+            payload_hash: Some(payload_hash.clone()),
+            target_principal,
+            rollback_window: chrono::Duration::hours(24),
+            ceremony_ttl: chrono::Duration::hours(12),
+        })
+        .await;
+
+    state
+        .inbox
+        .append(NewInboxItem {
+            kind: InboxKind::CeremonyPending,
+            title: req.title.clone(),
+            snippet: req.summary.clone(),
+            source_agent: source.to_string(),
+            badge: BadgeVariant::Ceremony,
+            ceremony_id: Some(ceremony.id.clone()),
+        })
+        .await;
+    ceremony
+}
+
+fn payload_hash(value: &Value) -> String {
+    let bytes = serde_json::to_vec(value).expect("payload json");
+    format!("blake3:{}", blake3::hash(&bytes).to_hex())
 }
 
 fn source_ref(uri: String, node: Node) -> WorkSourceRef {

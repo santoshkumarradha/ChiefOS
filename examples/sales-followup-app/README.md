@@ -39,6 +39,12 @@ Run the end-to-end gate:
 scripts/poc2-sales-followup-app.sh
 ```
 
+Run the same app in Ceremony mode:
+
+```bash
+scripts/poc3-external-app-ceremony.sh
+```
+
 ## Decisions
 
 1. **Use Python stdlib only.**
@@ -48,3 +54,7 @@ scripts/poc2-sales-followup-app.sh
 2. **Write a `finding` contribution.**
 
    Rationale: POC 2 must not invent a `contribution` node type. Chief projects existing Memory Graph nodes as Work Object contributions.
+
+3. **Use the same app for Ceremony.**
+
+   Rationale: POC 3 should prove authority on a real external app workflow, not on a separate fixture.

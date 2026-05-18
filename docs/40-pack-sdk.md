@@ -288,6 +288,12 @@ The POC 2B reference app lives at [`../examples/sales-followup-app`](../examples
 scripts/poc2-sales-followup-app.sh
 ```
 
+The same app can run in Ceremony mode for the POC 3A authority gate:
+
+```bash
+scripts/poc3-external-app-ceremony.sh
+```
+
 ## Related
 
 - [`adr/0010-sdk-public-api-stability.md`](../adr/0010-sdk-public-api-stability.md) — canonical decision.

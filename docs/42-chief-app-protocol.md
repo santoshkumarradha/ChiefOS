@@ -41,6 +41,15 @@ POST /v1/work/:id/contributions
 GET  /v1/work/:id/provenance
 ```
 
+POC 3A adds headless authority:
+
+```text
+POST /v1/work/:id/contributions   # with ceremony payload
+GET  /v1/ceremony
+chief ceremony list --json
+POST /v1/ceremony/:id/approve
+```
+
 Request identity:
 
 ```http
@@ -64,6 +73,35 @@ Contribution write shape:
 }
 ```
 
+Contribution write with Ceremony:
+
+```json
+{
+  "node_type": "artifact",
+  "kind": "proposed_send",
+  "title": "Send Acme follow-up after call",
+  "summary": "External app drafted an email send that requires Ceremony.",
+  "body": {
+    "draft_action": "email.send",
+    "payload": {
+      "to": "maya@acme.example",
+      "subject": "Acme follow-up",
+      "body": "Confirm clause 4 before sending."
+    }
+  },
+  "ceremony": {
+    "title": "Send Acme follow-up after call",
+    "summary": "sales-followup app needs Ceremony before sending externally.",
+    "category": "email.send",
+    "payload": {
+      "to": "maya@acme.example",
+      "subject": "Acme follow-up",
+      "body": "Confirm clause 4 before sending."
+    }
+  }
+}
+```
+
 Invariants:
 
 - `node_type` is one of `finding`, `artifact`, or `decision`.
@@ -72,6 +110,8 @@ Invariants:
 - Chief stores an ordinary Memory Graph node.
 - Chief projects the node as a Work Object contribution.
 - Provenance attributes the contribution to the app principal.
+- If `ceremony` is present, Chief creates a real pending Ceremony and Inbox item.
+- Ceremony approval is bound to the exact payload hash Chief returned.
 - The app does not coordinate with packs directly.
 
 ## Decisions
@@ -100,6 +140,7 @@ Invariants:
 - [x] Work Object and provenance show `app:sales-followup`.
 - [x] CLI reads the same contribution as HTTP.
 - [x] E2E gate: `scripts/poc2-sales-followup-app.sh`.
+- [x] Ceremony gate: `scripts/poc3-external-app-ceremony.sh`.
 
 ## Related
 

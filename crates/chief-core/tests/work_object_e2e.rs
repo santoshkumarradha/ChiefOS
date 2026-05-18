@@ -231,6 +231,123 @@ async fn external_app_contribution_write_requires_broker_grant() {
     assert_eq!(body["kind"], "mem.write");
 }
 
+#[tokio::test]
+async fn external_app_contribution_can_open_headless_ceremony() {
+    let tmp = tempdir().expect("state tempdir");
+    let config = AppConfig {
+        state_dir: Some(tmp.path().to_path_buf()),
+        dev_mode: true,
+        backend: BackendKind::Stub,
+        model_path: None,
+    };
+    let state = Arc::new(AppState::new(config).await.expect("init state"));
+    seed_acme_work_object(&state).await;
+
+    let app = router_with_dist(state, None);
+    let srv = spawn(app).await;
+    let client = reqwest::Client::new();
+    let action_payload = json!({
+        "to": "maya@acme.example",
+        "subject": "Acme follow-up",
+        "body": "Confirm clause 4 before sending."
+    });
+
+    let written: Value = client
+        .post(srv.url("/v1/work/acme-follow-up/contributions"))
+        .header("x-chief-principal", "app:sales-followup")
+        .json(&json!({
+            "node_type": "artifact",
+            "kind": "proposed_send",
+            "title": "Send Acme follow-up after call",
+            "summary": "External app drafted an email send that requires Ceremony.",
+            "body": {
+                "draft_action": "email.send",
+                "payload": action_payload
+            },
+            "ceremony": {
+                "title": "Send Acme follow-up after call",
+                "summary": "sales-followup app needs Ceremony before sending externally.",
+                "category": "email.send",
+                "payload": action_payload,
+                "trust_context": 3
+            }
+        }))
+        .send()
+        .await
+        .expect("POST contribution")
+        .error_for_status()
+        .expect("created")
+        .json()
+        .await
+        .expect("json");
+
+    assert_eq!(written["contribution"]["source"], "app:sales-followup");
+    assert_eq!(written["contribution"]["authority_state"], "needs_ceremony");
+    let ceremony_id = written["ceremony"]["id"]
+        .as_str()
+        .expect("ceremony id")
+        .to_string();
+    let payload_hash = written["ceremony"]["payload_hash"]
+        .as_str()
+        .expect("payload hash")
+        .to_string();
+
+    let pending: Value = client
+        .get(srv.url("/v1/ceremony"))
+        .send()
+        .await
+        .expect("GET ceremony")
+        .error_for_status()
+        .expect("ok")
+        .json()
+        .await
+        .expect("json");
+    assert!(
+        pending.as_array().expect("pending").iter().any(|item| {
+            item["id"] == ceremony_id && item["source_agent"] == "app:sales-followup"
+        }),
+        "pending Ceremony should include external app item: {pending:?}"
+    );
+
+    let inbox: Value = client
+        .get(srv.url("/v1/inbox"))
+        .send()
+        .await
+        .expect("GET inbox")
+        .error_for_status()
+        .expect("ok")
+        .json()
+        .await
+        .expect("json");
+    assert!(
+        inbox.as_array().expect("inbox").iter().any(|item| {
+            item["ceremony_id"] == ceremony_id && item["source_agent"] == "app:sales-followup"
+        }),
+        "inbox should include external app Ceremony item: {inbox:?}"
+    );
+
+    let approved: Value = client
+        .post(srv.url(&format!("/v1/ceremony/{ceremony_id}/approve")))
+        .json(&json!({
+            "held_ms": 3000,
+            "payload_hash": payload_hash
+        }))
+        .send()
+        .await
+        .expect("POST approve")
+        .error_for_status()
+        .expect("approved")
+        .json()
+        .await
+        .expect("json");
+    assert_eq!(approved["status"], "approved");
+    assert_eq!(
+        approved["ceremony"]["target_principal"],
+        "app:sales-followup"
+    );
+    assert!(approved["ceremony"]["grant_issued"].is_object());
+}
+
 async fn seed_acme_work_object(state: &AppState) -> String {
     let mem = state.mem.lock().await;
     let contract_uri = mem

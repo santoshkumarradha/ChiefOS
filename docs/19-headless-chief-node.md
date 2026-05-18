@@ -138,9 +138,13 @@ External app minimum loop:
 GET  /v1/work/:id
 POST /v1/work/:id/contributions
 GET  /v1/work/:id/provenance
+GET  /v1/ceremony
+POST /v1/ceremony/:id/approve
 ```
 
 `POST /v1/work/:id/contributions` is the first public app write path for the POC ladder. It writes an existing `finding`, `artifact`, or `decision` node with `body.work_object_id = :id`, checks Broker `mem.write`, and attributes the contribution to `x-chief-principal`. This is a developer-facing protocol affordance over Memory Graph, Broker, and Provenance; it is not a new kernel primitive.
+
+When a contribution includes a `ceremony` payload, Chief opens a real pending Ceremony and Inbox item for that app principal. Approval remains headless and payload-bound through `/v1/ceremony/:id/approve`; Chief still does not execute the app's semantic workflow.
 
 Invariants:
 

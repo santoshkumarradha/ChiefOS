@@ -59,6 +59,16 @@ GET  /v1/work/:id/provenance
 chief work show :id --json
 ```
 
+POC 4A proves bring-your-own orchestration:
+
+```text
+external process selects agents and plan
+GET  /v1/work/:id
+POST /v1/work/:id/contributions   # orchestrated result plus Ceremony payload
+GET  /v1/work/:id/provenance
+chief ceremony list --json
+```
+
 Request identity:
 
 ```http
@@ -141,6 +151,10 @@ Invariants:
 
    Rationale: [`../examples/sales-followup-app`](../examples/sales-followup-app) uses only Python stdlib HTTP so the demo proves the OS boundary, not SDK ergonomics.
 
+5. **External orchestration is user-space.**
+
+   Rationale: [`../examples/external-orchestrator`](../examples/external-orchestrator) chooses its own local agents and plan. Chief only sees protocol calls, contributions, provenance, and Ceremony.
+
 ## Acceptance
 
 - [x] Example app imports no Chief kernel crates.
@@ -151,6 +165,7 @@ Invariants:
 - [x] E2E gate: `scripts/poc2-sales-followup-app.sh`.
 - [x] Ceremony gate: `scripts/poc3-external-app-ceremony.sh`.
 - [x] Payload + rewind gate: `scripts/poc3-payload-rewind.sh`.
+- [x] External orchestrator gate: `scripts/poc4-external-orchestrator.sh`.
 
 ## Related
 

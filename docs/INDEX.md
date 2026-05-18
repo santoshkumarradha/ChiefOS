@@ -66,6 +66,7 @@ Grouped by topic (numbered ranges):
 | ID | File | Status | Purpose |
 |---|---|---|---|
 | `example-sales-followup-app` | [`../examples/sales-followup-app/README.md`](../examples/sales-followup-app/README.md) | draft | POC 2 external app using only Chief HTTP protocol |
+| `example-external-orchestrator` | [`../examples/external-orchestrator/README.md`](../examples/external-orchestrator/README.md) | draft | POC 4 external orchestrator using Chief as substrate |
 
 ## Deployment and scope (50-59)
 

@@ -300,6 +300,12 @@ POC 3B verifies exact payload binding and rewind on that app contribution:
 scripts/poc3-payload-rewind.sh
 ```
 
+POC 4A uses a separate external orchestrator process to show that planning and agent selection stay in user-space:
+
+```bash
+scripts/poc4-external-orchestrator.sh
+```
+
 ## Related
 
 - [`adr/0010-sdk-public-api-stability.md`](../adr/0010-sdk-public-api-stability.md) — canonical decision.

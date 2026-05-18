@@ -109,6 +109,128 @@ async fn v1_work_missing_id_returns_404() {
     assert_eq!(resp.status(), reqwest::StatusCode::NOT_FOUND);
 }
 
+#[tokio::test]
+async fn external_app_can_write_work_contribution_through_public_api() {
+    let tmp = tempdir().expect("state tempdir");
+    let config = AppConfig {
+        state_dir: Some(tmp.path().to_path_buf()),
+        dev_mode: true,
+        backend: BackendKind::Stub,
+        model_path: None,
+    };
+    let state = Arc::new(AppState::new(config).await.expect("init state"));
+    seed_acme_work_object(&state).await;
+
+    let app = router_with_dist(state, None);
+    let srv = spawn(app).await;
+    let client = reqwest::Client::new();
+
+    let written: Value = client
+        .post(srv.url("/v1/work/acme-follow-up/contributions"))
+        .header("x-chief-principal", "app:sales-followup")
+        .json(&json!({
+            "node_type": "finding",
+            "kind": "next_best_action",
+            "title": "Call Acme before sending the draft",
+            "summary": "External app recommends a call because the contract clause changed.",
+            "authority_state": "handled",
+            "body": {
+                "confidence": 0.82,
+                "rationale": "Clause 4 changed since the prior email thread."
+            }
+        }))
+        .send()
+        .await
+        .expect("POST contribution")
+        .error_for_status()
+        .expect("created")
+        .json()
+        .await
+        .expect("json");
+
+    assert_eq!(written["work_object_id"], "acme-follow-up");
+    assert_eq!(written["contribution"]["source"], "app:sales-followup");
+    assert_eq!(written["contribution"]["pack"], "app:sales-followup");
+    assert_eq!(written["contribution"]["node_type"], "finding");
+    assert_eq!(written["contribution"]["kind"], "next_best_action");
+    assert_eq!(
+        written["contribution"]["body"]["work_object_id"],
+        "acme-follow-up"
+    );
+
+    let work: Value = client
+        .get(srv.url("/v1/work/acme-follow-up"))
+        .send()
+        .await
+        .expect("GET work")
+        .error_for_status()
+        .expect("ok")
+        .json()
+        .await
+        .expect("json");
+    let contributions = work["contributions"].as_array().expect("contributions");
+    assert_eq!(contributions.len(), 1);
+    assert_eq!(contributions[0]["source"], "app:sales-followup");
+    assert_eq!(
+        contributions[0]["title"],
+        "Call Acme before sending the draft"
+    );
+
+    let provenance: Value = client
+        .get(srv.url("/v1/work/acme-follow-up/provenance"))
+        .send()
+        .await
+        .expect("GET provenance")
+        .error_for_status()
+        .expect("ok")
+        .json()
+        .await
+        .expect("json");
+    assert!(
+        provenance
+            .as_array()
+            .expect("provenance")
+            .iter()
+            .any(|row| {
+                row["kind"] == "contribution_written" && row["source"] == "app:sales-followup"
+            }),
+        "provenance should attribute the external app contribution: {provenance:?}"
+    );
+}
+
+#[tokio::test]
+async fn external_app_contribution_write_requires_broker_grant() {
+    let tmp = tempdir().expect("state tempdir");
+    let config = AppConfig {
+        state_dir: Some(tmp.path().to_path_buf()),
+        dev_mode: false,
+        backend: BackendKind::Stub,
+        model_path: None,
+    };
+    let state = Arc::new(AppState::new(config).await.expect("init state"));
+    seed_acme_work_object(&state).await;
+
+    let app = router_with_dist(state, None);
+    let srv = spawn(app).await;
+
+    let resp = reqwest::Client::new()
+        .post(srv.url("/v1/work/acme-follow-up/contributions"))
+        .header("x-chief-principal", "app:sales-followup")
+        .json(&json!({
+            "node_type": "finding",
+            "kind": "next_best_action",
+            "title": "Call Acme before sending the draft"
+        }))
+        .send()
+        .await
+        .expect("POST contribution");
+
+    assert_eq!(resp.status(), reqwest::StatusCode::FORBIDDEN);
+    let body: Value = resp.json().await.expect("json");
+    assert_eq!(body["error"], "capability_denied");
+    assert_eq!(body["kind"], "mem.write");
+}
+
 async fn seed_acme_work_object(state: &AppState) -> String {
     let mem = state.mem.lock().await;
     let contract_uri = mem

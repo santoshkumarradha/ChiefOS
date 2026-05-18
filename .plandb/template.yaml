@@ -1335,6 +1335,10 @@ dependencies:
   to_ref: task-84
   kind: blocks
 context:
+- kind: decision
+  content: 'decision: revised headless POC ladder to POC 2 first real Chief app, POC 3 authority/rewind on that app, POC 4 external orchestrator/AgentField; GitHub milestone #2 retitled and issues #75-#81 mapped accordingly'
+  tags: []
+  task_ref: null
 - kind: discovery
   content: 'demo-backend discovery: GrantHandle in chief-core::broker does not derive Deserialize, which forced CeremonyItem to drop Deserialize too. If a future task needs to read CeremonyItems from JSON (e.g. restore), add #[derive(Deserialize)] to GrantHandle first.'
   tags: []

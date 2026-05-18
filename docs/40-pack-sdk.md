@@ -3,7 +3,7 @@ id: pack-sdk
 title: "Pack SDK — developer contract"
 status: draft
 owners: [santosh]
-last_updated: 2026-05-17
+last_updated: 2026-05-18
 related: [module-system, security-model, os-ceremonies, chief-kernel]
 depends_on: [module-system]
 tags: [sdk, developer-contract, capabilities]
@@ -269,6 +269,18 @@ The Platform MVP Demo adds fixture-backed POC packs to prove pack interoperabili
 The POC E2E path boots real `AppState`, seeds a `mem://artifact/...` Work Object, runs pack agents through `CapabilityContext`, and verifies `/v1/work/:id`. The packs must not call each other or import kernel internals. Cross-pack composition happens through Memory Graph state and scoped SDK connectors.
 
 Phase 5 adds `POST /v1/packs/install-preview` as the demo install gate. The route parses a pack manifest from disk, checks the `ed25519:` signature placeholder shape, and returns requested grants plus usage reasons before activation. Activation still runs the pack through `CapabilityContext`; install preview does not grant ambient authority.
+
+## External app protocol POC
+
+POC 2 starts with the smallest external Chief app contract before a full SDK stabilizes:
+
+```text
+GET  /v1/work/:id
+POST /v1/work/:id/contributions
+GET  /v1/work/:id/provenance
+```
+
+The external app sends `x-chief-principal: app:<name>`, writes only `finding`, `artifact`, or `decision` contributions, and receives the same Work Object projection every surface receives. The route checks Broker `mem.write` and persists ordinary Memory Graph nodes. This is a public protocol path for app development, not a new storage primitive and not semantic orchestration inside Chief.
 
 ## Related
 

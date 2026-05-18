@@ -132,6 +132,16 @@ The product boundary is: Chief owns the substrate; packs own domain behavior; su
 | MCP / agent-server API | Future compatibility layer for agent runtimes such as AgentField, LangGraph, CrewAI, AutoGen, or custom services that want to treat Chief as their tool/capability server. This must wrap existing Broker/Memory/Event primitives, not bypass them. |
 | L4 surfaces | Optional reference/control clients. They render L2 state and submit user intent back through the kernel. |
 
+External app minimum loop:
+
+```text
+GET  /v1/work/:id
+POST /v1/work/:id/contributions
+GET  /v1/work/:id/provenance
+```
+
+`POST /v1/work/:id/contributions` is the first public app write path for the POC ladder. It writes an existing `finding`, `artifact`, or `decision` node with `body.work_object_id = :id`, checks Broker `mem.write`, and attributes the contribution to `x-chief-principal`. This is a developer-facing protocol affordance over Memory Graph, Broker, and Provenance; it is not a new kernel primitive.
+
 Invariants:
 
 - No surface owns authority, memory, or workflow state.

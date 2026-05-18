@@ -367,6 +367,13 @@ impl CapabilityKind {
 
     pub fn allows(&self, op: &RequestedOp) -> ScopeDecision {
         match (self, op) {
+            (Self::MemWrite { types, .. }, RequestedOp::MemWrite { node_type }) => {
+                if allows_str(types, node_type) {
+                    ScopeDecision::Allowed
+                } else {
+                    ScopeDecision::ScopeExceeded
+                }
+            }
             (
                 Self::AgentSpawn {
                     pack_ids,
@@ -588,6 +595,9 @@ pub enum ScopeDecision {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case")]
 pub enum RequestedOp {
+    MemWrite {
+        node_type: NodeType,
+    },
     AgentSpawn {
         pack_id: PackId,
         depth: u8,
@@ -610,6 +620,12 @@ pub enum RequestedOp {
 }
 
 impl RequestedOp {
+    pub fn mem_write(node_type: impl Into<String>) -> Self {
+        Self::MemWrite {
+            node_type: node_type.into(),
+        }
+    }
+
     pub fn agent_spawn(pack_id: impl Into<String>, depth: u8) -> Self {
         Self::AgentSpawn {
             pack_id: pack_id.into(),
@@ -649,6 +665,7 @@ impl RequestedOp {
 
     pub fn kind(&self) -> &'static str {
         match self {
+            Self::MemWrite { .. } => "mem.write",
             Self::AgentSpawn { .. } => "agent.spawn",
             Self::CeremonyRequest { .. } => "ceremony.request",
             Self::LedgerRead { .. } => "ledger.read",

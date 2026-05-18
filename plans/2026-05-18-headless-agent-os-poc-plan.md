@@ -14,8 +14,9 @@ tags: [plans, poc, headless, agent-server, platform]
 
 - The completed Platform MVP demo is **POC 0**: it seeded the Work Object, pack, Ceremony, risk-pack, provenance, rewind, Docker, HTTP, CLI, and UI paths.
 - **POC 1** proves Chief can be used as a headless OS-like node without a UI process.
-- **POC 2** proves why authority, approval, provenance, and rewind must be OS-level substrate, not app-local features.
-- **POC 3** proves external agent servers, including AgentField-style apps, can bring their own orchestration while Chief provides identity, capabilities, memory, audit, approval, and rewind.
+- **POC 2** proves a real app can be built on Chief primitives through public protocol, without importing kernel internals.
+- **POC 3** proves why authority, approval, provenance, and rewind must be OS-level substrate, not app-local features.
+- **POC 4** proves external agent servers, including AgentField-style apps, can bring their own orchestration while Chief provides identity, capabilities, memory, audit, approval, and rewind.
 
 ## Prerequisites
 
@@ -58,6 +59,8 @@ The POC ladder must demonstrate this boundary:
 
 ## POC 1 — Headless Chief Node product proof
 
+**Status:** complete for the POC ladder gate.
+
 **Question answered:** Can Chief be operated like an OS-like server without UI?
 
 **Demo flow:**
@@ -76,35 +79,66 @@ curl /v1/inbox
 1. Package the current demo runner as a clearly named headless node path in docs and scripts.
 2. Add a `poc1-headless-node` script or make target that starts the deterministic node and runs the operator checks.
 3. Add `/v1/status` or equivalent health/status projection showing active services, state directory, demo fixture id, and available channels.
-4. Add CLI parity for headless inspection gaps:
-   - inbox list,
-   - Work Object provenance,
-   - pack install preview if not already exposed.
+4. Add live user-facing E2E gate using `OPENROUTER_API_KEY` from the environment without committing secrets.
 5. Document the operator walkthrough.
 6. Ensure the Docker demo can pass with no UI build or UI process.
 
 **Acceptance:**
 
-- [ ] One command starts the headless node.
-- [ ] No UI process is required for the POC 1 gate.
-- [ ] HTTP and CLI read the same Work Object and provenance state.
-- [ ] Inbox/Ceremony state is inspectable headlessly.
-- [ ] Status endpoint makes it obvious this is an OS node, not a UI demo server.
-- [ ] Existing POC 0 Docker/Work Object regression still passes.
+- [x] One command starts the headless node.
+- [x] No UI process is required for the POC 1 gate.
+- [x] HTTP and CLI read the same Work Object state.
+- [x] Inbox/Ceremony state is inspectable headlessly over HTTP.
+- [x] Status endpoint makes it obvious this is an OS node, not a UI demo server.
+- [x] Live OpenRouter gate verifies user-facing `/v1/inbox`, `/v1/brief`, and `/` state.
+- [x] Existing POC 0 Docker/Work Object regression still passes.
 
-## POC 2 — Authority boundary and rewind proof
+## POC 2 — First real Chief app proof
+
+**Status:** in progress; POC 2A public contribution-write API is implemented on the feature branch.
+
+**Question answered:** Can a developer build an actual Chief app on top of OS primitives instead of linking to kernel internals?
+
+**Demo flow:**
+
+```text
+Chief Node runs
+external sales-followup app starts as a separate process
+app reads Work Object over public HTTP
+app writes a recommendation contribution through public HTTP
+Work Object, Inbox/Provenance, CLI, and optional UI all show the same app contribution
+```
+
+**Build:**
+
+1. Add public contribution-write API if the current write path is too internal.
+2. Attribute external app writes to an app principal while still passing through Broker.
+3. Add a tiny external app example that imports no `chief-core` internals.
+4. Add an E2E script that runs Chief Node plus the external app process.
+5. Document the app developer contract: read Work Object, request/use scoped capability, write contribution, inspect provenance.
+
+**Acceptance:**
+
+- [ ] External app has no internal crate imports.
+- [ ] External app reads work state through public protocol.
+- [ ] External app writes a contribution through public protocol.
+- [ ] Contribution is persisted as an existing Memory Graph node type, not a new primitive.
+- [ ] Provenance identifies the external app principal.
+- [ ] HTTP and CLI show the same app contribution.
+
+## POC 3 — Authority boundary and rewind proof
 
 **Question answered:** Why does this need to be OS-level rather than an app-local agent feature?
 
 **Demo flow:**
 
 ```text
-email-pack proposes Acme send
+sales-followup app proposes Acme send
 Chief blocks send
 headless Ceremony approval is required
 payload A approval cannot authorize payload B
 approved action emits receipt
-rewind removes active contribution
+rewind removes active app contribution
 provenance remains replayable
 downstream state is marked stale
 ```
@@ -113,7 +147,7 @@ downstream state is marked stale
 
 1. Add headless Ceremony CLI/API flow for listing and approving pending actions.
 2. Add a bypass demo script that approves payload A, mutates payload B, and shows Broker rejection.
-3. Add before/after JSON snapshots for rewind.
+3. Add before/after JSON snapshots for rewind using the external app contribution.
 4. Add CLI parity:
    - `chief inbox list --json`,
    - `chief ceremony approve ...`,
@@ -129,7 +163,7 @@ downstream state is marked stale
 - [ ] Rewind changes active Work Object state without deleting event history.
 - [ ] HTTP and CLI show the same approval, provenance, and rewind state.
 
-## POC 3 — External agent server proof
+## POC 4 — Bring-your-own orchestrator proof
 
 **Question answered:** Can another agent system use Chief as its OS substrate while bringing its own orchestration?
 
@@ -138,6 +172,7 @@ downstream state is marked stale
 ```text
 Chief Node runs
 external AgentField/simple agent-server process starts
+external process owns planning and agent selection
 external process reads Work Object over public protocol
 external process requests scoped capability
 external process writes a contribution
@@ -147,16 +182,15 @@ high-risk action is still blocked by Ceremony
 
 **Build:**
 
-1. Add public contribution-write API if the current write path is too internal.
-2. Add external principal identity and scoped capability request path for non-pack agent servers.
-3. Add a simple external agent-server example that imports no `chief-core` internals.
-4. Add AgentField example/adapter once the HTTP contract is stable enough.
-5. Add E2E test that runs Chief Node plus an external process.
-6. Document the difference between simple packs, app-owned orchestrators, and Chief OS substrate.
+1. Add external principal identity and scoped capability request path for non-pack agent servers.
+2. Add a simple external agent-server example that imports no `chief-core` internals.
+3. Add AgentField example/adapter once the HTTP contract is stable enough.
+4. Add E2E test that runs Chief Node plus an external process.
+5. Document the difference between simple packs, app-owned orchestrators, and Chief OS substrate.
 
 **Acceptance:**
 
-- [ ] External process has no internal crate imports.
+- [ ] External process owns semantic orchestration; Chief does not choose agents or plans.
 - [ ] External process authenticates as its own principal.
 - [ ] External process can read only scoped Work Object state.
 - [ ] External process can write a contribution through public protocol.
@@ -172,28 +206,32 @@ POC 0 complete
 POC 1 headless node
    |
    v
-POC 2 authority + rewind
+POC 2 first Chief app
    |
    v
-POC 3 external agent server
+POC 3 authority + rewind on app contribution
+   |
+   v
+POC 4 external orchestrator / AgentField
 ```
 
-POC 1 must come before POC 3 because external agent servers need a stable headless node contract. POC 2 can overlap with POC 1 only for CLI work, but the end-to-end authority demo should use the finalized POC 1 headless runner.
+POC 1 must come before POC 2 because app developers need a stable headless node contract. POC 3 comes after POC 2 so the authority proof is attached to a real external app workflow, not only a fixture. POC 4 comes last because AgentField/custom orchestrators should prove they are user-space applications on the same contract, not privileged kernel extensions.
 
 ## GitHub issue map
 
 | Issue | Depends on | Purpose |
 |---|---|---|
-| [#71](https://github.com/santoshkumarradha/ChiefOS/issues/71) Tracker: POC 1-3 Headless Agent OS Proofs | none | Milestone overview and dependency map. |
+| [#71](https://github.com/santoshkumarradha/ChiefOS/issues/71) Tracker: POC 1-4 Chief App Platform Proofs | none | Milestone overview and dependency map. |
 | [#72](https://github.com/santoshkumarradha/ChiefOS/issues/72) POC 1A: Headless operator walkthrough + script | POC 0 | One-command headless node proof. |
 | [#73](https://github.com/santoshkumarradha/ChiefOS/issues/73) POC 1B: Status endpoint and no-UI gate | #72 | Make node/server nature inspectable. |
-| [#74](https://github.com/santoshkumarradha/ChiefOS/issues/74) POC 1C: CLI parity for inbox/provenance/pack preview | #72 | Make protocol parity real for headless operation. |
-| [#75](https://github.com/santoshkumarradha/ChiefOS/issues/75) POC 2A: Headless Ceremony CLI/API | #74 | Authority proof without UI. |
-| [#76](https://github.com/santoshkumarradha/ChiefOS/issues/76) POC 2B: Payload mutation rejection demo | #75 | Show OS-bound approval cannot be reused. |
-| [#77](https://github.com/santoshkumarradha/ChiefOS/issues/77) POC 2C: Rewind before/after snapshots | #75 | Show active-state rollback plus retained history. |
-| [#78](https://github.com/santoshkumarradha/ChiefOS/issues/78) POC 3A: External principal + scoped capability path | #74 | Let non-pack agent servers enter through protocol. |
-| [#79](https://github.com/santoshkumarradha/ChiefOS/issues/79) POC 3B: External simple agent-server E2E | #78 | Prove no internal imports. |
-| [#80](https://github.com/santoshkumarradha/ChiefOS/issues/80) POC 3C: AgentField example adapter | #79 | Prove app-owned orchestration on Chief substrate. |
+| [#74](https://github.com/santoshkumarradha/ChiefOS/issues/74) POC 1C: Live OpenRouter user-facing gate | #73 | Show headless node can produce live user-facing state with real LLM/API IO. |
+| [#75](https://github.com/santoshkumarradha/ChiefOS/issues/75) POC 2A: Public Work contribution API | #74 | Let external apps write through protocol, Broker, Memory Graph, and Provenance. |
+| [#76](https://github.com/santoshkumarradha/ChiefOS/issues/76) POC 2B: External sales-followup app E2E | #75 | Prove a real app process can use Chief without internal imports. |
+| [#77](https://github.com/santoshkumarradha/ChiefOS/issues/77) POC 2C: Chief app developer walkthrough | #76 | Document the small "Swift-like" app contract for Chief. |
+| [#78](https://github.com/santoshkumarradha/ChiefOS/issues/78) POC 3A: Headless Ceremony for external app | #76 | Authority proof without UI on the real app workflow. |
+| [#79](https://github.com/santoshkumarradha/ChiefOS/issues/79) POC 3B: Payload-bound rejection + rewind for external app | #78 | Show OS-bound approval cannot be reused and rewind preserves history. |
+| [#80](https://github.com/santoshkumarradha/ChiefOS/issues/80) POC 4A: External orchestrator E2E | #79 | Prove app-owned orchestration on Chief substrate. |
+| [#81](https://github.com/santoshkumarradha/ChiefOS/issues/81) POC 4B: AgentField example adapter | #80 | Prove AgentField can be a user-space app server on the same protocol. |
 
 ## Verification
 
@@ -201,8 +239,9 @@ Each issue must land with a real end-to-end check, not only unit tests.
 
 - POC 1 gate: deterministic Docker or local runner plus HTTP and CLI checks.
 - Live user-facing gate: `scripts/poc-live-openrouter.sh` with `OPENROUTER_API_KEY` from the environment; this must hit real OpenRouter and user-facing `/v1/inbox`, `/v1/brief`, and `/` surfaces.
-- POC 2 gate: real Ceremony/Broker/Rewind path with HTTP and CLI assertions.
-- POC 3 gate: Chief Node plus external process, no internal crate imports, provenance attributed to external principal.
+- POC 2 gate: Chief Node plus external app process, no internal crate imports, public contribution write, provenance attributed to external principal.
+- POC 3 gate: real Ceremony/Broker/Rewind path with HTTP and CLI assertions, using the external app workflow.
+- POC 4 gate: Chief Node plus external orchestrator process, no internal crate imports, provenance attributed to external principal.
 
 Before merging the feature branch:
 

@@ -126,7 +126,7 @@ Grouped by topic (numbered ranges):
 |---|---|---|---|
 | `plans-readme` | [`../plans/README.md`](../plans/README.md) | stable | Plan format and workflow |
 | `plan-platform-mvp-demo` | [`../plans/2026-05-17-platform-mvp-demo-plan.md`](../plans/2026-05-17-platform-mvp-demo-plan.md) | complete | POC 0 platform demo: independent packs composing through OS primitives |
-| `plan-headless-agent-os-poc` | [`../plans/2026-05-18-headless-agent-os-poc-plan.md`](../plans/2026-05-18-headless-agent-os-poc-plan.md) | active | POC 1-3 ladder: headless node, authority/rewind, external agent server |
+| `plan-headless-agent-os-poc` | [`../plans/2026-05-18-headless-agent-os-poc-plan.md`](../plans/2026-05-18-headless-agent-os-poc-plan.md) | active | POC 1-4 ladder: headless node, first Chief app, authority/rewind, external orchestrator |
 
 ## Ideation
 

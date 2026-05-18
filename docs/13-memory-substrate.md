@@ -3,7 +3,7 @@ id: memory-substrate
 title: "Memory Substrate"
 status: draft
 owners: [santosh]
-last_updated: 2026-05-17
+last_updated: 2026-05-18
 related: [chief-kernel, architecture, hax-principles]
 depends_on: [architecture]
 tags: [memory, graph, storage, retrieval]
@@ -96,6 +96,7 @@ The Platform MVP Demo uses a **Work Object** as product/demo language for an exi
 | Contributions | Existing `finding`, `artifact`, or `decision` nodes | No `contribution` node type at POC |
 | Authority state | Capability Broker decision + Provenance Log entry + optional Ceremony token | Not stored as UI-local state |
 | Projection route | `GET /v1/work/:id` and `chief work show <id> --json` | Route is a view over Memory Graph + Provenance Log |
+| Public contribution write | `POST /v1/work/:id/contributions` | Writes an existing `finding`, `artifact`, or `decision` node after Broker `mem.write` check |
 
 Example aggregate body:
 
@@ -116,6 +117,8 @@ Example aggregate body:
 The POC must not add `work://`, new Memory Graph node types, new edge kinds, or new capability kinds without an ADR. If the demo later proves that a first-class Work Object primitive is needed, that decision belongs in an ADR and must explain why `mem://artifact` plus projection routes are insufficient.
 
 Projection responses may include UI-ready contribution fields such as `pack`, `kind`, `title`, `summary`, `source_refs`, and `authority_state`. These are derived fields over existing Memory Graph, Broker, and Provenance state; they are not new persisted primitives. L4 surfaces must render these fields instead of recomputing authority locally.
+
+POC 2A exposes `POST /v1/work/:id/contributions` so external Chief apps can write to the Work Object through public protocol. The route still writes normal Memory Graph nodes, sets `body.work_object_id`, checks `mem.write` through the Broker, and attributes provenance to the request principal. It does not add a `contribution` node type.
 
 Phase 6 exposes `GET /v1/work/:id/provenance` and `POST /v1/work/:id/rewind`. Rewind tombstones the active contribution node, appends a signed `UIAction` event, and writes a `decision` node with `body.kind = "rewind_event"` that preserves the original contribution payload for replay. Downstream active contributions that cite the rewound URI receive `decision` nodes with `body.kind = "stale_marker"`.
 

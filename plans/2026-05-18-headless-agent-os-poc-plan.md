@@ -18,6 +18,7 @@ tags: [plans, poc, headless, agent-server, platform]
 - **POC 3** proves why authority, approval, provenance, and rewind must be OS-level substrate, not app-local features.
 - **POC 4** proves external agent servers, including AgentField-style apps, can bring their own orchestration while Chief provides identity, capabilities, memory, audit, approval, and rewind.
 - **POC 5** proves the developer experience with an SDK-only TypeScript app using real Chief-mediated LLM inference.
+- **POC 6** proves a relatable real-machine app: clean a local folder through Chief-scoped filesystem, LLM, Ceremony, apply, and rewind.
 
 ## Prerequisites
 
@@ -242,6 +243,46 @@ operator approves exact payload hash over HTTP/CLI
 - [x] Ceremony is bound to the exact outbound payload hash.
 - [x] HTTP and CLI see the same pending Ceremony.
 
+## POC 6 — Downloads Steward real local app proof
+
+**Status:** complete for the POC ladder gate.
+
+**Question answered:** Can a useful AI app operate on local machine state without receiving broad ambient filesystem authority?
+
+**Demo flow:**
+
+```text
+script creates a real temporary messy Downloads-like folder
+Downloads Steward installs/builds as a TypeScript SDK app
+app creates a Chief Work Object
+app scans the folder through Chief fs.read
+app calls Chief-mediated llm.generate with real OpenRouter
+app writes a cleanup plan contribution
+Chief opens Ceremony over the exact file move manifest
+app approves/applies real file moves through Chief fs.write
+app rewinds the move receipt and restores the folder
+operator sees Work Object, provenance, Ceremony, and printed before/after tree
+```
+
+**Build:**
+
+1. Add brokered `POST /v1/fs/scan`, `POST /v1/fs/apply`, and `POST /v1/fs/rewind` using existing `fs.read`/`fs.write` capability kinds.
+2. Add `POST /v1/work` so apps can create their own Work Object without kernel imports.
+3. Extend `packages/chief-sdk-ts` with `createWork()` and `fs` client methods.
+4. Add `examples/downloads-steward-ts`.
+5. Add live E2E gate `scripts/poc6-downloads-steward.sh` with clear install/build/demo output.
+
+**Acceptance:**
+
+- [x] Example app imports only `@chief-os/sdk` from Chief code.
+- [x] Demo operates on real files in a temporary local folder.
+- [x] App uses real OpenRouter through Chief, not a direct provider call.
+- [x] Broker checks `fs.read`, `llm.generate`, `mem.write`, and `fs.write`.
+- [x] File move manifest is locked by Ceremony payload hash.
+- [x] Chief applies real file moves only after Ceremony approval.
+- [x] Chief rewind restores the files from the apply receipt.
+- [x] Demo prints install steps, initial folder tree, proposed operations, applied/rewound counts, and final folder tree.
+
 ## Dependencies
 
 ```text
@@ -261,9 +302,12 @@ POC 4 external orchestrator / AgentField
    |
    v
 POC 5 SDK-only TypeScript app
+   |
+   v
+POC 6 Downloads Steward
 ```
 
-POC 1 must come before POC 2 because app developers need a stable headless node contract. POC 3 comes after POC 2 so the authority proof is attached to a real external app workflow, not only a fixture. POC 4 proves AgentField/custom orchestrators are user-space applications on the same contract, not privileged kernel extensions. POC 5 then tightens the developer experience so the same proof is understandable as a small app, not only protocol scripts.
+POC 1 must come before POC 2 because app developers need a stable headless node contract. POC 3 comes after POC 2 so the authority proof is attached to a real external app workflow, not only a fixture. POC 4 proves AgentField/custom orchestrators are user-space applications on the same contract, not privileged kernel extensions. POC 5 tightens the developer experience so the same proof is understandable as a small app, not only protocol scripts. POC 6 makes it relatable by operating on real local files safely.
 
 ## GitHub issue map
 
@@ -281,6 +325,7 @@ POC 1 must come before POC 2 because app developers need a stable headless node 
 | [#80](https://github.com/santoshkumarradha/ChiefOS/issues/80) POC 4A: External orchestrator E2E | #79 | Prove app-owned orchestration on Chief substrate. |
 | [#81](https://github.com/santoshkumarradha/ChiefOS/issues/81) POC 4B: AgentField example adapter | #80 | Prove AgentField can be a user-space app server on the same protocol. |
 | [#82](https://github.com/santoshkumarradha/ChiefOS/issues/82) POC 5: SDK-only TypeScript Chief app with real LLM | #81 | Prove the clean SDK-first app developer experience with Chief-mediated inference. |
+| [#83](https://github.com/santoshkumarradha/ChiefOS/issues/83) POC 6: Downloads Steward real local-folder Chief app | #82 | Prove a relatable real local app with Chief filesystem, Ceremony, and rewind. |
 
 ## Verification
 
@@ -292,6 +337,7 @@ Each issue must land with a real end-to-end check, not only unit tests.
 - POC 3 gate: real Ceremony/Broker/Rewind path with HTTP and CLI assertions, using the external app workflow.
 - POC 4 gate: Chief Node plus external orchestrator process, no internal crate imports, provenance attributed to external principal.
 - POC 5 gate: `scripts/poc5-sdk-ts-chief-app.sh` with `OPENROUTER_API_KEY`; app imports only `@chief-os/sdk`, calls real Chief-mediated inference, writes contribution, and approves exact Ceremony payload hash.
+- POC 6 gate: `scripts/poc6-downloads-steward.sh` with `OPENROUTER_API_KEY`; app imports only `@chief-os/sdk`, scans a real temp folder, calls real Chief-mediated inference, applies approved moves, and rewinds them.
 
 Before merging the feature branch:
 
@@ -306,6 +352,7 @@ scripts/poc3-payload-rewind.sh
 scripts/poc4-external-orchestrator.sh
 scripts/poc4-agentfield-adapter.sh
 scripts/poc5-sdk-ts-chief-app.sh
+scripts/poc6-downloads-steward.sh
 CHIEF_DEMO_PORT=18081 docker compose -f deploy/docker/docker-compose.yml up --build -d
 curl -fsS http://localhost:18081/v1/work/acme-follow-up
 ```

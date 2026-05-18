@@ -510,6 +510,117 @@ async fn v1_ai_generate_uses_brokered_stub_without_openrouter() {
 }
 
 #[tokio::test]
+async fn v1_fs_apply_requires_approved_payload_and_rewinds() {
+    let srv = spawn_default().await;
+    let downloads = tempdir().expect("downloads temp");
+    let root = downloads
+        .path()
+        .canonicalize()
+        .expect("canonical")
+        .display()
+        .to_string();
+    tokio::fs::write(downloads.path().join("receipt_4381.txt"), "receipt")
+        .await
+        .expect("write file");
+
+    let client = reqwest::Client::new();
+    let work: Value = client
+        .post(srv.url("/v1/work"))
+        .json(&serde_json::json!({
+            "id": "downloads-test",
+            "title": "Downloads Test",
+        }))
+        .send()
+        .await
+        .expect("create work")
+        .json()
+        .await
+        .expect("work json");
+    assert_eq!(work["id"].as_str(), Some("downloads-test"));
+
+    let operations = serde_json::json!([
+        {"from": "receipt_4381.txt", "to": "Finance/Receipts/receipt_4381.txt"}
+    ]);
+    let payload = serde_json::json!({
+        "root": root,
+        "operations": operations,
+    });
+    let contribution: Value = client
+        .post(srv.url("/v1/work/downloads-test/contributions"))
+        .json(&serde_json::json!({
+            "node_type": "artifact",
+            "kind": "downloads_cleanup_plan",
+            "body": {"plan": "move receipt"},
+            "ceremony": {
+                "title": "Apply Downloads cleanup",
+                "summary": "Move one file",
+                "category": "fs.write",
+                "payload": payload
+            }
+        }))
+        .send()
+        .await
+        .expect("write contribution")
+        .json()
+        .await
+        .expect("contribution json");
+    let ceremony_id = contribution["ceremony"]["id"]
+        .as_str()
+        .expect("ceremony id");
+    let payload_hash = contribution["ceremony"]["payload_hash"]
+        .as_str()
+        .expect("payload hash");
+
+    client
+        .post(srv.url(&format!("/v1/ceremony/{ceremony_id}/approve")))
+        .json(&serde_json::json!({
+            "held_ms": 3000,
+            "payload_hash": payload_hash,
+        }))
+        .send()
+        .await
+        .expect("approve")
+        .error_for_status()
+        .expect("approved");
+
+    let apply: Value = client
+        .post(srv.url("/v1/fs/apply"))
+        .json(&serde_json::json!({
+            "root": root,
+            "operations": operations,
+            "ceremony_id": ceremony_id,
+        }))
+        .send()
+        .await
+        .expect("apply")
+        .json()
+        .await
+        .expect("apply json");
+    assert!(
+        downloads
+            .path()
+            .join("Finance/Receipts/receipt_4381.txt")
+            .exists(),
+        "file moved"
+    );
+
+    client
+        .post(srv.url("/v1/fs/rewind"))
+        .json(&serde_json::json!({
+            "receipt": apply["receipt"],
+        }))
+        .send()
+        .await
+        .expect("rewind")
+        .error_for_status()
+        .expect("rewound");
+    assert!(
+        downloads.path().join("receipt_4381.txt").exists(),
+        "file restored"
+    );
+}
+
+#[tokio::test]
 async fn v1_static_placeholder_when_dist_missing() {
     let srv = spawn_default().await;
     let resp = reqwest::get(srv.url("/")).await.expect("GET root");

@@ -28,6 +28,7 @@ use tracing::warn;
 
 pub fn routes() -> Router<Arc<AppState>> {
     Router::new()
+        .route("/work", post(create_work_handler))
         .route("/work/:id", get(handler))
         .route("/work/:id/contributions", post(contribution_handler))
         .route("/work/:id/provenance", get(provenance_handler))
@@ -63,6 +64,16 @@ pub struct WorkContribution {
     pub summary: String,
     pub authority_state: String,
     pub source_refs: Vec<String>,
+    pub body: Value,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CreateWorkObjectRequest {
+    pub id: String,
+    pub title: String,
+    #[serde(default)]
+    pub summary: Option<String>,
+    #[serde(default)]
     pub body: Value,
 }
 
@@ -119,6 +130,45 @@ pub struct RewindResponse {
     pub contribution_uri: String,
     pub event_id: String,
     pub stale_marked: usize,
+}
+
+async fn create_work_handler(
+    State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
+    Json(req): Json<CreateWorkObjectRequest>,
+) -> Response {
+    if req.id.trim().is_empty() || req.title.trim().is_empty() {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({
+                "error": "invalid_work_object",
+            })),
+        )
+            .into_response();
+    }
+
+    let principal = principal_for_request(&headers, &state);
+    if let Err(denied) = state
+        .broker
+        .check(&principal, &RequestedOp::mem_write("artifact"))
+        .await
+    {
+        return capability_denied_response(denied);
+    }
+
+    match create_work_object(&state, &headers, req).await {
+        Ok(work) => (StatusCode::CREATED, Json(work)).into_response(),
+        Err(err) => {
+            warn!(error = %err, "work object create failed");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({
+                    "error": "work_object_create_failed",
+                })),
+            )
+                .into_response()
+        }
+    }
 }
 
 async fn contribution_handler(
@@ -385,6 +435,42 @@ async fn write_contribution(
         contribution,
         ceremony,
     }))
+}
+
+async fn create_work_object(
+    state: &AppState,
+    headers: &HeaderMap,
+    req: CreateWorkObjectRequest,
+) -> anyhow::Result<WorkObjectResponse> {
+    let source = contribution_source(headers, state);
+    let mut body = match req.body {
+        Value::Null => Map::new(),
+        Value::Object(map) => map,
+        other => {
+            let mut map = Map::new();
+            map.insert("content".into(), other);
+            map
+        }
+    };
+    body.insert("kind".into(), Value::String("work_object".into()));
+    body.insert("id".into(), Value::String(req.id.clone()));
+    body.insert("title".into(), Value::String(req.title));
+    if let Some(summary) = req.summary {
+        body.insert("summary".into(), Value::String(summary));
+    }
+
+    let mem = state.mem.lock().await;
+    mem.put_node(Node::new(
+        NodeType::Artifact,
+        Horizon::Medium,
+        source,
+        Value::Object(body).to_string(),
+    ))?;
+    drop(mem);
+
+    load_work_object(state, &req.id)
+        .await?
+        .ok_or_else(|| anyhow::anyhow!("created work object not readable"))
 }
 
 async fn rewind_contribution(

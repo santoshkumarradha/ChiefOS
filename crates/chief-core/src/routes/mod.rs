@@ -18,6 +18,7 @@ mod static_fallback;
 mod v1_ai;
 mod v1_brief;
 mod v1_ceremony;
+mod v1_fs;
 mod v1_inbox;
 mod v1_models;
 mod v1_omnibar;
@@ -71,6 +72,7 @@ fn v1_routes() -> Router<Arc<AppState>> {
         .merge(v1_packs::routes())
         .merge(v1_status::routes())
         .merge(v1_ceremony::routes())
+        .merge(v1_fs::routes())
         .merge(v1_trust::routes())
         .merge(v1_models::routes())
         .merge(v1_work::routes())

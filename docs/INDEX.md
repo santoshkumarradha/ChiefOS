@@ -69,6 +69,7 @@ Grouped by topic (numbered ranges):
 | `example-external-orchestrator` | [`../examples/external-orchestrator/README.md`](../examples/external-orchestrator/README.md) | draft | POC 4 external orchestrator using Chief as substrate |
 | `example-agentfield-adapter` | [`../examples/agentfield-adapter/README.md`](../examples/agentfield-adapter/README.md) | draft | POC 4 AgentField adapter using Chief as substrate |
 | `acme-chief-app-ts` | [`../examples/acme-chief-app-ts/README.md`](../examples/acme-chief-app-ts/README.md) | draft | POC 5 SDK-only TypeScript Chief app with real Chief-mediated LLM |
+| `downloads-steward-ts` | [`../examples/downloads-steward-ts/README.md`](../examples/downloads-steward-ts/README.md) | draft | POC 6 SDK-only local folder cleanup app with Chief fs/Ceremony/rewind |
 
 ## Deployment and scope (50-59)
 

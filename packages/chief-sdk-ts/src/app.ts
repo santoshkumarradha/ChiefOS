@@ -13,6 +13,13 @@ export interface WorkObject {
   provenance: unknown[];
 }
 
+export interface CreateWorkObjectRequest {
+  id: string;
+  title: string;
+  summary?: string;
+  body?: unknown;
+}
+
 export interface WorkSourceRef {
   uri: string;
   node_type: string;
@@ -107,6 +114,51 @@ export interface RewindResponse {
   stale_marked: number;
 }
 
+export interface FsScanRequest {
+  root: string;
+  maxEntries?: number;
+}
+
+export interface FsEntry {
+  relative_path: string;
+  kind: string;
+  size_bytes: number;
+  extension?: string;
+  preview?: string;
+}
+
+export interface FsScanResponse {
+  root: string;
+  entries: FsEntry[];
+}
+
+export interface FsMoveOperation {
+  from: string;
+  to: string;
+}
+
+export interface FsApplyRequest {
+  root: string;
+  operations: FsMoveOperation[];
+  ceremonyId: string;
+}
+
+export interface FsReceipt {
+  root: string;
+  operations: FsMoveOperation[];
+  undo_operations: FsMoveOperation[];
+  payload_hash: string;
+}
+
+export interface FsApplyResponse {
+  applied: FsMoveOperation[];
+  receipt: FsReceipt;
+}
+
+export interface FsRewindResponse {
+  rewound: FsMoveOperation[];
+}
+
 export class ChiefApiError extends Error {
   readonly status: number;
   readonly body: unknown;
@@ -134,8 +186,21 @@ export class ChiefApp {
     return new WorkClient(this, id);
   }
 
+  createWork(request: CreateWorkObjectRequest): Promise<WorkObject> {
+    return this.request<WorkObject>("POST", "/v1/work", {
+      id: request.id,
+      title: request.title,
+      summary: request.summary,
+      body: request.body ?? null,
+    });
+  }
+
   get ai(): AiClient {
     return new AiClient(this);
+  }
+
+  get fs(): FsClient {
+    return new FsClient(this);
   }
 
   get ceremony(): CeremonyClient {
@@ -211,6 +276,31 @@ export class AiClient {
       max_tokens: request.maxTokens,
       temperature: request.temperature,
       top_p: request.topP,
+    });
+  }
+}
+
+export class FsClient {
+  constructor(private readonly app: ChiefApp) {}
+
+  scan(request: FsScanRequest): Promise<FsScanResponse> {
+    return this.app.request<FsScanResponse>("POST", "/v1/fs/scan", {
+      root: request.root,
+      max_entries: request.maxEntries,
+    });
+  }
+
+  apply(request: FsApplyRequest): Promise<FsApplyResponse> {
+    return this.app.request<FsApplyResponse>("POST", "/v1/fs/apply", {
+      root: request.root,
+      operations: request.operations,
+      ceremony_id: request.ceremonyId,
+    });
+  }
+
+  rewind(receipt: FsReceipt): Promise<FsRewindResponse> {
+    return this.app.request<FsRewindResponse>("POST", "/v1/fs/rewind", {
+      receipt,
     });
   }
 }

@@ -1336,6 +1336,10 @@ dependencies:
   kind: blocks
 context:
 - kind: implementation
+  content: 'POC 6 Downloads Steward added: SDK-only TypeScript app scans a real temp folder through Chief fs.read, uses Chief-mediated OpenRouter, writes a Work Object contribution with Ceremony over exact move manifest, applies moves through Chief fs.write, and rewinds from the receipt. Gate: scripts/poc6-downloads-steward.sh.'
+  tags: []
+  task_ref: null
+- kind: implementation
   content: 'POC 5 SDK-first app landed: Chief Core now exposes brokered /v1/ai/generate using existing llm.generate, packages/chief-sdk-ts exports ChiefApp, examples/acme-chief-app-ts imports only @chief-os/sdk, and scripts/poc5-sdk-ts-chief-app.sh verifies live OpenRouter -> contribution -> Ceremony -> CLI/HTTP parity.'
   tags: []
   task_ref: null

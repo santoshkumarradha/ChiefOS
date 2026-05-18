@@ -243,6 +243,39 @@ await chief.work("acme-follow-up").contribute({
 
 The SDK client is ergonomic only. Chief Core still enforces the same protocol path: `llm.generate`, `mem.write`, provenance, payload-bound Ceremony, and rewind.
 
+For local filesystem apps, `ChiefApp` exposes the same brokered OS path:
+
+```ts
+const scan = await chief.fs.scan({ root: "/tmp/Downloads Mess" });
+const plan = await chief.ai.generate({
+  prompt: "Return JSON move operations. Never delete files.",
+  input: { files: scan.entries },
+});
+const contribution = await chief.work("downloads-steward-demo").contribute({
+  node_type: "artifact",
+  kind: "downloads_cleanup_plan",
+  body: plan.json,
+  ceremony: {
+    title: "Apply Downloads cleanup",
+    summary: "Approve exact file move manifest.",
+    category: "fs.write",
+    payload: { root: scan.root, operations: (plan.json as any).operations },
+  },
+});
+await chief.ceremony.approve(contribution.ceremony!.id, {
+  heldMs: 3000,
+  payloadHash: contribution.ceremony!.payload_hash!,
+});
+const applied = await chief.fs.apply({
+  root: scan.root,
+  operations: (plan.json as any).operations,
+  ceremonyId: contribution.ceremony!.id,
+});
+await chief.fs.rewind(applied.receipt);
+```
+
+`fs.apply` only supports move operations in this POC. Delete is intentionally absent.
+
 ## SDK shape (TypeScript — panes)
 
 ```ts

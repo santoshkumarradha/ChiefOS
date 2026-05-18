@@ -406,6 +406,14 @@ impl CapabilityKind {
                     ScopeDecision::ScopeExceeded
                 }
             }
+            (Self::FsRead { paths, .. }, RequestedOp::FsRead { path })
+            | (Self::FsWrite { paths, .. }, RequestedOp::FsWrite { path }) => {
+                if allows_path(paths, path) {
+                    ScopeDecision::Allowed
+                } else {
+                    ScopeDecision::ScopeExceeded
+                }
+            }
             (
                 Self::NetOauth2 {
                     providers, scopes, ..
@@ -619,6 +627,12 @@ pub enum RequestedOp {
         host: Hostname,
         method: HttpMethod,
     },
+    FsRead {
+        path: PathGlob,
+    },
+    FsWrite {
+        path: PathGlob,
+    },
     NetOauth2 {
         provider: Provider,
         scopes: Vec<String>,
@@ -662,6 +676,14 @@ impl RequestedOp {
         }
     }
 
+    pub fn fs_read(path: impl Into<String>) -> Self {
+        Self::FsRead { path: path.into() }
+    }
+
+    pub fn fs_write(path: impl Into<String>) -> Self {
+        Self::FsWrite { path: path.into() }
+    }
+
     pub fn net_oauth2(provider: impl Into<String>, scopes: Vec<String>) -> Self {
         Self::NetOauth2 {
             provider: provider.into(),
@@ -686,6 +708,8 @@ impl RequestedOp {
             Self::CeremonyRequest { .. } => "ceremony.request",
             Self::LedgerRead { .. } => "ledger.read",
             Self::NetHttp { .. } => "net.http",
+            Self::FsRead { .. } => "fs.read",
+            Self::FsWrite { .. } => "fs.write",
             Self::NetOauth2 { .. } => "net.oauth2",
             Self::LlmGenerate { .. } => "llm.generate",
             Self::MetaRootOfTrust => "meta.root_of_trust",
@@ -732,6 +756,14 @@ fn allows_str(allowed: &[String], requested: &str) -> bool {
     allowed
         .iter()
         .any(|value| value == "*" || value.eq_ignore_ascii_case(requested))
+}
+
+fn allows_path(allowed: &[String], requested: &str) -> bool {
+    allowed.iter().any(|value| {
+        value == "*"
+            || value == requested
+            || requested.starts_with(&format!("{}/", value.trim_end_matches('/')))
+    })
 }
 
 fn allows_method(allowed: &[HttpMethod], requested: &HttpMethod) -> bool {

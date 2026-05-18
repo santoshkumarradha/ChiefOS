@@ -15,7 +15,7 @@ tags: [developer-platform, app-protocol, poc]
 
 - A Chief app is user-space software that uses Chief as its OS substrate.
 - The app owns domain logic; Chief owns identity, capabilities, memory, provenance, approval, and rewind.
-- POC 2 uses the smallest protocol loop: read Work Object, write contribution, inspect provenance; POC 5 makes that loop SDK-first with real Chief-mediated inference.
+- POC 2 uses the smallest protocol loop: read Work Object, write contribution, inspect provenance; POC 5 makes that loop SDK-first with real Chief-mediated inference; POC 6 adds real local filesystem action.
 - This is a protocol contract over existing primitives, not a new kernel primitive.
 
 ## Context
@@ -90,6 +90,19 @@ chief ceremony list --json
 POST /v1/ceremony/:id/approve
 ```
 
+POC 6 proves a relatable real-machine app:
+
+```text
+import { ChiefApp } from "@chief-os/sdk"
+POST /v1/work                    # create a folder cleanup Work Object
+POST /v1/fs/scan                 # brokered fs.read over a chosen folder
+POST /v1/ai/generate             # Chief-mediated cleanup plan
+POST /v1/work/:id/contributions  # plan + Ceremony payload
+POST /v1/ceremony/:id/approve    # approve exact move manifest
+POST /v1/fs/apply                # brokered fs.write after approved Ceremony
+POST /v1/fs/rewind               # restore moved files from receipt
+```
+
 Request identity:
 
 ```http
@@ -154,6 +167,7 @@ Invariants:
 - Ceremony approval is bound to the exact payload hash Chief returned.
 - The app does not coordinate with packs directly.
 - If the app uses LLMs, inference goes through Chief `llm.generate`; the app receives provider/model identity and an OS-signed attestation.
+- If the app mutates files, the operation manifest is payload-bound by Ceremony before `fs.write` applies it.
 
 ## Decisions
 
@@ -189,6 +203,10 @@ Invariants:
 
    Rationale: `/v1/ai/generate` checks the existing `llm.generate` capability, calls the configured model backend, and signs the prompt/output pair. It does not choose agents, steps, or workflow for the app.
 
+9. **Filesystem action is manifest-first.**
+
+   Rationale: [`../examples/downloads-steward-ts`](../examples/downloads-steward-ts) demonstrates that a useful local assistant can operate on real machine state without ambient authority. Chief scans through `fs.read`, locks an exact move manifest through Ceremony, applies through `fs.write`, and emits a rewind receipt.
+
 ## Acceptance
 
 - [x] Example app imports no Chief kernel crates.
@@ -202,6 +220,7 @@ Invariants:
 - [x] External orchestrator gate: `scripts/poc4-external-orchestrator.sh`.
 - [x] AgentField adapter gate: `scripts/poc4-agentfield-adapter.sh`.
 - [x] SDK-only TypeScript app gate with real OpenRouter: `scripts/poc5-sdk-ts-chief-app.sh`.
+- [x] Downloads Steward real filesystem gate: `scripts/poc6-downloads-steward.sh`.
 
 ## Related
 

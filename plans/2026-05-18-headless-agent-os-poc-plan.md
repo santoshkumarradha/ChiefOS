@@ -184,16 +184,16 @@ POC 1 must come before POC 3 because external agent servers need a stable headle
 
 | Issue | Depends on | Purpose |
 |---|---|---|
-| Tracker: POC 1-3 Headless Agent OS Proofs | none | Milestone overview and dependency map. |
-| POC 1A: Headless operator walkthrough + script | POC 0 | One-command headless node proof. |
-| POC 1B: Status endpoint and no-UI gate | POC 1A | Make node/server nature inspectable. |
-| POC 1C: CLI parity for inbox/provenance/pack preview | POC 1A | Make protocol parity real for headless operation. |
-| POC 2A: Headless Ceremony CLI/API | POC 1C | Authority proof without UI. |
-| POC 2B: Payload mutation rejection demo | POC 2A | Show OS-bound approval cannot be reused. |
-| POC 2C: Rewind before/after snapshots | POC 2A | Show active-state rollback plus retained history. |
-| POC 3A: External principal + scoped capability path | POC 1C | Let non-pack agent servers enter through protocol. |
-| POC 3B: External simple agent-server E2E | POC 3A | Prove no internal imports. |
-| POC 3C: AgentField example adapter | POC 3B | Prove app-owned orchestration on Chief substrate. |
+| [#71](https://github.com/santoshkumarradha/ChiefOS/issues/71) Tracker: POC 1-3 Headless Agent OS Proofs | none | Milestone overview and dependency map. |
+| [#72](https://github.com/santoshkumarradha/ChiefOS/issues/72) POC 1A: Headless operator walkthrough + script | POC 0 | One-command headless node proof. |
+| [#73](https://github.com/santoshkumarradha/ChiefOS/issues/73) POC 1B: Status endpoint and no-UI gate | #72 | Make node/server nature inspectable. |
+| [#74](https://github.com/santoshkumarradha/ChiefOS/issues/74) POC 1C: CLI parity for inbox/provenance/pack preview | #72 | Make protocol parity real for headless operation. |
+| [#75](https://github.com/santoshkumarradha/ChiefOS/issues/75) POC 2A: Headless Ceremony CLI/API | #74 | Authority proof without UI. |
+| [#76](https://github.com/santoshkumarradha/ChiefOS/issues/76) POC 2B: Payload mutation rejection demo | #75 | Show OS-bound approval cannot be reused. |
+| [#77](https://github.com/santoshkumarradha/ChiefOS/issues/77) POC 2C: Rewind before/after snapshots | #75 | Show active-state rollback plus retained history. |
+| [#78](https://github.com/santoshkumarradha/ChiefOS/issues/78) POC 3A: External principal + scoped capability path | #74 | Let non-pack agent servers enter through protocol. |
+| [#79](https://github.com/santoshkumarradha/ChiefOS/issues/79) POC 3B: External simple agent-server E2E | #78 | Prove no internal imports. |
+| [#80](https://github.com/santoshkumarradha/ChiefOS/issues/80) POC 3C: AgentField example adapter | #79 | Prove app-owned orchestration on Chief substrate. |
 
 ## Verification
 

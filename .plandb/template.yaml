@@ -1336,6 +1336,10 @@ dependencies:
   kind: blocks
 context:
 - kind: discovery
+  content: 'progress: POC 4B AgentField adapter gate added; examples/agentfield-adapter stays user-space, uses Chief HTTP protocol as app:agentfield-adapter, and scripts/poc4-agentfield-adapter.sh verifies Work Object/provenance/CLI Ceremony plus payload-hash approval'
+  tags: []
+  task_ref: null
+- kind: discovery
   content: 'progress: POC 4A external orchestrator E2E added; examples/external-orchestrator owns planning and selected agents, while Chief provides Work Object, contribution/provenance, and Ceremony gate via scripts/poc4-external-orchestrator.sh'
   tags: []
   task_ref: null

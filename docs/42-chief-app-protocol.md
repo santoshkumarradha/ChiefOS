@@ -69,6 +69,15 @@ GET  /v1/work/:id/provenance
 chief ceremony list --json
 ```
 
+POC 4B proves an AgentField adapter can use the same boundary:
+
+```text
+AgentField-shaped adapter owns reasoner graph
+Chief remains HTTP substrate
+Provenance source is app:agentfield-adapter
+High-risk action still goes through Ceremony
+```
+
 Request identity:
 
 ```http
@@ -155,6 +164,10 @@ Invariants:
 
    Rationale: [`../examples/external-orchestrator`](../examples/external-orchestrator) chooses its own local agents and plan. Chief only sees protocol calls, contributions, provenance, and Ceremony.
 
+6. **AgentField stays outside the kernel.**
+
+   Rationale: [`../examples/agentfield-adapter`](../examples/agentfield-adapter) demonstrates the adapter pattern without making Chief import AgentField or depend on an AgentField control plane.
+
 ## Acceptance
 
 - [x] Example app imports no Chief kernel crates.
@@ -166,6 +179,7 @@ Invariants:
 - [x] Ceremony gate: `scripts/poc3-external-app-ceremony.sh`.
 - [x] Payload + rewind gate: `scripts/poc3-payload-rewind.sh`.
 - [x] External orchestrator gate: `scripts/poc4-external-orchestrator.sh`.
+- [x] AgentField adapter gate: `scripts/poc4-agentfield-adapter.sh`.
 
 ## Related
 

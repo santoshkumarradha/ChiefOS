@@ -169,7 +169,7 @@ downstream state is marked stale
 
 ## POC 4 — Bring-your-own orchestrator proof
 
-**Status:** in progress; POC 4A external orchestrator E2E is implemented on the feature branch.
+**Status:** complete for the POC ladder gate.
 
 **Question answered:** Can another agent system use Chief as its OS substrate while bringing its own orchestration?
 
@@ -202,6 +202,7 @@ high-risk action is still blocked by Ceremony
 - [x] External process can write a contribution through public protocol.
 - [x] Provenance identifies the external principal.
 - [x] High-risk action is still blocked by Chief, regardless of external orchestrator.
+- [x] AgentField adapter uses the same public protocol boundary.
 
 ## Dependencies
 
@@ -260,6 +261,7 @@ scripts/poc2-sales-followup-app.sh
 scripts/poc3-external-app-ceremony.sh
 scripts/poc3-payload-rewind.sh
 scripts/poc4-external-orchestrator.sh
+scripts/poc4-agentfield-adapter.sh
 CHIEF_DEMO_PORT=18081 docker compose -f deploy/docker/docker-compose.yml up --build -d
 curl -fsS http://localhost:18081/v1/work/acme-follow-up
 ```

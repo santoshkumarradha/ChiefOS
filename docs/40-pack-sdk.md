@@ -306,6 +306,12 @@ POC 4A uses a separate external orchestrator process to show that planning and a
 scripts/poc4-external-orchestrator.sh
 ```
 
+POC 4B adds an AgentField adapter example on the same protocol boundary:
+
+```bash
+scripts/poc4-agentfield-adapter.sh
+```
+
 ## Related
 
 - [`adr/0010-sdk-public-api-stability.md`](../adr/0010-sdk-public-api-stability.md) — canonical decision.

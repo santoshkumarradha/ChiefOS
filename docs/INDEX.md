@@ -59,6 +59,7 @@ Grouped by topic (numbered ranges):
 |---|---|---|---|
 | `pack-sdk` | [`40-pack-sdk.md`](./40-pack-sdk.md) | draft | Developer contract — public SDK, CapabilityKind closed enum |
 | `local-vs-cloud` | [`41-local-vs-cloud.md`](./41-local-vs-cloud.md) | draft | Hybrid runtime + Model Router swappability |
+| `chief-app-protocol` | [`42-chief-app-protocol.md`](./42-chief-app-protocol.md) | draft | Public protocol loop for external Chief apps |
 
 ## Examples
 

@@ -294,3 +294,4 @@ scripts/poc2-sales-followup-app.sh
 - [`12-module-system.md`](./12-module-system.md) — pack registry + stacks.
 - [`14-security-model.md`](./14-security-model.md) — capability broker + cryptography.
 - [`17-os-ceremonies-and-boundaries.md`](./17-os-ceremonies-and-boundaries.md) — what the OS absorbs; complementary doc.
+- [`42-chief-app-protocol.md`](./42-chief-app-protocol.md) — public protocol loop for external apps.

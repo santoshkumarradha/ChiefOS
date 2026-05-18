@@ -239,5 +239,6 @@ flowchart LR
 - [`architecture`](./10-architecture.md) — L0-L4 layers
 - [`chief-kernel`](./11-chief-kernel.md) — L2 service contracts
 - [`pack-sdk`](./40-pack-sdk.md) — developer contract for packs
+- [`chief-app-protocol`](./42-chief-app-protocol.md) — public protocol loop for external apps
 - [`surfaces`](./30-surfaces.md) — optional L4 projections
 - [`v0-scope`](./50-v0-scope-90-day.md) — MVP scope and gates

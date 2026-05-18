@@ -95,7 +95,7 @@ curl /v1/inbox
 
 ## POC 2 — First real Chief app proof
 
-**Status:** in progress; POC 2A public contribution-write API and POC 2B external app E2E are implemented on the feature branch.
+**Status:** complete for the POC ladder gate.
 
 **Question answered:** Can a developer build an actual Chief app on top of OS primitives instead of linking to kernel internals?
 
@@ -125,6 +125,7 @@ Work Object, Inbox/Provenance, CLI, and optional UI all show the same app contri
 - [x] Contribution is persisted as an existing Memory Graph node type, not a new primitive.
 - [x] Provenance identifies the external app principal.
 - [x] HTTP and CLI show the same app contribution.
+- [x] Developer walkthrough exists at [`chief-app-protocol`](../docs/42-chief-app-protocol.md).
 
 ## POC 3 — Authority boundary and rewind proof
 
